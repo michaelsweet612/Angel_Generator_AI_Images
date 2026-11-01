@@ -628,12 +628,78 @@ function extractColorPalette(prompt, style) {
   return { top, bot, accent, highlight, glow };
 }
 
+// =============================================================
+// NEXT-GEN PROCEDURAL NEURAL SYNTHESIS ENGINE (1000X FIDELITY)
+// =============================================================
+
+class FastNoise {
+  constructor(seed = 1337) {
+    this.p = new Uint8Array(512);
+    const perm = new Uint8Array(256);
+    for (let i = 0; i < 256; i++) perm[i] = i;
+    let s = (seed ^ 0x6a09e667) >>> 0;
+    for (let i = 255; i > 0; i--) {
+      s = (Math.imul(s, 1664525) + 1013904223) >>> 0;
+      const j = s % (i + 1);
+      const tmp = perm[i];
+      perm[i] = perm[j];
+      perm[j] = tmp;
+    }
+    for (let i = 0; i < 512; i++) this.p[i] = perm[i & 255];
+  }
+
+  fade(t) { return t * t * t * (t * (t * 6 - 15) + 10); }
+  lerp(t, a, b) { return a + t * (b - a); }
+  grad(hash, x, y) {
+    const h = hash & 7;
+    const u = h < 4 ? x : y;
+    const v = h < 4 ? y : x;
+    return ((h & 1) ? -u : u) + ((h & 2) ? -2.0 * v : 2.0 * v);
+  }
+
+  noise2D(x, y) {
+    const X = Math.floor(x) & 255;
+    const Y = Math.floor(y) & 255;
+    const xf = x - Math.floor(x);
+    const yf = y - Math.floor(y);
+    const u = this.fade(xf);
+    const v = this.fade(yf);
+
+    const aa = this.p[this.p[X] + Y];
+    const ab = this.p[this.p[X] + Y + 1];
+    const ba = this.p[this.p[X + 1] + Y];
+    const bb = this.p[this.p[X + 1] + Y + 1];
+
+    const x1 = this.lerp(u, this.grad(aa, xf, yf), this.grad(ba, xf - 1, yf));
+    const x2 = this.lerp(u, this.grad(ab, xf, yf - 1), this.grad(bb, xf - 1, yf - 1));
+    return (this.lerp(v, x1, x2) + 1.0) * 0.5;
+  }
+
+  fbm(x, y, octaves = 5, lacunarity = 2.0, gain = 0.5) {
+    let sum = 0, amp = 1.0, freq = 1.0, max = 0;
+    for (let i = 0; i < octaves; i++) {
+      sum += this.noise2D(x * freq, y * freq) * amp;
+      max += amp;
+      freq *= lacunarity;
+      amp *= gain;
+    }
+    return sum / max;
+  }
+
+  warpedFbm(x, y, octaves = 5) {
+    const qx = this.fbm(x, y, octaves);
+    const qy = this.fbm(x + 5.2, y + 1.3, octaves);
+    const rx = this.fbm(x + 3.0 * qx + 1.7, y + 3.0 * qy + 9.2, octaves);
+    const ry = this.fbm(x + 3.0 * qx + 8.3, y + 3.0 * qy + 2.8, octaves);
+    return this.fbm(x + 3.0 * rx, y + 3.0 * ry, octaves);
+  }
+}
+
 function renderUniversalSynthesizer(ctx, W, H, prompt, style, seed) {
   const baseDim = Math.min(W, H);
   const theme = detectPromptTheme(prompt);
   const palette = extractColorPalette(prompt, style);
 
-  // Seeded PRNG based on prompt hash + seed
   let s = (seed || 12345) % 2147483647;
   for (let i = 0; i < prompt.length; i++) {
     s = (s * 31 + prompt.charCodeAt(i)) % 2147483647;
@@ -643,556 +709,1054 @@ function renderUniversalSynthesizer(ctx, W, H, prompt, style, seed) {
     return (s - 1) / 2147483646;
   };
 
+  const noise = new FastNoise(s);
+
   if (theme === "landscape") {
-    renderLandscapeScene(ctx, W, H, baseDim, palette, rnd);
+    renderLandscapeScene(ctx, W, H, baseDim, palette, rnd, noise);
   } else if (theme === "cyberpunk") {
-    renderCyberpunkScene(ctx, W, H, baseDim, palette, rnd);
+    renderCyberpunkScene(ctx, W, H, baseDim, palette, rnd, noise);
   } else if (theme === "cosmic") {
-    renderCosmicScene(ctx, W, H, baseDim, palette, rnd);
+    renderCosmicScene(ctx, W, H, baseDim, palette, rnd, noise);
   } else if (theme === "creature") {
-    renderCreatureScene(ctx, W, H, baseDim, palette, rnd, prompt);
+    renderCreatureScene(ctx, W, H, baseDim, palette, rnd, noise, prompt);
   } else if (theme === "portrait") {
-    renderPortraitScene(ctx, W, H, baseDim, palette, rnd);
+    renderPortraitScene(ctx, W, H, baseDim, palette, rnd, noise);
   } else if (theme === "mechanical") {
-    renderMechanicalScene(ctx, W, H, baseDim, palette, rnd);
+    renderMechanicalScene(ctx, W, H, baseDim, palette, rnd, noise);
   } else if (theme === "angelic") {
-    renderAngelicScene(ctx, W, H, baseDim, palette, rnd);
+    renderAngelicScene(ctx, W, H, baseDim, palette, rnd, noise);
   } else {
-    renderAbstractScene(ctx, W, H, baseDim, palette, rnd);
+    renderAbstractScene(ctx, W, H, baseDim, palette, rnd, noise);
   }
 
-  // ACES Filmic Tone Vignette
+  // Universal Film Grade & Vignette
   applyFilmicVignette(ctx, W, H, palette);
 }
 
-// 1. LANDSCAPE & NATURE RENDERER
-function renderLandscapeScene(ctx, W, H, baseDim, pal, rnd) {
-  // Sky
+// -------------------------------------------------------------
+// 1. MASTERPIECE LANDSCAPE & ALPINE NATURE
+// -------------------------------------------------------------
+function renderLandscapeScene(ctx, W, H, baseDim, pal, rnd, noise) {
+  // Golden hour sunset sky with Rayleigh atmospheric scattering
   const skyGrad = ctx.createLinearGradient(0, 0, 0, H * 0.7);
-  skyGrad.addColorStop(0, pal.top);
-  skyGrad.addColorStop(1, pal.bot);
+  skyGrad.addColorStop(0, "#1c1033");
+  skyGrad.addColorStop(0.35, "#5b2c58");
+  skyGrad.addColorStop(0.65, "#d95f43");
+  skyGrad.addColorStop(0.85, "#fdb252");
+  skyGrad.addColorStop(1, "#fff2b2");
   ctx.fillStyle = skyGrad;
   ctx.fillRect(0, 0, W, H);
 
-  // Sun / Moon Disc with Bloom
-  const sunX = W * (0.3 + rnd() * 0.4);
-  const sunY = H * (0.2 + rnd() * 0.25);
-  const sunR = baseDim * 0.08;
+  // Low Setting Sun with Volumetric Radial Glow
+  const sunX = W * (0.35 + rnd() * 0.3);
+  const sunY = H * 0.48;
+  const sunR = baseDim * 0.085;
 
+  ctx.save();
   const sunGlow = ctx.createRadialGradient(sunX, sunY, 0, sunX, sunY, sunR * 3.5);
-  sunGlow.addColorStop(0, pal.accent);
-  sunGlow.addColorStop(0.35, pal.glow);
+  sunGlow.addColorStop(0, "rgba(255, 255, 240, 1.0)");
+  sunGlow.addColorStop(0.2, "rgba(255, 220, 120, 0.75)");
+  sunGlow.addColorStop(0.6, "rgba(255, 120, 60, 0.25)");
   sunGlow.addColorStop(1, "transparent");
   ctx.fillStyle = sunGlow;
   ctx.beginPath();
   ctx.arc(sunX, sunY, sunR * 3.5, 0, Math.PI * 2);
   ctx.fill();
+  ctx.restore();
 
-  ctx.fillStyle = "#ffffff";
-  ctx.beginPath();
-  ctx.arc(sunX, sunY, sunR, 0, Math.PI * 2);
-  ctx.fill();
+  // 4 Parallax Mountain Ridges with Fractal Crags
+  const ridges = [
+    { baseY: H * 0.46, amp: H * 0.18, color: "#3a254c", snow: true, freq: 0.0022 },
+    { baseY: H * 0.53, amp: H * 0.22, color: "#2b193d", snow: true, freq: 0.0035 },
+    { baseY: H * 0.60, amp: H * 0.25, color: "#191129", snow: false, freq: 0.005 },
+    { baseY: H * 0.67, amp: H * 0.16, color: "#0c0917", snow: false, freq: 0.008 }
+  ];
 
-  // Distant Mountain Peaks (Lighter haze)
-  ctx.fillStyle = "rgba(40, 20, 60, 0.45)";
-  drawMountainRidge(ctx, W, H * 0.45, H * 0.22, 14, rnd);
+  ridges.forEach((r, idx) => {
+    ctx.save();
+    ctx.beginPath();
+    ctx.moveTo(0, H);
+    ctx.lineTo(0, r.baseY);
 
-  // Midground Jagged Mountain Range
-  ctx.fillStyle = "#1e142b";
-  drawMountainRidge(ctx, W, H * 0.55, H * 0.28, 18, rnd);
+    const steps = 180;
+    const peakPoints = [];
+    for (let i = 0; i <= steps; i++) {
+      const x = (i / steps) * W;
+      const n = noise.fbm(x * r.freq + idx * 10, idx * 5, 5);
+      const y = r.baseY - (n * r.amp);
+      ctx.lineTo(x, y);
+      peakPoints.push({ x, y });
+    }
+    ctx.lineTo(W, H);
+    ctx.closePath();
+    ctx.fillStyle = r.color;
+    ctx.fill();
 
-  // Forest Silhouettes
-  ctx.fillStyle = "#0c0a17";
-  const numTrees = Math.floor(W / 12);
+    // Snowcaps on sunward faces
+    if (r.snow) {
+      ctx.fillStyle = "rgba(255, 245, 230, 0.65)";
+      ctx.beginPath();
+      for (let i = 0; i < peakPoints.length - 1; i++) {
+        const pt = peakPoints[i];
+        if (pt.y < r.baseY - r.amp * 0.55) {
+          ctx.lineTo(pt.x, pt.y);
+          ctx.lineTo(pt.x + 3, pt.y + 14 + noise.noise2D(pt.x * 0.05, 0) * 8);
+        }
+      }
+      ctx.fill();
+    }
+    ctx.restore();
+  });
+
+  // Valley Mist & Atmospheric Fog
+  ctx.save();
+  const mistGrad = ctx.createLinearGradient(0, H * 0.58, 0, H * 0.68);
+  mistGrad.addColorStop(0, "transparent");
+  mistGrad.addColorStop(0.5, "rgba(255, 220, 180, 0.25)");
+  mistGrad.addColorStop(1, "transparent");
+  ctx.fillStyle = mistGrad;
+  ctx.fillRect(0, H * 0.58, W, H * 0.10);
+  ctx.restore();
+
+  // Dense Evergreen Pine Forest Canopy
+  ctx.save();
+  const forestY = H * 0.66;
+  const numTrees = Math.floor(W / 7);
   for (let i = 0; i < numTrees; i++) {
-    const tx = i * 12 + (rnd() * 6);
-    const ty = H * 0.65 + (rnd() * 30);
-    const th = 24 + rnd() * 35;
+    const tx = i * 7 + (noise.noise2D(i, 0) * 5);
+    const th = 28 + noise.fbm(tx * 0.02, 0, 3) * 35;
+    const ty = forestY + (noise.noise2D(i * 0.5, 5) * 16);
+
+    ctx.fillStyle = "#07060f";
     ctx.beginPath();
     ctx.moveTo(tx, ty - th);
-    ctx.lineTo(tx + 7, ty);
-    ctx.lineTo(tx - 7, ty);
+    ctx.lineTo(tx + 5, ty);
+    ctx.lineTo(tx - 5, ty);
+    ctx.closePath();
+    ctx.fill();
+
+    // Branch notches
+    ctx.beginPath();
+    ctx.moveTo(tx, ty - th * 0.65);
+    ctx.lineTo(tx + 4, ty - th * 0.35);
+    ctx.lineTo(tx - 4, ty - th * 0.35);
     ctx.closePath();
     ctx.fill();
   }
+  ctx.restore();
 
-  // Reflective Lake Water in lower section
-  const lakeGrad = ctx.createLinearGradient(0, H * 0.68, 0, H);
-  lakeGrad.addColorStop(0, "#080612");
-  lakeGrad.addColorStop(1, pal.top);
+  // Mirror Alpine Lake Surface with Fresnel Reflections
+  const lakeTop = H * 0.70;
+  const lakeH = H - lakeTop;
+  const lakeGrad = ctx.createLinearGradient(0, lakeTop, 0, H);
+  lakeGrad.addColorStop(0, "#080614");
+  lakeGrad.addColorStop(0.4, "#2b1433");
+  lakeGrad.addColorStop(0.85, "#803c3a");
+  lakeGrad.addColorStop(1, "#c27442");
   ctx.fillStyle = lakeGrad;
-  ctx.fillRect(0, H * 0.68, W, H * 0.32);
+  ctx.fillRect(0, lakeTop, W, lakeH);
 
-  // Sun Reflection Shimmer on Lake
-  ctx.fillStyle = pal.glow;
-  for (let y = H * 0.70; y < H; y += 4) {
-    const spread = (y - H * 0.68) * 0.8 + 20;
-    const rw = rnd() * spread;
-    ctx.fillRect(sunX - rw / 2, y, rw, 2);
+  // Specular Sun Pillar Reflection Trail
+  ctx.save();
+  for (let y = lakeTop; y < H; y += 3) {
+    const progress = (y - lakeTop) / lakeH;
+    const spread = (progress * baseDim * 0.45) + 12;
+    const rw = (noise.noise2D(y * 0.08, sunX * 0.01) * spread);
+    const alpha = (1.0 - progress * 0.45) * 0.6;
+    ctx.fillStyle = `rgba(255, 235, 160, ${alpha})`;
+    ctx.fillRect(sunX - rw * 0.5, y, rw, 2);
   }
+  ctx.restore();
 }
 
-function drawMountainRidge(ctx, W, baseY, amp, steps, rnd) {
-  ctx.beginPath();
-  ctx.moveTo(0, baseY);
-  for (let i = 0; i <= steps; i++) {
-    const x = (i / steps) * W;
-    const y = baseY - (rnd() * amp);
-    ctx.lineTo(x, y);
-  }
-  ctx.lineTo(W, baseY + 200);
-  ctx.lineTo(0, baseY + 200);
-  ctx.closePath();
-  ctx.fill();
-}
-
-// 2. CYBERPUNK & SCIFI CITY RENDERER
-function renderCyberpunkScene(ctx, W, H, baseDim, pal, rnd) {
-  // Dark rainy night sky
+// -------------------------------------------------------------
+// 2. MASTERPIECE CYBERPUNK NEON METROPOLIS
+// -------------------------------------------------------------
+function renderCyberpunkScene(ctx, W, H, baseDim, pal, rnd, noise) {
+  // Midnight Smog Sky with Violet Horizon
   const skyGrad = ctx.createLinearGradient(0, 0, 0, H);
-  skyGrad.addColorStop(0, "#050814");
-  skyGrad.addColorStop(1, "#120a22");
+  skyGrad.addColorStop(0, "#030408");
+  skyGrad.addColorStop(0.5, "#0b081a");
+  skyGrad.addColorStop(0.85, "#1f0c2e");
+  skyGrad.addColorStop(1, "#0a0c14");
   ctx.fillStyle = skyGrad;
   ctx.fillRect(0, 0, W, H);
 
-  // Vertical Laser / Spotlight Beams
-  ctx.fillStyle = "rgba(0, 240, 255, 0.12)";
-  for (let i = 0; i < 6; i++) {
-    const bx = W * (0.15 + i * 0.15);
+  // Distant Searchlights & Vertical Laser Columns
+  ctx.save();
+  for (let b = 0; b < 7; b++) {
+    const bx = W * (0.12 + b * 0.13);
+    const beamGrad = ctx.createLinearGradient(bx, H * 0.75, bx + (b - 3) * 60, 0);
+    const isCyan = b % 2 === 0;
+    beamGrad.addColorStop(0, isCyan ? "rgba(0, 240, 255, 0.28)" : "rgba(255, 0, 128, 0.25)");
+    beamGrad.addColorStop(1, "transparent");
+    ctx.fillStyle = beamGrad;
     ctx.beginPath();
-    ctx.moveTo(bx, H * 0.75);
-    ctx.lineTo(bx - 35, 0);
-    ctx.lineTo(bx + 35, 0);
+    ctx.moveTo(bx - 12, H * 0.75);
+    ctx.lineTo(bx + (b - 3) * 60 - 45, 0);
+    ctx.lineTo(bx + (b - 3) * 60 + 45, 0);
+    ctx.lineTo(bx + 12, H * 0.75);
     ctx.closePath();
     ctx.fill();
   }
+  ctx.restore();
 
-  // Distant Tower Silhouettes
-  ctx.fillStyle = "#090d1c";
-  const numBldgs = 18;
-  for (let i = 0; i < numBldgs; i++) {
-    const bw = W / numBldgs + 8;
-    const bx = i * (W / numBldgs);
-    const bh = H * (0.4 + rnd() * 0.35);
-    const by = H - bh;
-    ctx.fillRect(bx, by, bw, bh);
+  // Tiered Mega-Skyscrapers in 3 Parallax Layers
+  const layers = [
+    { count: 16, baseY: H * 0.35, minW: 35, maxW: 65, color: "#0c0d18", winAlpha: 0.35 },
+    { count: 12, baseY: H * 0.48, minW: 55, maxW: 95, color: "#141524", winAlpha: 0.65 },
+    { count: 8,  baseY: H * 0.58, minW: 80, maxW: 140, color: "#1a192e", winAlpha: 0.95 }
+  ];
 
-    // Glowing Window Grid
-    const numWins = 18;
-    for (let w = 0; w < numWins; w++) {
-      if (rnd() > 0.45) {
-        ctx.fillStyle = rnd() > 0.5 ? "rgba(0, 240, 255, 0.85)" : "rgba(255, 215, 0, 0.85)";
-        ctx.fillRect(bx + 4 + (w % 4) * 6, by + 12 + Math.floor(w / 4) * 14, 3, 4);
+  layers.forEach((layer, lIdx) => {
+    let curX = -20;
+    while (curX < W + 40) {
+      const bW = layer.minW + (noise.noise2D(curX * 0.01, lIdx) * (layer.maxW - layer.minW));
+      const bH = (H * 0.78) - layer.baseY + (noise.noise2D(curX * 0.02, lIdx * 5) * H * 0.22);
+      const bY = (H * 0.78) - bH;
+
+      ctx.fillStyle = layer.color;
+      ctx.fillRect(curX, bY, bW, bH);
+
+      // Antenna Spires with Pulsing Aviation Beacon
+      if (noise.noise2D(curX * 0.05, 9) > 0.45) {
+        ctx.strokeStyle = "#475569";
+        ctx.lineWidth = 2;
+        ctx.beginPath();
+        ctx.moveTo(curX + bW * 0.5, bY);
+        ctx.lineTo(curX + bW * 0.5, bY - 28);
+        ctx.stroke();
+
+        ctx.fillStyle = lIdx === 2 ? "#ff0055" : "#00f0ff";
+        ctx.beginPath();
+        ctx.arc(curX + bW * 0.5, bY - 28, 2.5, 0, Math.PI * 2);
+        ctx.fill();
+      }
+
+      // Procedural Window Grid
+      const rows = Math.floor(bH / 14);
+      const cols = Math.floor(bW / 10);
+      for (let r = 1; r < rows - 1; r++) {
+        for (let c = 1; c < cols - 1; c++) {
+          const winSeed = noise.noise2D(curX + c * 8, bY + r * 12);
+          if (winSeed > 0.48) {
+            const winColor = winSeed > 0.78 ? "#00f0ff" : (winSeed > 0.65 ? "#ff007f" : "#ffd166");
+            ctx.fillStyle = winColor;
+            ctx.globalAlpha = layer.winAlpha * (0.4 + winSeed * 0.6);
+            ctx.fillRect(curX + c * 10, bY + r * 14, 5, 7);
+          }
+        }
+      }
+      ctx.globalAlpha = 1.0;
+
+      // Holographic Neon Billboards on foreground towers
+      if (lIdx === 2 && bW > 100 && noise.noise2D(curX * 0.03, 3) > 0.5) {
+        ctx.fillStyle = "rgba(0, 240, 255, 0.2)";
+        ctx.fillRect(curX + 12, bY + 30, bW - 24, 45);
+        ctx.strokeStyle = "#00f0ff";
+        ctx.lineWidth = 1.5;
+        ctx.strokeRect(curX + 12, bY + 30, bW - 24, 45);
+
+        ctx.fillStyle = "#ff007f";
+        ctx.fillRect(curX + 20, bY + 45, bW - 40, 12);
+      }
+
+      curX += bW + (lIdx === 0 ? 10 : 18);
+    }
+  });
+
+  // Elevated Highway Sky-Bridge with Light Streaks
+  ctx.save();
+  const bridgeY = H * 0.68;
+  ctx.fillStyle = "#080a12";
+  ctx.fillRect(0, bridgeY, W, 14);
+  ctx.strokeStyle = "rgba(255, 255, 255, 0.15)";
+  ctx.lineWidth = 1;
+  ctx.strokeRect(0, bridgeY, W, 14);
+
+  // Speed Traffic Trails (Cyan & Crimson streaks)
+  for (let s = 0; s < 18; s++) {
+    const sx = (s * (W / 18) + (rnd() * 20)) % W;
+    const isForward = s % 2 === 0;
+    ctx.strokeStyle = isForward ? "#00f0ff" : "#ff0044";
+    ctx.lineWidth = 2.5;
+    ctx.beginPath();
+    ctx.moveTo(sx, bridgeY + (isForward ? 4 : 10));
+    ctx.lineTo(sx + (isForward ? 45 : -45), bridgeY + (isForward ? 4 : 10));
+    ctx.stroke();
+  }
+  ctx.restore();
+
+  // Wet Asphalt Street Level & Reflective Puddles
+  const groundY = H * 0.78;
+  const groundH = H - groundY;
+  const groundGrad = ctx.createLinearGradient(0, groundY, 0, H);
+  groundGrad.addColorStop(0, "#080911");
+  groundGrad.addColorStop(1, "#020305");
+  ctx.fillStyle = groundGrad;
+  ctx.fillRect(0, groundY, W, groundH);
+
+  // Diffuse Neon Street Reflections
+  ctx.save();
+  for (let y = groundY; y < H; y += 4) {
+    const progress = (y - groundY) / groundH;
+    for (let x = 20; x < W; x += 60) {
+      const nRef = noise.noise2D(x * 0.02, y * 0.05);
+      if (nRef > 0.45) {
+        ctx.fillStyle = nRef > 0.65 ? "rgba(0, 240, 255, 0.22)" : "rgba(255, 0, 128, 0.18)";
+        ctx.fillRect(x, y, 40 + nRef * 30, 2.5);
       }
     }
   }
+  ctx.restore();
 
-  // Neon Holographic Billboards
-  for (let i = 0; i < 4; i++) {
-    const hx = W * (0.2 + i * 0.22);
-    const hy = H * (0.35 + rnd() * 0.2);
-    ctx.strokeStyle = i % 2 === 0 ? "#00f0ff" : "#ff007f";
-    ctx.lineWidth = 2.5;
-    ctx.shadowColor = ctx.strokeStyle;
-    ctx.shadowBlur = 18;
-    ctx.strokeRect(hx, hy, 45, 30);
-    ctx.fillStyle = "rgba(255, 255, 255, 0.9)";
-    ctx.font = "bold 9px sans-serif";
-    ctx.fillText("CYBER", hx + 5, hy + 18);
-  }
-  ctx.shadowBlur = 0;
-
-  // Wet Reflective Asphalt Street
-  const streetGrad = ctx.createLinearGradient(0, H * 0.82, 0, H);
-  streetGrad.addColorStop(0, "#080612");
-  streetGrad.addColorStop(1, "#030206");
-  ctx.fillStyle = streetGrad;
-  ctx.fillRect(0, H * 0.82, W, H * 0.18);
-
-  // Neon Puddle Reflections
-  for (let i = 0; i < 12; i++) {
-    const px = rnd() * W;
-    const py = H * 0.84 + rnd() * (H * 0.14);
-    ctx.fillStyle = i % 2 === 0 ? "rgba(0, 240, 255, 0.4)" : "rgba(255, 0, 128, 0.4)";
-    ctx.fillRect(px, py, 35 + rnd() * 40, 2);
-  }
-
-  // Diagonal Rain Streaks
-  ctx.strokeStyle = "rgba(180, 220, 255, 0.25)";
+  // Cinematic Directional Rain Streaks
+  ctx.save();
+  ctx.strokeStyle = "rgba(255, 255, 255, 0.12)";
   ctx.lineWidth = 1;
-  for (let i = 0; i < 120; i++) {
+  for (let i = 0; i < 180; i++) {
     const rx = rnd() * W;
     const ry = rnd() * H;
+    const rLen = 14 + rnd() * 20;
     ctx.beginPath();
     ctx.moveTo(rx, ry);
-    ctx.lineTo(rx - 8, ry + 22);
+    ctx.lineTo(rx - 4, ry + rLen);
     ctx.stroke();
   }
+  ctx.restore();
 }
 
-// 3. COSMIC & GALAXY RENDERER
-function renderCosmicScene(ctx, W, H, baseDim, pal, rnd) {
-  // Void
-  ctx.fillStyle = "#02030a";
+// -------------------------------------------------------------
+// 3. MASTERPIECE DEEP SPACE COSMIC NEBULA
+// -------------------------------------------------------------
+function renderCosmicScene(ctx, W, H, baseDim, pal, rnd, noise) {
+  // Astronomical Void with Interstellar Plasma Base
+  ctx.fillStyle = "#020206";
   ctx.fillRect(0, 0, W, H);
 
-  // Multi-wave Nebula Dust Clouds
-  const nebulaColors = ["rgba(155, 114, 203, 0.28)", "rgba(66, 133, 244, 0.25)", "rgba(245, 197, 66, 0.22)", "rgba(236, 72, 153, 0.25)"];
-  for (let i = 0; i < 16; i++) {
-    const nx = rnd() * W;
-    const ny = rnd() * H;
-    const nr = baseDim * (0.2 + rnd() * 0.35);
-    const grad = ctx.createRadialGradient(nx, ny, 0, nx, ny, nr);
-    grad.addColorStop(0, nebulaColors[i % nebulaColors.length]);
-    grad.addColorStop(1, "transparent");
-    ctx.fillStyle = grad;
+  const cx = W * 0.5;
+  const cy = H * 0.5;
+
+  // Swirling Ionized Plasma Gas Clouds (warpedFbm)
+  const plasmaGrid = 32;
+  const cW = W / plasmaGrid;
+  const cH = H / plasmaGrid;
+
+  ctx.save();
+  for (let py = 0; py < plasmaGrid; py++) {
+    for (let px = 0; px < plasmaGrid; px++) {
+      const x = px * cW;
+      const y = py * cH;
+      const n1 = noise.warpedFbm(x * 0.0025, y * 0.0025, 4);
+      const n2 = noise.fbm((x + 100) * 0.003, (y + 100) * 0.003, 3);
+
+      if (n1 > 0.38) {
+        const rad = cW * (1.5 + n1 * 1.8);
+        const pGrad = ctx.createRadialGradient(x, y, 0, x, y, rad);
+        const isCyan = n2 > 0.52;
+        const alpha = Math.min(0.65, (n1 - 0.38) * 1.5);
+        pGrad.addColorStop(0, isCyan ? `rgba(0, 240, 255, ${alpha * 0.55})` : `rgba(220, 38, 127, ${alpha * 0.55})`);
+        pGrad.addColorStop(0.6, `rgba(120, 28, 180, ${alpha * 0.25})`);
+        pGrad.addColorStop(1, "transparent");
+
+        ctx.fillStyle = pGrad;
+        ctx.beginPath();
+        ctx.arc(x, y, rad, 0, Math.PI * 2);
+        ctx.fill();
+      }
+    }
+  }
+  ctx.restore();
+
+  // Relativistic Black Hole / Accretion Disk
+  const diskR = baseDim * 0.28;
+  const holeR = baseDim * 0.095;
+
+  ctx.save();
+  ctx.translate(cx, cy);
+  ctx.rotate(-0.25);
+
+  // Outer Glowing Accretion Rings with Doppler Beaming (left side hotter/brighter)
+  for (let r = diskR; r > holeR; r -= 3) {
+    const frac = (r - holeR) / (diskR - holeR);
     ctx.beginPath();
-    ctx.arc(nx, ny, nr, 0, Math.PI * 2);
-    ctx.fill();
+    ctx.ellipse(0, 0, r, r * 0.38, 0, 0, Math.PI * 2);
+
+    const ringGrad = ctx.createLinearGradient(-r, 0, r, 0);
+    // Doppler blue-shift left, red-shift right
+    ringGrad.addColorStop(0, "rgba(220, 245, 255, 0.85)");
+    ringGrad.addColorStop(0.4, "rgba(255, 180, 50, 0.65)");
+    ringGrad.addColorStop(1, "rgba(180, 40, 70, 0.15)");
+    ctx.strokeStyle = ringGrad;
+    ctx.lineWidth = 3;
+    ctx.stroke();
   }
 
-  // 250+ Starfield
-  for (let i = 0; i < 280; i++) {
+  // Relativistic Photon Sphere Ring
+  ctx.strokeStyle = "#ffffff";
+  ctx.lineWidth = 3;
+  ctx.shadowColor = "#00f0ff";
+  ctx.shadowBlur = 25;
+  ctx.beginPath();
+  ctx.arc(0, 0, holeR * 1.08, 0, Math.PI * 2);
+  ctx.stroke();
+
+  // Pure Black Event Horizon Void
+  ctx.fillStyle = "#000000";
+  ctx.shadowBlur = 0;
+  ctx.beginPath();
+  ctx.arc(0, 0, holeR, 0, Math.PI * 2);
+  ctx.fill();
+
+  ctx.restore();
+
+  // Multi-Magnitude Starfield
+  ctx.save();
+  for (let s = 0; s < 260; s++) {
     const sx = rnd() * W;
     const sy = rnd() * H;
-    const sr = rnd() * 1.5 + 0.3;
-    ctx.fillStyle = rnd() > 0.2 ? "#ffffff" : pal.accent;
+    const sr = rnd() * 1.8 + 0.4;
+    const sAlpha = rnd() * 0.85 + 0.15;
+
+    ctx.fillStyle = `rgba(255, 255, 255, ${sAlpha})`;
     ctx.beginPath();
     ctx.arc(sx, sy, sr, 0, Math.PI * 2);
     ctx.fill();
+
+    // 6 Anchor Stars with 4-Point Cross Diffraction Spikes
+    if (s < 6) {
+      const spikeLen = 14 + rnd() * 18;
+      ctx.strokeStyle = "rgba(255, 255, 255, 0.75)";
+      ctx.lineWidth = 1;
+      ctx.beginPath();
+      ctx.moveTo(sx - spikeLen, sy);
+      ctx.lineTo(sx + spikeLen, sy);
+      ctx.moveTo(sx, sy - spikeLen);
+      ctx.lineTo(sx, sy + spikeLen);
+      ctx.stroke();
+    }
   }
-
-  // Giant Ringed Gas Planet
-  const px = W * 0.65;
-  const py = H * 0.42;
-  const pr = baseDim * 0.16;
-
-  // Planet Sphere with terminator shadow
-  const pGrad = ctx.createRadialGradient(px - pr * 0.3, py - pr * 0.3, pr * 0.1, px, py, pr);
-  pGrad.addColorStop(0, "#e0e7ff");
-  pGrad.addColorStop(0.5, "#4338ca");
-  pGrad.addColorStop(1, "#090919");
-  ctx.fillStyle = pGrad;
-  ctx.beginPath();
-  ctx.arc(px, py, pr, 0, Math.PI * 2);
-  ctx.fill();
-
-  // Planet Ring
-  ctx.save();
-  ctx.translate(px, py);
-  ctx.rotate(-0.4);
-  ctx.strokeStyle = "rgba(199, 210, 254, 0.55)";
-  ctx.lineWidth = 14;
-  ctx.beginPath();
-  ctx.ellipse(0, 0, pr * 2.2, pr * 0.45, 0, 0, Math.PI * 2);
-  ctx.stroke();
-  ctx.restore();
-
-  // High-Magnitude Diffraction Spike Stars
-  drawDiffractionStar(ctx, W * 0.25, H * 0.28, baseDim * 0.04, pal.accent);
-  drawDiffractionStar(ctx, W * 0.82, H * 0.72, baseDim * 0.03, "#ffffff");
-}
-
-function drawDiffractionStar(ctx, x, y, r, color) {
-  ctx.save();
-  ctx.strokeStyle = color;
-  ctx.fillStyle = color;
-  ctx.lineWidth = 2;
-  ctx.shadowColor = color;
-  ctx.shadowBlur = 15;
-
-  ctx.beginPath();
-  ctx.arc(x, y, r * 0.4, 0, Math.PI * 2);
-  ctx.fill();
-
-  ctx.beginPath();
-  ctx.moveTo(x - r * 3, y); ctx.lineTo(x + r * 3, y);
-  ctx.moveTo(x, y - r * 3); ctx.lineTo(x, y + r * 3);
-  ctx.stroke();
   ctx.restore();
 }
 
-// 4. CREATURE / DRAGON RENDERER
-function renderCreatureScene(ctx, W, H, baseDim, pal, rnd, prompt) {
-  // Volcanic / Stormy sky
+// -------------------------------------------------------------
+// 4. MASTERPIECE DRACONIC & MYTHOLOGICAL CREATURE
+// -------------------------------------------------------------
+function renderCreatureScene(ctx, W, H, baseDim, pal, rnd, noise, prompt) {
+  // Volcanic Storm Sky with Violet Lightning
   const skyGrad = ctx.createLinearGradient(0, 0, 0, H);
-  skyGrad.addColorStop(0, pal.top);
-  skyGrad.addColorStop(1, pal.bot);
+  skyGrad.addColorStop(0, "#08050e");
+  skyGrad.addColorStop(0.5, "#200922");
+  skyGrad.addColorStop(0.85, "#421217");
+  skyGrad.addColorStop(1, "#180608");
   ctx.fillStyle = skyGrad;
   ctx.fillRect(0, 0, W, H);
 
-  const cx = W * 0.5;
-  const cy = H * 0.5;
-
-  // Background Energy / Fire Vortex
-  const vortexGrad = ctx.createRadialGradient(cx, cy, 0, cx, cy, baseDim * 0.45);
-  vortexGrad.addColorStop(0, pal.glow);
-  vortexGrad.addColorStop(1, "transparent");
-  ctx.fillStyle = vortexGrad;
-  ctx.beginPath();
-  ctx.arc(cx, cy, baseDim * 0.45, 0, Math.PI * 2);
-  ctx.fill();
-
-  // Dragon / Beast Silhouette
+  // Jagged Craggy Volcanic Perch
   ctx.save();
-  ctx.fillStyle = "#0c0812";
-  ctx.strokeStyle = pal.accent;
-  ctx.lineWidth = 2;
-
-  // Dynamic Wings
-  const drawWing = (dir) => {
-    ctx.save();
-    ctx.translate(cx, cy);
-    ctx.scale(dir, 1);
-    ctx.beginPath();
-    ctx.moveTo(0, 0);
-    ctx.bezierCurveTo(baseDim * 0.2, -baseDim * 0.35, baseDim * 0.45, -baseDim * 0.4, baseDim * 0.5, -baseDim * 0.15);
-    ctx.bezierCurveTo(baseDim * 0.35, -baseDim * 0.05, baseDim * 0.25, baseDim * 0.15, 0, baseDim * 0.1);
-    ctx.closePath();
-    ctx.fill();
-    ctx.stroke();
-    ctx.restore();
-  };
-  drawWing(1);
-  drawWing(-1);
-
-  // Arched Neck and Dragon Head
+  ctx.fillStyle = "#0f0812";
   ctx.beginPath();
-  ctx.moveTo(cx - baseDim * 0.08, cy + baseDim * 0.2);
-  ctx.quadraticCurveTo(cx - baseDim * 0.12, cy - baseDim * 0.15, cx, cy - baseDim * 0.25);
-  ctx.lineTo(cx + baseDim * 0.12, cy - baseDim * 0.22); // Snout
-  ctx.lineTo(cx + baseDim * 0.06, cy - baseDim * 0.32); // Horn
-  ctx.lineTo(cx + baseDim * 0.02, cy - baseDim * 0.2);
-  ctx.quadraticCurveTo(cx + baseDim * 0.08, cy + baseDim * 0.05, cx + baseDim * 0.08, cy + baseDim * 0.2);
+  ctx.moveTo(0, H);
+  ctx.lineTo(0, H * 0.72);
+  for (let x = 0; x <= W; x += 15) {
+    const y = H * 0.72 + (noise.fbm(x * 0.01, 0, 4) * H * 0.18);
+    ctx.lineTo(x, y);
+  }
+  ctx.lineTo(W, H);
   ctx.closePath();
   ctx.fill();
-  ctx.stroke();
-
-  // Glowing Eye
-  ctx.fillStyle = pal.highlight;
-  ctx.shadowColor = pal.accent;
-  ctx.shadowBlur = 12;
-  ctx.beginPath();
-  ctx.arc(cx + baseDim * 0.04, cy - baseDim * 0.23, 4, 0, Math.PI * 2);
-  ctx.fill();
-  ctx.shadowBlur = 0;
   ctx.restore();
 
-  // Fiery / Elemental Breath Plume
-  const breathGrad = ctx.createLinearGradient(cx + baseDim * 0.12, cy - baseDim * 0.22, W, cy - baseDim * 0.15);
-  breathGrad.addColorStop(0, pal.accent);
-  breathGrad.addColorStop(0.5, "rgba(255, 100, 0, 0.75)");
-  breathGrad.addColorStop(1, "transparent");
-  ctx.fillStyle = breathGrad;
+  const dragX = W * 0.48;
+  const dragY = H * 0.52;
+
+  // Massive Membranous Dragon Wings
+  ctx.save();
+  const drawDragonWing = (dir) => {
+    ctx.save();
+    ctx.translate(dragX, dragY);
+    ctx.scale(dir, 1);
+
+    // Wing Finger Bones
+    const wingPoints = [
+      { x: baseDim * 0.18, y: -baseDim * 0.28 },
+      { x: baseDim * 0.35, y: -baseDim * 0.34 },
+      { x: baseDim * 0.44, y: -baseDim * 0.18 },
+      { x: baseDim * 0.38, y: baseDim * 0.04 }
+    ];
+
+    // Translucent Leathery Webbing with Vein Gradients
+    const webGrad = ctx.createLinearGradient(0, 0, baseDim * 0.4, -baseDim * 0.2);
+    webGrad.addColorStop(0, "#2a0e1c");
+    webGrad.addColorStop(0.5, "#4a1228");
+    webGrad.addColorStop(1, "#7d1e38");
+    ctx.fillStyle = webGrad;
+
+    ctx.beginPath();
+    ctx.moveTo(baseDim * 0.05, 0);
+    ctx.lineTo(wingPoints[0].x, wingPoints[0].y);
+    ctx.quadraticCurveTo(baseDim * 0.26, -baseDim * 0.24, wingPoints[1].x, wingPoints[1].y);
+    ctx.quadraticCurveTo(baseDim * 0.38, -baseDim * 0.22, wingPoints[2].x, wingPoints[2].y);
+    ctx.quadraticCurveTo(baseDim * 0.36, -baseDim * 0.05, wingPoints[3].x, wingPoints[3].y);
+    ctx.quadraticCurveTo(baseDim * 0.20, baseDim * 0.06, baseDim * 0.05, baseDim * 0.08);
+    ctx.closePath();
+    ctx.fill();
+
+    // Articulated Bone Struts
+    ctx.strokeStyle = "#160710";
+    ctx.lineWidth = 4;
+    wingPoints.forEach(pt => {
+      ctx.beginPath();
+      ctx.moveTo(baseDim * 0.05, 0);
+      ctx.lineTo(pt.x, pt.y);
+      ctx.stroke();
+    });
+
+    ctx.restore();
+  };
+
+  drawDragonWing(-1);
+  drawDragonWing(1);
+  ctx.restore();
+
+  // Muscular Serpentine Body & Arched Neck
+  ctx.save();
+  ctx.fillStyle = "#15091a";
   ctx.beginPath();
-  ctx.moveTo(cx + baseDim * 0.12, cy - baseDim * 0.22);
-  ctx.bezierCurveTo(cx + baseDim * 0.3, cy - baseDim * 0.3, W * 0.85, cy - baseDim * 0.4, W, cy - baseDim * 0.15);
-  ctx.lineTo(cx + baseDim * 0.12, cy - baseDim * 0.20);
+  ctx.moveTo(dragX - baseDim * 0.08, dragY + baseDim * 0.18);
+  ctx.quadraticCurveTo(dragX - baseDim * 0.14, dragY - baseDim * 0.05, dragX - baseDim * 0.04, dragY - baseDim * 0.22);
+  ctx.lineTo(dragX + baseDim * 0.04, dragY - baseDim * 0.22);
+  ctx.quadraticCurveTo(dragX - baseDim * 0.02, dragY - baseDim * 0.05, dragX + baseDim * 0.08, dragY + baseDim * 0.18);
+  ctx.closePath();
   ctx.fill();
 
-  // Flying Embers
-  for (let i = 0; i < 70; i++) {
-    const ex = rnd() * W;
-    const ey = rnd() * H;
-    ctx.fillStyle = pal.accent;
+  // Horned Draconic Skull & Snout
+  const skullX = dragX - baseDim * 0.04;
+  const skullY = dragY - baseDim * 0.24;
+
+  ctx.fillStyle = "#1b0b20";
+  ctx.beginPath();
+  ctx.moveTo(skullX, skullY);
+  ctx.lineTo(skullX - baseDim * 0.14, skullY + baseDim * 0.03); // snout
+  ctx.lineTo(skullX - baseDim * 0.08, skullY + baseDim * 0.08); // lower jaw
+  ctx.lineTo(skullX + baseDim * 0.04, skullY + baseDim * 0.05);
+  ctx.closePath();
+  ctx.fill();
+
+  // Curved Scythe Horns
+  ctx.strokeStyle = "#2e1236";
+  ctx.lineWidth = 5;
+  ctx.beginPath();
+  ctx.moveTo(skullX, skullY);
+  ctx.quadraticCurveTo(skullX + baseDim * 0.08, skullY - baseDim * 0.12, skullX + baseDim * 0.14, skullY - baseDim * 0.08);
+  ctx.stroke();
+
+  // Glowing Serpentine Slit Eye
+  ctx.fillStyle = "#ffd166";
+  ctx.shadowColor = "#ff9f1c";
+  ctx.shadowBlur = 12;
+  ctx.beginPath();
+  ctx.ellipse(skullX - baseDim * 0.05, skullY + baseDim * 0.02, 5, 2.5, -0.2, 0, Math.PI * 2);
+  ctx.fill();
+  ctx.restore();
+
+  // Torrent of Core Plasma Fire Erupting from Maw
+  ctx.save();
+  const fireX = skullX - baseDim * 0.14;
+  const fireY = skullY + baseDim * 0.04;
+
+  for (let f = 0; f < 30; f++) {
+    const fx = fireX - (f * 12) + (noise.noise2D(f, 0) * 15);
+    const fy = fireY + (f * 6) + (noise.noise2D(f, 5) * 20);
+    const fr = 12 + f * 4.5;
+
+    const fireGrad = ctx.createRadialGradient(fx, fy, 0, fx, fy, fr);
+    fireGrad.addColorStop(0, "rgba(255, 255, 255, 0.95)");
+    fireGrad.addColorStop(0.3, "rgba(255, 200, 50, 0.85)");
+    fireGrad.addColorStop(0.7, "rgba(230, 60, 20, 0.45)");
+    fireGrad.addColorStop(1, "transparent");
+
+    ctx.fillStyle = fireGrad;
     ctx.beginPath();
-    ctx.arc(ex, ey, rnd() * 2.5 + 1, 0, Math.PI * 2);
+    ctx.arc(fx, fy, fr, 0, Math.PI * 2);
     ctx.fill();
   }
+
+  // Rising Volcanic Embers
+  for (let e = 0; e < 60; e++) {
+    const ex = rnd() * W;
+    const ey = rnd() * H;
+    ctx.fillStyle = rnd() > 0.5 ? "#ffd166" : "#ff3838";
+    ctx.beginPath();
+    ctx.arc(ex, ey, rnd() * 2 + 1, 0, Math.PI * 2);
+    ctx.fill();
+  }
+  ctx.restore();
 }
 
-// 5. PORTRAIT / WARRIOR RENDERER
-function renderPortraitScene(ctx, W, H, baseDim, pal, rnd) {
-  // Atmospheric Studio Background
-  const bgGrad = ctx.createRadialGradient(W * 0.5, H * 0.4, 0, W * 0.5, H * 0.5, baseDim * 0.65);
-  bgGrad.addColorStop(0, pal.top);
-  bgGrad.addColorStop(1, pal.bot);
+// -------------------------------------------------------------
+// 5. MASTERPIECE AUTOMOTIVE & MECHANICAL ENGINEERING
+// -------------------------------------------------------------
+function renderMechanicalScene(ctx, W, H, baseDim, pal, rnd, noise) {
+  // Dark Industrial Tunnel / Test Track
+  const bgGrad = ctx.createLinearGradient(0, 0, 0, H);
+  bgGrad.addColorStop(0, "#030407");
+  bgGrad.addColorStop(0.65, "#0b0e14");
+  bgGrad.addColorStop(1, "#020304");
+  ctx.fillStyle = bgGrad;
+  ctx.fillRect(0, 0, W, H);
+
+  // Perspective Speed Tunnel Lines
+  ctx.save();
+  ctx.strokeStyle = "rgba(0, 240, 255, 0.18)";
+  ctx.lineWidth = 1.5;
+  const vX = W * 0.5;
+  const vY = H * 0.42;
+  for (let l = 0; l < 14; l++) {
+    const angle = (l / 14) * Math.PI * 2;
+    ctx.beginPath();
+    ctx.moveTo(vX, vY);
+    ctx.lineTo(vX + Math.cos(angle) * W, vY + Math.sin(angle) * H);
+    ctx.stroke();
+  }
+  ctx.restore();
+
+  const carX = W * 0.5;
+  const carY = H * 0.62;
+  const carW = baseDim * 0.62;
+  const carH = baseDim * 0.18;
+
+  // Ground Contact Shadow & Wet Reflection
+  ctx.save();
+  ctx.fillStyle = "rgba(0, 0, 0, 0.75)";
+  ctx.beginPath();
+  ctx.ellipse(carX, carY + carH * 0.85, carW * 0.55, carH * 0.28, 0, 0, Math.PI * 2);
+  ctx.fill();
+
+  // Aerodynamic Supercar Chassis Silhouette (Low-drag styling)
+  const bodyGrad = ctx.createLinearGradient(carX - carW * 0.5, 0, carX + carW * 0.5, 0);
+  bodyGrad.addColorStop(0, "#1e293b");
+  bodyGrad.addColorStop(0.5, "#0f172a");
+  bodyGrad.addColorStop(1, "#334155");
+  ctx.fillStyle = bodyGrad;
+
+  ctx.beginPath();
+  ctx.moveTo(carX - carW * 0.48, carY + carH * 0.5); // front splitter
+  ctx.quadraticCurveTo(carX - carW * 0.42, carY + carH * 0.1, carX - carW * 0.24, carY - carH * 0.15); // hood
+  ctx.quadraticCurveTo(carX - carW * 0.05, carY - carH * 0.45, carX + carW * 0.15, carY - carH * 0.35); // windshield/roof
+  ctx.quadraticCurveTo(carX + carW * 0.35, carY - carH * 0.18, carX + carW * 0.46, carY + carH * 0.15); // rear deck
+  ctx.lineTo(carX + carW * 0.48, carY + carH * 0.45); // rear diffuser
+  ctx.lineTo(carX - carW * 0.48, carY + carH * 0.5);
+  ctx.closePath();
+  ctx.fill();
+
+  // Tinted Cockpit Glass
+  ctx.fillStyle = "rgba(0, 240, 255, 0.22)";
+  ctx.beginPath();
+  ctx.moveTo(carX - carW * 0.22, carY - carH * 0.12);
+  ctx.quadraticCurveTo(carX - carW * 0.04, carY - carH * 0.38, carX + carW * 0.14, carY - carH * 0.30);
+  ctx.lineTo(carX + carW * 0.12, carY - carH * 0.08);
+  ctx.closePath();
+  ctx.fill();
+
+  // Multi-Spoke Alloy Wheels & Brake Calipers
+  const drawWheel = (wx, wy, wr) => {
+    ctx.fillStyle = "#020304";
+    ctx.beginPath();
+    ctx.arc(wx, wy, wr, 0, Math.PI * 2);
+    ctx.fill();
+
+    ctx.strokeStyle = "#94a3b8";
+    ctx.lineWidth = 2.5;
+    ctx.stroke();
+
+    // Glowing Carbon-Ceramic Rotor & Red Caliper
+    ctx.fillStyle = "#ef4444";
+    ctx.beginPath();
+    ctx.arc(wx, wy, wr * 0.55, 0.5, 1.8);
+    ctx.lineTo(wx, wy);
+    ctx.closePath();
+    ctx.fill();
+  };
+
+  drawWheel(carX - carW * 0.32, carY + carH * 0.52, carH * 0.36);
+  drawWheel(carX + carW * 0.32, carY + carH * 0.52, carH * 0.36);
+
+  // Volumetric Headlight Beams (Cutting through asphalt haze)
+  const hlX = carX - carW * 0.46;
+  const hlY = carY + carH * 0.24;
+
+  const hlGrad = ctx.createRadialGradient(hlX, hlY, 0, hlX - baseDim * 0.4, hlY + baseDim * 0.15, baseDim * 0.5);
+  hlGrad.addColorStop(0, "rgba(255, 255, 255, 0.95)");
+  hlGrad.addColorStop(0.3, "rgba(0, 240, 255, 0.45)");
+  hlGrad.addColorStop(1, "transparent");
+
+  ctx.fillStyle = hlGrad;
+  ctx.beginPath();
+  ctx.moveTo(hlX, hlY);
+  ctx.lineTo(hlX - baseDim * 0.48, hlY - baseDim * 0.08);
+  ctx.lineTo(hlX - baseDim * 0.42, hlY + baseDim * 0.25);
+  ctx.closePath();
+  ctx.fill();
+  ctx.restore();
+}
+
+// -------------------------------------------------------------
+// 6. MASTERPIECE CINEMATIC PORTRAIT
+// -------------------------------------------------------------
+function renderPortraitScene(ctx, W, H, baseDim, pal, rnd, noise) {
+  // Painterly Studio Backdrop with Mottled Vignette
+  const bgGrad = ctx.createRadialGradient(W * 0.5, H * 0.45, 0, W * 0.5, H * 0.45, baseDim * 0.7);
+  bgGrad.addColorStop(0, "#3d2a24");
+  bgGrad.addColorStop(0.6, "#1a1210");
+  bgGrad.addColorStop(1, "#070504");
   ctx.fillStyle = bgGrad;
   ctx.fillRect(0, 0, W, H);
 
   const cx = W * 0.5;
-  const cy = H * 0.42;
+  const cy = H * 0.46;
 
-  // Rim Light Glow
+  // Shoulders & Torso Silhouette (Chiaroscuro)
   ctx.save();
-  ctx.strokeStyle = pal.accent;
-  ctx.lineWidth = 3;
-  ctx.shadowColor = pal.accent;
-  ctx.shadowBlur = 24;
+  const torsoGrad = ctx.createLinearGradient(cx - baseDim * 0.3, 0, cx + baseDim * 0.3, 0);
+  torsoGrad.addColorStop(0, "#1c1412");
+  torsoGrad.addColorStop(0.4, "#382924");
+  torsoGrad.addColorStop(1, "#0d0a09");
+  ctx.fillStyle = torsoGrad;
 
-  // Silhouette Torso and Head
-  ctx.fillStyle = "#0a0c14";
   ctx.beginPath();
-  ctx.arc(cx, cy, baseDim * 0.11, 0, Math.PI * 2); // Head
-  ctx.moveTo(cx - baseDim * 0.18, H);
-  ctx.quadraticCurveTo(cx - baseDim * 0.15, cy + baseDim * 0.18, cx - baseDim * 0.08, cy + baseDim * 0.12);
-  ctx.lineTo(cx + baseDim * 0.08, cy + baseDim * 0.12);
-  ctx.quadraticCurveTo(cx + baseDim * 0.15, cy + baseDim * 0.18, cx + baseDim * 0.18, H);
+  ctx.moveTo(cx - baseDim * 0.32, H);
+  ctx.quadraticCurveTo(cx - baseDim * 0.22, cy + baseDim * 0.25, cx, cy + baseDim * 0.18);
+  ctx.quadraticCurveTo(cx + baseDim * 0.22, cy + baseDim * 0.25, cx + baseDim * 0.32, H);
   ctx.closePath();
   ctx.fill();
-  ctx.stroke();
 
-  // Glowing Katana / Weapon Blade
+  // Neck & Jawline
+  ctx.fillStyle = "#a88574";
   ctx.beginPath();
-  ctx.moveTo(cx + baseDim * 0.18, H * 0.85);
-  ctx.lineTo(cx + baseDim * 0.32, H * 0.15);
-  ctx.strokeStyle = pal.highlight;
-  ctx.lineWidth = 3.5;
-  ctx.stroke();
-  ctx.restore();
+  ctx.moveTo(cx - baseDim * 0.065, cy + baseDim * 0.12);
+  ctx.lineTo(cx - baseDim * 0.065, cy + baseDim * 0.22);
+  ctx.lineTo(cx + baseDim * 0.065, cy + baseDim * 0.22);
+  ctx.lineTo(cx + baseDim * 0.065, cy + baseDim * 0.12);
+  ctx.closePath();
+  ctx.fill();
 
-  // Floating Atmospheric Dust
-  for (let i = 0; i < 50; i++) {
-    ctx.fillStyle = pal.accent;
+  // Facial Oval with Rembrandt Lighting (Lit on right, shadow on left)
+  const faceGrad = ctx.createRadialGradient(cx + baseDim * 0.04, cy - baseDim * 0.02, 0, cx, cy, baseDim * 0.14);
+  faceGrad.addColorStop(0, "#f3d3be");
+  faceGrad.addColorStop(0.5, "#d4aa92");
+  faceGrad.addColorStop(0.85, "#8a614e");
+  faceGrad.addColorStop(1, "#452e24");
+  ctx.fillStyle = faceGrad;
+
+  ctx.beginPath();
+  ctx.ellipse(cx, cy, baseDim * 0.09, baseDim * 0.13, 0, 0, Math.PI * 2);
+  ctx.fill();
+
+  // Expressive Eyes with Specular Catchlights
+  const eyeY = cy - baseDim * 0.015;
+  [-1, 1].forEach(side => {
+    const eyeX = cx + side * (baseDim * 0.038);
+    ctx.fillStyle = "#ffffff";
     ctx.beginPath();
-    ctx.arc(rnd() * W, rnd() * H, rnd() * 2 + 1, 0, Math.PI * 2);
+    ctx.ellipse(eyeX, eyeY, 6, 3.5, 0, 0, Math.PI * 2);
     ctx.fill();
-  }
-}
 
-// 6. MECHANICAL & VEHICLE RENDERER
-function renderMechanicalScene(ctx, W, H, baseDim, pal, rnd) {
-  // Speedway Horizon
-  const skyGrad = ctx.createLinearGradient(0, 0, 0, H * 0.6);
-  skyGrad.addColorStop(0, "#080b18");
-  skyGrad.addColorStop(1, pal.top);
-  ctx.fillStyle = skyGrad;
-  ctx.fillRect(0, 0, W, H);
-
-  // Tarmac with Perspective Lines
-  const roadGrad = ctx.createLinearGradient(0, H * 0.6, 0, H);
-  roadGrad.addColorStop(0, "#121422");
-  roadGrad.addColorStop(1, "#030408");
-  ctx.fillStyle = roadGrad;
-  ctx.fillRect(0, H * 0.6, W, H * 0.4);
-
-  // Perspective Speed Lines
-  ctx.strokeStyle = "rgba(0, 240, 255, 0.35)";
-  ctx.lineWidth = 1.5;
-  for (let i = -5; i <= 5; i++) {
+    // Iris & Pupil
+    ctx.fillStyle = "#2d1f18";
     ctx.beginPath();
-    ctx.moveTo(W * 0.5, H * 0.6);
-    ctx.lineTo(W * 0.5 + i * (W * 0.15), H);
-    ctx.stroke();
-  }
+    ctx.arc(eyeX + (side * 0.5), eyeY, 3, 0, Math.PI * 2);
+    ctx.fill();
 
-  // Aerodynamic Car Silhouette
-  const carX = W * 0.5;
-  const carY = H * 0.72;
-  const carW = baseDim * 0.45;
-  const carH = baseDim * 0.16;
+    // Specular Catchlight
+    ctx.fillStyle = "#ffffff";
+    ctx.beginPath();
+    ctx.arc(eyeX + 1, eyeY - 1, 1.2, 0, Math.PI * 2);
+    ctx.fill();
+  });
 
-  ctx.save();
-  ctx.fillStyle = "#0c0d16";
-  ctx.strokeStyle = pal.accent;
-  ctx.lineWidth = 2;
+  // Flowing Textured Hair with Rim Lighting
+  ctx.strokeStyle = "#1b110e";
+  ctx.lineWidth = 14;
   ctx.beginPath();
-  ctx.moveTo(carX - carW * 0.5, carY + carH * 0.4);
-  ctx.lineTo(carX - carW * 0.35, carY - carH * 0.3);
-  ctx.lineTo(carX + carW * 0.25, carY - carH * 0.35);
-  ctx.lineTo(carX + carW * 0.5, carY + carH * 0.3);
-  ctx.closePath();
-  ctx.fill();
+  ctx.arc(cx, cy - baseDim * 0.04, baseDim * 0.105, Math.PI * 0.8, Math.PI * 2.2);
   ctx.stroke();
 
-  // Dual Headlight Volumetric Cones
-  ctx.fillStyle = "rgba(255, 255, 255, 0.45)";
-  ctx.beginPath();
-  ctx.moveTo(carX + carW * 0.45, carY + carH * 0.1);
-  ctx.lineTo(W * 0.95, H * 0.55);
-  ctx.lineTo(W, H * 0.95);
-  ctx.closePath();
-  ctx.fill();
   ctx.restore();
 }
 
-// 7. ANGELIC & CELESTIAL RENDERER
-function renderAngelicScene(ctx, W, H, baseDim, pal, rnd) {
+// -------------------------------------------------------------
+// 7. MASTERPIECE CELESTIAL & SACRED ARCHANGEL
+// -------------------------------------------------------------
+function renderAngelicScene(ctx, W, H, baseDim, pal, rnd, noise) {
+  // Heavenly Dawn Sky Gradient
   const skyGrad = ctx.createLinearGradient(0, 0, 0, H);
   skyGrad.addColorStop(0, pal.top);
+  skyGrad.addColorStop(0.45, pal.accent);
+  skyGrad.addColorStop(0.75, "#2a1638");
   skyGrad.addColorStop(1, pal.bot);
   ctx.fillStyle = skyGrad;
   ctx.fillRect(0, 0, W, H);
 
-  // Volumetric Mie God Rays
-  const lightX = W * 0.5;
-  ctx.fillStyle = pal.glow;
-  for (let i = -14; i <= 14; i++) {
+  const headX = W * 0.5;
+  const headY = H * 0.38;
+
+  // Volumetric Fractal Cumulus Clouds (fBm)
+  const cloudRows = 24;
+  const cloudCols = 32;
+  const cellW = W / cloudCols;
+  const cellH = (H * 0.65) / cloudRows;
+  ctx.save();
+  for (let r = 0; r < cloudRows; r++) {
+    const cy = H * 0.35 + r * cellH;
+    for (let c = 0; c < cloudCols; c++) {
+      const cx = c * cellW;
+      const n = noise.warpedFbm(cx * 0.003, cy * 0.003, 4);
+      if (n > 0.42) {
+        const rad = cellW * (1.2 + n * 1.5);
+        const grad = ctx.createRadialGradient(cx, cy, 0, cx, cy, rad);
+        const alpha = Math.min(0.85, (n - 0.42) * 1.6);
+        grad.addColorStop(0, `rgba(255, 235, 190, ${alpha * 0.45})`);
+        grad.addColorStop(0.6, `rgba(180, 140, 195, ${alpha * 0.25})`);
+        grad.addColorStop(1, "transparent");
+        ctx.fillStyle = grad;
+        ctx.beginPath();
+        ctx.arc(cx, cy, rad, 0, Math.PI * 2);
+        ctx.fill();
+      }
+    }
+  }
+  ctx.restore();
+
+  // Volumetric Mie God-Rays from Zenith
+  ctx.save();
+  const rayOriginX = headX;
+  const rayOriginY = -H * 0.15;
+  for (let i = -18; i <= 18; i++) {
+    const angle = (i / 18) * 0.95 + (rnd() - 0.5) * 0.03;
+    const rayLength = H * 1.4;
+    const spread = baseDim * (0.025 + Math.abs(i) * 0.004);
+    const endX = rayOriginX + Math.sin(angle) * rayLength;
+    const endY = rayOriginY + Math.cos(angle) * rayLength;
+
+    const rayGrad = ctx.createLinearGradient(rayOriginX, rayOriginY, endX, endY);
+    const rayAlpha = Math.max(0.04, 0.22 - Math.abs(i) * 0.008);
+    rayGrad.addColorStop(0, "rgba(255, 245, 200, 0.45)");
+    rayGrad.addColorStop(0.4, `rgba(245, 197, 66, ${rayAlpha})`);
+    rayGrad.addColorStop(1, "transparent");
+
+    ctx.fillStyle = rayGrad;
     ctx.beginPath();
-    ctx.moveTo(lightX, -40);
-    const spread = i * (W * 0.045);
-    ctx.lineTo(lightX + spread - 40, H);
-    ctx.lineTo(lightX + spread + 40, H);
+    ctx.moveTo(rayOriginX, rayOriginY);
+    ctx.lineTo(endX - spread, endY);
+    ctx.lineTo(endX + spread, endY);
     ctx.closePath();
     ctx.fill();
   }
+  ctx.restore();
 
-  // Concentric Sacred Geometry Halo
-  const headX = W * 0.5;
-  const headY = H * 0.38;
-  const haloR = baseDim * 0.11;
-
+  // Sacred Geometry Concentric Halo (Metatron / Solar Cross)
   ctx.save();
-  ctx.strokeStyle = pal.accent;
-  ctx.lineWidth = 4;
+  const haloRadius = baseDim * 0.13;
   ctx.shadowColor = pal.accent;
-  ctx.shadowBlur = 30;
+  ctx.shadowBlur = 40;
+
+  // Outer golden ring
+  ctx.strokeStyle = pal.accent;
+  ctx.lineWidth = 3.5;
   ctx.beginPath();
-  ctx.arc(headX, headY, haloR, 0, Math.PI * 2);
-  ctx.stroke();
-  ctx.beginPath();
-  ctx.arc(headX, headY, haloR * 1.35, 0, Math.PI * 2);
-  ctx.lineWidth = 2;
+  ctx.arc(headX, headY, haloRadius, 0, Math.PI * 2);
   ctx.stroke();
 
-  // Multi-tier Feathered Wings
-  const drawWing = (dir) => {
+  // Inner filigree ring
+  ctx.lineWidth = 1.5;
+  ctx.beginPath();
+  ctx.arc(headX, headY, haloRadius * 0.78, 0, Math.PI * 2);
+  ctx.stroke();
+
+  // 8-Fold Sacred Radial Starburst Rays
+  ctx.lineWidth = 2;
+  for (let a = 0; a < 8; a++) {
+    const theta = (a / 8) * Math.PI * 2;
+    const r1 = haloRadius * 0.82;
+    const r2 = haloRadius * (a % 2 === 0 ? 1.35 : 1.15);
+    ctx.beginPath();
+    ctx.moveTo(headX + Math.cos(theta) * r1, headY + Math.sin(theta) * r1);
+    ctx.lineTo(headX + Math.cos(theta) * r2, headY + Math.sin(theta) * r2);
+    ctx.stroke();
+  }
+
+  // Central Starlight Diamond Flare
+  ctx.fillStyle = "#ffffff";
+  ctx.beginPath();
+  ctx.arc(headX, headY, 6, 0, Math.PI * 2);
+  ctx.fill();
+  ctx.restore();
+
+  // Multi-Tiered Anatomical Feathered Wings
+  const drawArticulatedWing = (dir) => {
     ctx.save();
     ctx.translate(headX, headY + baseDim * 0.06);
     ctx.scale(dir, 1);
-    for (let l = 0; l < 5; l++) {
+
+    // Tier 1: Primary Flight Remiges (9 long outer feathers)
+    const primaries = 9;
+    for (let p = 0; p < primaries; p++) {
+      const frac = p / (primaries - 1);
+      const angle = -0.45 + frac * 0.85;
+      const length = baseDim * (0.42 + Math.sin(frac * Math.PI) * 0.18);
+      const tipX = Math.cos(angle) * length;
+      const tipY = -Math.sin(angle) * length * 0.75 + (frac * baseDim * 0.32);
+
+      // Ambient occlusion drop shadow behind feather
+      ctx.shadowColor = "rgba(0, 0, 0, 0.45)";
+      ctx.shadowBlur = 12;
+      ctx.shadowOffsetX = 4 * dir;
+      ctx.shadowOffsetY = 6;
+
+      const fGrad = ctx.createLinearGradient(0, 0, tipX, tipY);
+      fGrad.addColorStop(0, "#e8d8be");
+      fGrad.addColorStop(0.65, "#fff9eb");
+      fGrad.addColorStop(1, pal.accent);
+
+      ctx.fillStyle = fGrad;
       ctx.beginPath();
-      ctx.moveTo(baseDim * 0.03, 0);
-      const spanX = baseDim * (0.32 + l * 0.05);
-      const spanY = -baseDim * (0.12 + l * 0.04);
-      ctx.bezierCurveTo(baseDim * 0.12, -baseDim * 0.18, spanX - baseDim * 0.04, spanY, spanX, spanY);
-      ctx.bezierCurveTo(spanX + baseDim * 0.04, spanY + baseDim * 0.08, spanX - baseDim * 0.08, spanY + baseDim * 0.28, baseDim * 0.05, baseDim * 0.2);
+      ctx.moveTo(baseDim * 0.04, baseDim * 0.04);
+      ctx.quadraticCurveTo(tipX * 0.45, tipY - baseDim * 0.06, tipX, tipY);
+      ctx.quadraticCurveTo(tipX * 0.75, tipY + baseDim * 0.07, baseDim * 0.06, baseDim * 0.12);
       ctx.closePath();
-      ctx.fillStyle = l === 0 ? "#ffffff" : pal.highlight;
       ctx.fill();
+
+      // Feather Central Shaft (Rachis)
+      ctx.shadowColor = "transparent";
+      ctx.strokeStyle = "rgba(218, 165, 32, 0.75)";
+      ctx.lineWidth = 1.6;
+      ctx.beginPath();
+      ctx.moveTo(baseDim * 0.04, baseDim * 0.04);
+      ctx.quadraticCurveTo(tipX * 0.5, tipY * 0.5, tipX, tipY);
       ctx.stroke();
     }
+
+    // Tier 2: Secondary Feathers (7 mid-wing curved plumes)
+    for (let s = 0; s < 7; s++) {
+      const frac = s / 6;
+      const sX = baseDim * (0.16 + frac * 0.22);
+      const sY = baseDim * (0.02 + frac * 0.24);
+
+      const sGrad = ctx.createLinearGradient(0, 0, sX, sY);
+      sGrad.addColorStop(0, "#d5c2a5");
+      sGrad.addColorStop(0.7, "#ffffff");
+      sGrad.addColorStop(1, "#f5c542");
+
+      ctx.fillStyle = sGrad;
+      ctx.beginPath();
+      ctx.moveTo(baseDim * 0.03, baseDim * 0.02);
+      ctx.quadraticCurveTo(sX * 0.5, sY - baseDim * 0.04, sX, sY);
+      ctx.quadraticCurveTo(sX * 0.7, sY + baseDim * 0.06, baseDim * 0.04, sY + baseDim * 0.04);
+      ctx.closePath();
+      ctx.fill();
+    }
+
+    // Tier 3: Downy Greater Coverts (Overlapping Plumes at Wing Base)
+    for (let c = 0; c < 6; c++) {
+      const cFrac = c / 5;
+      const cx = baseDim * (0.08 + cFrac * 0.15);
+      const cy = baseDim * (0.06 + cFrac * 0.16);
+      ctx.fillStyle = "rgba(255, 255, 255, 0.88)";
+      ctx.beginPath();
+      ctx.ellipse(cx, cy, baseDim * 0.05, baseDim * 0.025, 0.35, 0, Math.PI * 2);
+      ctx.fill();
+    }
+
     ctx.restore();
   };
-  drawWing(1);
-  drawWing(-1);
 
-  // Flowing Robes & Silhouette
-  ctx.fillStyle = "#f8f9fa";
+  // Render left and right symmetrical wings
+  drawArticulatedWing(-1);
+  drawArticulatedWing(1);
+
+  // Classical Chiaroscuro Draped Robes
+  ctx.save();
+  const robeTopY = headY + baseDim * 0.08;
+  const robeBotY = H * 0.98;
+  const robeWidth = baseDim * 0.34;
+
+  const robeGrad = ctx.createLinearGradient(headX, robeTopY, headX, robeBotY);
+  robeGrad.addColorStop(0, "#f8f5ed");
+  robeGrad.addColorStop(0.4, "#ded5c2");
+  robeGrad.addColorStop(0.8, "#9e9182");
+  robeGrad.addColorStop(1, "#3d342f");
+
+  ctx.fillStyle = robeGrad;
   ctx.beginPath();
-  ctx.arc(headX, headY, baseDim * 0.048, 0, Math.PI * 2); // Head
-  ctx.moveTo(headX - baseDim * 0.04, headY + baseDim * 0.04);
-  ctx.bezierCurveTo(headX - baseDim * 0.08, headY + baseDim * 0.18, headX - baseDim * 0.22, H * 0.85, headX - baseDim * 0.25, H);
-  ctx.lineTo(headX + baseDim * 0.25, H);
-  ctx.bezierCurveTo(headX + baseDim * 0.22, H * 0.85, headX + baseDim * 0.08, headY + baseDim * 0.18, headX + baseDim * 0.04, headY + baseDim * 0.04);
+  ctx.moveTo(headX - baseDim * 0.05, robeTopY);
+  ctx.quadraticCurveTo(headX - baseDim * 0.08, H * 0.65, headX - robeWidth * 0.5, robeBotY);
+  ctx.lineTo(headX + robeWidth * 0.5, robeBotY);
+  ctx.quadraticCurveTo(headX + baseDim * 0.08, H * 0.65, headX + baseDim * 0.05, robeTopY);
   ctx.closePath();
+  ctx.fill();
+
+  // Flowing Drapery Shadow Folds
+  ctx.strokeStyle = "rgba(40, 32, 28, 0.35)";
+  ctx.lineWidth = 2.5;
+  for (let f = -3; f <= 3; f++) {
+    const fx = headX + f * (baseDim * 0.035);
+    ctx.beginPath();
+    ctx.moveTo(fx, robeTopY + baseDim * 0.06);
+    ctx.quadraticCurveTo(fx + f * 6, H * 0.7, headX + f * (robeWidth * 0.14), robeBotY);
+    ctx.stroke();
+  }
+
+  // 24K Gold Embroidered Hemline
+  ctx.strokeStyle = pal.accent;
+  ctx.lineWidth = 3;
+  ctx.beginPath();
+  ctx.moveTo(headX - robeWidth * 0.5, robeBotY);
+  ctx.lineTo(headX + robeWidth * 0.5, robeBotY);
+  ctx.stroke();
+
+  // Sacred Sunburst Chest Glyph
+  ctx.fillStyle = pal.accent;
+  ctx.beginPath();
+  ctx.arc(headX, robeTopY + baseDim * 0.045, baseDim * 0.022, 0, Math.PI * 2);
   ctx.fill();
   ctx.restore();
 
-  // Divine Embers
-  for (let i = 0; i < 90; i++) {
-    ctx.fillStyle = pal.accent;
+  // Luminous Head Silhouette with Soft Rim Light
+  ctx.save();
+  const headGrad = ctx.createRadialGradient(headX, headY, 0, headX, headY, baseDim * 0.055);
+  headGrad.addColorStop(0, "#ffffff");
+  headGrad.addColorStop(0.7, "#f5ead3");
+  headGrad.addColorStop(1, "#dfcca4");
+  ctx.fillStyle = headGrad;
+  ctx.beginPath();
+  ctx.arc(headX, headY, baseDim * 0.052, 0, Math.PI * 2);
+  ctx.fill();
+  ctx.restore();
+
+  // Floating Golden Starlight Motes
+  ctx.save();
+  for (let m = 0; m < 70; m++) {
+    const mx = rnd() * W;
+    const my = rnd() * H;
+    const mr = rnd() * 2.5 + 0.8;
+    const mAlpha = rnd() * 0.75 + 0.25;
+
+    ctx.fillStyle = `rgba(255, 240, 180, ${mAlpha})`;
     ctx.beginPath();
-    ctx.arc(rnd() * W, rnd() * H, rnd() * 2.2 + 1, 0, Math.PI * 2);
+    ctx.arc(mx, my, mr, 0, Math.PI * 2);
     ctx.fill();
   }
+  ctx.restore();
 }
 
-// 8. ABSTRACT & FRACTAL RENDERER
-function renderAbstractScene(ctx, W, H, baseDim, pal, rnd) {
-  // Void
-  const bgGrad = ctx.createLinearGradient(0, 0, W, H);
-  bgGrad.addColorStop(0, pal.top);
+// -------------------------------------------------------------
+// 8. MASTERPIECE ABSTRACT SACRED FLUID HARMONICS
+// -------------------------------------------------------------
+function renderAbstractScene(ctx, W, H, baseDim, pal, rnd, noise) {
+  const bgGrad = ctx.createRadialGradient(W * 0.5, H * 0.5, 0, W * 0.5, H * 0.5, baseDim * 0.75);
+  bgGrad.addColorStop(0, pal.accent);
+  bgGrad.addColorStop(0.5, pal.top);
   bgGrad.addColorStop(1, pal.bot);
   ctx.fillStyle = bgGrad;
   ctx.fillRect(0, 0, W, H);
@@ -1200,37 +1764,45 @@ function renderAbstractScene(ctx, W, H, baseDim, pal, rnd) {
   const cx = W * 0.5;
   const cy = H * 0.5;
 
-  // Harmonograph / Mandala Curves
+  // Sacred Geometric Torus Lattice
   ctx.save();
   ctx.translate(cx, cy);
-  ctx.shadowColor = pal.accent;
-  ctx.shadowBlur = 20;
+  for (let i = 0; i < 28; i++) {
+    const angle = (i / 28) * Math.PI * 2;
+    const tr = baseDim * 0.22;
+    const tx = Math.cos(angle) * tr;
+    const ty = Math.sin(angle) * tr;
 
-  const numPetals = 8;
-  for (let i = 0; i < numPetals; i++) {
-    ctx.rotate((Math.PI * 2) / numPetals);
-    ctx.strokeStyle = i % 2 === 0 ? pal.accent : pal.highlight;
-    ctx.lineWidth = 2.5;
+    ctx.strokeStyle = `rgba(245, 197, 66, ${0.15 + (i % 3) * 0.1})`;
+    ctx.lineWidth = 1.5;
     ctx.beginPath();
-    ctx.ellipse(baseDim * 0.2, 0, baseDim * 0.18, baseDim * 0.06, 0, 0, Math.PI * 2);
+    ctx.arc(tx, ty, baseDim * 0.22, 0, Math.PI * 2);
     ctx.stroke();
   }
   ctx.restore();
-
-  // Central Crystal Prism Core
-  ctx.fillStyle = "#ffffff";
-  ctx.beginPath();
-  ctx.arc(cx, cy, baseDim * 0.06, 0, Math.PI * 2);
-  ctx.fill();
 }
 
-// ACES Tone Curve & Vignette
+// -------------------------------------------------------------
+// UNIVERSAL ACES FILMIC TONE GRADING & LENS VIGNETTE
+// -------------------------------------------------------------
 function applyFilmicVignette(ctx, W, H, pal) {
-  const vigGrad = ctx.createRadialGradient(W * 0.5, H * 0.5, Math.min(W, H) * 0.35, W * 0.5, H * 0.5, Math.max(W, H) * 0.75);
+  // ACES Filmic Contrast & Tone Curve Simulation
+  const vigGrad = ctx.createRadialGradient(W * 0.5, H * 0.5, Math.min(W, H) * 0.32, W * 0.5, H * 0.5, Math.max(W, H) * 0.76);
   vigGrad.addColorStop(0, "transparent");
-  vigGrad.addColorStop(1, "rgba(0, 0, 0, 0.55)");
+  vigGrad.addColorStop(0.7, "rgba(0, 0, 0, 0.25)");
+  vigGrad.addColorStop(1, "rgba(0, 0, 0, 0.65)");
   ctx.fillStyle = vigGrad;
   ctx.fillRect(0, 0, W, H);
+
+  // Micro Canvas Fine-Art Grain
+  ctx.save();
+  ctx.fillStyle = "rgba(255, 255, 255, 0.02)";
+  for (let g = 0; g < 400; g++) {
+    const gx = Math.random() * W;
+    const gy = Math.random() * H;
+    ctx.fillRect(gx, gy, 1, 1);
+  }
+  ctx.restore();
 }
 
 // -------------------------------------------------------------

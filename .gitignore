@@ -8,6 +8,7 @@ outputs/
 test_*.png
 test_*.bmp
 angel_seraphim.png
+*.zip
 
 # Environment
 .env
