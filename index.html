@@ -3,561 +3,247 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>✦ Angel Generator AI — Celestial Studio Portal</title>
+  <title>Angel Generator AI - Universal 4K Studio</title>
+  <link rel="stylesheet" href="style.css">
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Cinzel:wght@600;700;800;900&family=Plus+Jakarta+Sans:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
-  <link rel="icon" href="data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 100 100%22><text y=%22.9em%22 font-size=%2290%22>✨</text></svg>">
-  <style>
-    :root {
-      --bg-midnight: #060813;
-      --bg-panel: rgba(14, 18, 38, 0.78);
-      --gold-primary: #f5c542;
-      --gold-bright: #ffdf79;
-      --gold-glow: rgba(245, 197, 66, 0.45);
-      --purple-accent: #7c3aed;
-      --purple-glow: rgba(124, 58, 237, 0.35);
-      --cyan-accent: #38bdf8;
-      --border-panel: rgba(245, 197, 66, 0.28);
-      --text-main: #f8fafc;
-      --text-muted: #94a3b8;
-    }
-
-    * {
-      box-sizing: border-box;
-      margin: 0;
-      padding: 0;
-    }
-
-    body {
-      background: var(--bg-midnight);
-      color: var(--text-main);
-      font-family: 'Plus Jakarta Sans', -apple-system, BlinkMacSystemFont, sans-serif;
-      min-height: 100vh;
-      display: flex;
-      flex-direction: column;
-      align-items: center;
-      justify-content: center;
-      overflow-x: hidden;
-      position: relative;
-      padding: 30px 20px;
-    }
-
-    /* Ambient atmospheric backgrounds */
-    #starsCanvas {
-      position: fixed;
-      top: 0;
-      left: 0;
-      width: 100vw;
-      height: 100vh;
-      pointer-events: none;
-      z-index: 0;
-    }
-
-    .ambient-glow {
-      position: fixed;
-      width: 600px;
-      height: 600px;
-      border-radius: 50%;
-      pointer-events: none;
-      filter: blur(140px);
-      z-index: 0;
-    }
-
-    .glow-center {
-      top: 50%;
-      left: 50%;
-      transform: translate(-50%, -50%);
-      background: radial-gradient(circle, var(--gold-glow) 0%, rgba(124, 58, 237, 0.2) 60%, transparent 80%);
-    }
-
-    .glow-top {
-      top: -150px;
-      left: 50%;
-      transform: translateX(-50%);
-      background: radial-gradient(circle, rgba(245, 197, 66, 0.25) 0%, transparent 70%);
-    }
-
-    /* Main Container */
-    .portal-card {
-      position: relative;
-      z-index: 10;
-      max-width: 960px;
-      width: 100%;
-      background: var(--bg-panel);
-      backdrop-filter: blur(20px);
-      border: 1px solid var(--border-panel);
-      border-radius: 20px;
-      box-shadow: 0 0 50px rgba(0, 0, 0, 0.8), 0 0 35px var(--gold-glow);
-      padding: 45px 35px;
-      text-align: center;
-      animation: fadeIn 0.8s ease-out;
-    }
-
-    @keyframes fadeIn {
-      from { opacity: 0; transform: translateY(18px); }
-      to { opacity: 1; transform: translateY(0); }
-    }
-
-    /* Sacred Halo Emblem */
-    .halo-emblem {
-      width: 90px;
-      height: 90px;
-      margin: 0 auto 20px auto;
-      position: relative;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-    }
-
-    .halo-ring {
-      position: absolute;
-      width: 100%;
-      height: 100%;
-      border: 3px solid var(--gold-primary);
-      border-radius: 50%;
-      box-shadow: 0 0 25px var(--gold-primary), inset 0 0 15px var(--gold-glow);
-      animation: pulseHalo 4s ease-in-out infinite;
-    }
-
-    .halo-ring.inner {
-      width: 72%;
-      height: 72%;
-      border-width: 1.5px;
-      border-color: #ffffff;
-      box-shadow: 0 0 18px #fff;
-    }
-
-    @keyframes pulseHalo {
-      0%, 100% { transform: scale(1); opacity: 0.85; }
-      50% { transform: scale(1.08); opacity: 1; box-shadow: 0 0 40px var(--gold-bright); }
-    }
-
-    .halo-icon {
-      font-size: 2.2rem;
-      z-index: 2;
-      filter: drop-shadow(0 0 10px var(--gold-primary));
-    }
-
-    /* Typography */
-    .brand-badge {
-      display: inline-block;
-      padding: 6px 16px;
-      background: rgba(245, 197, 66, 0.12);
-      border: 1px solid rgba(245, 197, 66, 0.35);
-      border-radius: 999px;
-      color: var(--gold-bright);
-      font-size: 0.78rem;
-      font-weight: 700;
-      letter-spacing: 2px;
-      text-transform: uppercase;
-      margin-bottom: 12px;
-    }
-
-    h1 {
-      font-family: 'Cinzel', serif;
-      font-size: 2.8rem;
-      font-weight: 900;
-      letter-spacing: 4px;
-      background: linear-gradient(135deg, #ffffff 15%, var(--gold-bright) 60%, var(--gold-primary) 90%);
-      -webkit-background-clip: text;
-      -webkit-text-fill-color: transparent;
-      margin-bottom: 8px;
-      text-shadow: 0 0 35px var(--gold-glow);
-    }
-
-    .subtitle {
-      font-size: 1.15rem;
-      color: var(--text-muted);
-      letter-spacing: 1.5px;
-      margin-bottom: 25px;
-      font-weight: 500;
-    }
-
-    /* Mandate Badges */
-    .mandate-pills {
-      display: flex;
-      flex-wrap: wrap;
-      justify-content: center;
-      gap: 10px;
-      margin-bottom: 35px;
-    }
-
-    .mandate-pill {
-      font-size: 0.8rem;
-      font-weight: 600;
-      padding: 6px 14px;
-      background: rgba(255, 255, 255, 0.04);
-      border: 1px solid rgba(255, 255, 255, 0.12);
-      border-radius: 8px;
-      color: #cbd5e1;
-    }
-
-    .mandate-pill.gold {
-      border-color: rgba(245, 197, 66, 0.4);
-      color: var(--gold-bright);
-      background: rgba(245, 197, 66, 0.08);
-    }
-
-    /* Launcher Actions */
-    .launcher-grid {
-      display: grid;
-      grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
-      gap: 18px;
-      margin-bottom: 35px;
-    }
-
-    .btn-portal {
-      display: flex;
-      flex-direction: column;
-      align-items: center;
-      justify-content: center;
-      padding: 22px 20px;
-      border-radius: 14px;
-      text-decoration: none;
-      font-family: 'Plus Jakarta Sans', sans-serif;
-      font-weight: 700;
-      transition: all 0.25s cubic-bezier(0.16, 1, 0.3, 1);
-      cursor: pointer;
-      position: relative;
-      overflow: hidden;
-    }
-
-    .btn-portal-primary {
-      background: linear-gradient(135deg, #f5c542, #e0a314);
-      color: #060813;
-      border: 1px solid var(--gold-bright);
-      box-shadow: 0 0 25px rgba(245, 197, 66, 0.45);
-    }
-
-    .btn-portal-primary:hover {
-      transform: translateY(-3px);
-      box-shadow: 0 0 40px rgba(245, 197, 66, 0.8);
-      background: linear-gradient(135deg, #ffdf79, #f5c542);
-    }
-
-    .btn-portal-secondary {
-      background: rgba(124, 58, 237, 0.15);
-      color: #ffffff;
-      border: 1px solid rgba(124, 58, 237, 0.5);
-      box-shadow: 0 0 20px rgba(124, 58, 237, 0.25);
-    }
-
-    .btn-portal-secondary:hover {
-      transform: translateY(-3px);
-      background: rgba(124, 58, 237, 0.3);
-      border-color: var(--purple-accent);
-      box-shadow: 0 0 35px rgba(124, 58, 237, 0.6);
-    }
-
-    .btn-portal-outline {
-      background: rgba(255, 255, 255, 0.04);
-      color: #e2e8f0;
-      border: 1px solid rgba(255, 255, 255, 0.18);
-    }
-
-    .btn-portal-outline:hover {
-      transform: translateY(-3px);
-      background: rgba(255, 255, 255, 0.08);
-      border-color: var(--gold-primary);
-      color: var(--gold-bright);
-    }
-
-    .btn-portal .btn-title {
-      font-size: 1.15rem;
-      letter-spacing: 1px;
-      display: flex;
-      align-items: center;
-      gap: 8px;
-      margin-bottom: 6px;
-    }
-
-    .btn-portal .btn-desc {
-      font-size: 0.82rem;
-      opacity: 0.85;
-      font-weight: 500;
-    }
-
-    /* Auto Launch Banner */
-    .auto-launch-bar {
-      margin-bottom: 30px;
-      padding: 12px 18px;
-      background: rgba(245, 197, 66, 0.08);
-      border: 1px solid rgba(245, 197, 66, 0.25);
-      border-radius: 10px;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      gap: 15px;
-      font-size: 0.9rem;
-      color: var(--gold-bright);
-    }
-
-    .btn-cancel-auto {
-      background: transparent;
-      border: 1px solid rgba(245, 197, 66, 0.4);
-      color: var(--gold-bright);
-      padding: 4px 10px;
-      border-radius: 6px;
-      font-size: 0.78rem;
-      cursor: pointer;
-      font-weight: 600;
-      transition: 0.2s;
-    }
-
-    .btn-cancel-auto:hover {
-      background: rgba(245, 197, 66, 0.2);
-    }
-
-    /* Showcase Mini Gallery */
-    .showcase-heading {
-      font-family: 'Cinzel', serif;
-      font-size: 1.3rem;
-      color: var(--gold-bright);
-      letter-spacing: 2px;
-      margin-bottom: 18px;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      gap: 10px;
-    }
-
-    .gallery-grid {
-      display: grid;
-      grid-template-columns: repeat(auto-fit, minmax(130px, 1fr));
-      gap: 12px;
-      margin-bottom: 25px;
-    }
-
-    .gallery-card {
-      border-radius: 10px;
-      overflow: hidden;
-      border: 1px solid rgba(245, 197, 66, 0.2);
-      background: #090c1a;
-      transition: all 0.25s ease;
-      cursor: pointer;
-      text-decoration: none;
-      display: block;
-    }
-
-    .gallery-card:hover {
-      transform: scale(1.05);
-      border-color: var(--gold-primary);
-      box-shadow: 0 0 20px var(--gold-glow);
-    }
-
-    .gallery-card img {
-      width: 100%;
-      height: 120px;
-      object-fit: cover;
-      display: block;
-    }
-
-    .gallery-card .card-caption {
-      padding: 6px 4px;
-      font-size: 0.72rem;
-      color: #e2e8f0;
-      font-weight: 600;
-      white-space: nowrap;
-      overflow: hidden;
-      text-overflow: ellipsis;
-    }
-
-    /* Footer */
-    footer {
-      margin-top: 20px;
-      font-size: 0.8rem;
-      color: var(--text-muted);
-      display: flex;
-      flex-wrap: wrap;
-      justify-content: center;
-      gap: 15px;
-    }
-
-    footer a {
-      color: var(--gold-primary);
-      text-decoration: none;
-      transition: 0.2s;
-    }
-
-    footer a:hover {
-      text-decoration: underline;
-      color: var(--gold-bright);
-    }
-
-    @media (max-width: 600px) {
-      h1 { font-size: 2rem; }
-      .portal-card { padding: 30px 18px; }
-      .launcher-grid { grid-template-columns: 1fr; }
-    }
-  </style>
+  <link rel="icon" href="data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 100 100%22><text y=%22.9em%22 font-size=%2290%22>✦</text></svg>">
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/jszip/3.10.1/jszip.min.js"></script>
 </head>
 <body>
-  <!-- Atmospheric Canvas Background -->
+  <!-- Ambient Atmospheric Background -->
   <canvas id="starsCanvas"></canvas>
-  <div class="ambient-glow glow-center"></div>
-  <div class="ambient-glow glow-top"></div>
 
-  <!-- Portal Card -->
-  <div class="portal-card">
-    <div class="halo-emblem">
-      <div class="halo-ring"></div>
-      <div class="halo-ring inner"></div>
-      <span class="halo-icon">✨</span>
-    </div>
+  <div class="app-layout">
+    <!-- Collapsible Sidebar (Gemini / Claude style drawer) -->
+    <aside id="sidebar" class="sidebar">
+      <div class="sidebar-header">
+        <button id="btnNewCreation" class="btn-new-creation" title="Start new prompt">
+          <span style="font-size:1.1rem;">✦</span> New Creation
+        </button>
+        <div class="sidebar-library-title">
+          <h4>AI Image Library</h4>
+          <span class="sidebar-count-badge" id="sidebarCountBadge">0 items</span>
+        </div>
+        <div class="sidebar-library-actions">
+          <button id="btnSidebarDownloadZip" class="btn-sidebar-tool" title="Download all library images as a ZIP archive">
+            <span>📦</span> ZIP
+          </button>
+          <button id="btnSidebarSync" class="btn-sidebar-tool" title="Save Library folder to disk">
+            <span>💾</span> Save
+          </button>
+          <button id="btnSidebarClear" class="btn-sidebar-tool btn-danger" title="Clear all local library images">
+            <span>🗑️</span> Clear
+          </button>
+        </div>
+      </div>
 
-    <span class="brand-badge">STUDIO SUITE v3.0 • 4K CELESTIAL</span>
-    <h1>ANGEL GENERATOR AI</h1>
-    <p class="subtitle">Proprietary From-Scratch Neural Text-to-Image Generative Studio</p>
+      <!-- Scrollable Local Library Item List -->
+      <div id="sidebarLibraryList" class="sidebar-library-list">
+        <!-- Rendered dynamically by app.js -->
+      </div>
 
-    <!-- Mandate Badges -->
-    <div class="mandate-pills">
-      <span class="mandate-pill gold">✦ 100% From-Scratch Models</span>
-      <span class="mandate-pill">🛡️ Zero Cloud Dependencies</span>
-      <span class="mandate-pill">📂 AI Generated Image Library</span>
-      <span class="mandate-pill">🖼️ Landscape • Square • Portrait • Custom</span>
-      <span class="mandate-pill">⏹️ Dual Generate & Stop Controls</span>
-      <span class="mandate-pill">🧠 High Thinking AI Mode</span>
-      <span class="mandate-pill">🌐 Autonomous WebGL Synthesis</span>
-    </div>
+      <div class="sidebar-footer">
+        <span>Offline Neural Synthesizer</span>
+        <a href="https://github.com/michaelsweet612/Angel_Generator_AI_Images" target="_blank" rel="noopener">v3.5.0</a>
+      </div>
+    </aside>
 
-    <!-- Auto-launch notice -->
-    <div id="autoLaunchBar" class="auto-launch-bar">
-      <span>Auto-launching Widescreen Studio in <strong id="countdownSecs">5</strong>s...</span>
-      <button id="btnCancelAuto" class="btn-cancel-auto">Pause Countdown</button>
-    </div>
+    <!-- Main Workspace Stage -->
+    <main class="main-stage">
+      <!-- Top Navigation Bar -->
+      <header class="top-navbar">
+        <div class="nav-left">
+          <button id="btnSidebarToggle" class="btn-sidebar-toggle" title="Toggle Library Sidebar (Ctrl+B)">
+            ☰
+          </button>
+          <div class="nav-brand">
+            <h1>ANGEL GENERATOR AI</h1>
+            <span class="brand-chip">v3.5.0 STUDIO</span>
+          </div>
+        </div>
 
-    <!-- Launcher Action Buttons -->
-    <div class="launcher-grid">
-      <a href="javascript:loadStudio('ANGEL_GENERATOR_STUDIO.html')" class="btn-portal btn-portal-primary">
-        <span class="btn-title">✦ LAUNCH CELESTIAL STUDIO</span>
-        <span class="btn-desc">Widescreen 4K Studio with live synthesis & stop controls</span>
-      </a>
+        <div class="nav-center">
+          <div class="engine-status-pill">
+            <span class="status-dot"></span>
+            <span>100% Offline Multi-Category Synthesizer</span>
+          </div>
+        </div>
 
-      <a href="javascript:loadStudio('ANGEL_GENERATOR_STUDIO.html?layout=responsive')" class="btn-portal btn-portal-secondary">
-        <span class="btn-title">📱 RESPONSIVE STUDIO</span>
-        <span class="btn-desc">Optimized for mobile, tablets, and compact screens</span>
-      </a>
+        <div class="nav-right">
+          <button id="btnSoundToggle" class="btn-nav-action" title="Toggle Audio Sound FX">
+            <span class="nav-icon">🔊</span>
+          </button>
+          <button id="btnFullscreen" class="btn-nav-action" title="Toggle Fullscreen">
+            <span>⛶</span> Fullscreen
+          </button>
+          <a href="https://github.com/michaelsweet612/Angel_Generator_AI_Images/releases" target="_blank" class="btn-nav-action gold-accent" rel="noopener">
+            <span>⚡</span> Win64 App
+          </a>
+        </div>
+      </header>
 
-      <a href="https://github.com/michaelsweet612/Angel_Generator_AI_Images/releases/tag/v3.0.0" target="_blank" class="btn-portal btn-portal-outline">
-        <span class="btn-title">⬇️ WIN64 OFFLINE SUITE</span>
-        <span class="btn-desc">Download standalone EXE, weights & GUI (v3.0.0 ZIP)</span>
-      </a>
-    </div>
+      <!-- Central Viewport -->
+      <div class="viewport-content">
+        <!-- Welcome Screen (Default empty state like Gemini / Claude) -->
+        <div id="welcomeContainer" class="welcome-container">
+          <h2 class="welcome-title">What will you imagine?</h2>
+          <p class="welcome-subtitle">From-scratch multi-category procedural neural synthesis. 100% private &amp; offline.</p>
 
-    <!-- Curated 4K Showcase Gallery -->
-    <div class="showcase-heading">
-      <span>✦</span>
-      <span>4K Celestial Showcase Gallery</span>
-      <span>✦</span>
-    </div>
+          <div class="suggestion-cards-grid">
+            <div class="suggestion-card" data-prompt="Archangel Michael with massive radiant golden feathered wings, golden halo in heavenly clouds, volumetric divine light rays, masterpiece, 4k ultra-hd">
+              <span class="suggestion-icon">✨</span>
+              <div class="suggestion-text">Archangel Michael with massive radiant golden feathered wings and luminous divine rays</div>
+              <span class="suggestion-tag">Celestial &bull; Sacred</span>
+            </div>
 
-    <div class="gallery-grid">
-      <a href="ANGEL_GENERATOR_STUDIO.html?preset=archangel" class="gallery-card" title="Archangel Michael">
-        <img src="samples/01_archangel_michael_4k.png" alt="Archangel Michael">
-        <div class="card-caption">Archangel Michael</div>
-      </a>
-      <a href="ANGEL_GENERATOR_STUDIO.html?preset=seraphim" class="gallery-card" title="Six-Winged Seraphim">
-        <img src="samples/02_seraphim_celestial_dawn_4k.png" alt="Six-Winged Seraphim">
-        <div class="card-caption">Six-Winged Seraphim</div>
-      </a>
-      <a href="ANGEL_GENERATOR_STUDIO.html?preset=cathedral" class="gallery-card" title="Cathedral Guardian">
-        <img src="samples/03_cathedral_guardian_angel_4k.png" alt="Cathedral Guardian">
-        <div class="card-caption">Cathedral Guardian</div>
-      </a>
-      <a href="ANGEL_GENERATOR_STUDIO.html?preset=cyberpunk" class="gallery-card" title="Cyberpunk Hologram">
-        <img src="samples/04_cyberpunk_holographic_angel_4k.png" alt="Cyberpunk Angel">
-        <div class="card-caption">Cyberpunk Hologram</div>
-      </a>
-      <a href="ANGEL_GENERATOR_STUDIO.html?preset=cosmic" class="gallery-card" title="Cosmic Starlight">
-        <img src="samples/05_cosmic_starlight_angel_4k.png" alt="Cosmic Starlight">
-        <div class="card-caption">Cosmic Starlight</div>
-      </a>
-      <a href="ANGEL_GENERATOR_STUDIO.html?preset=baroque" class="gallery-card" title="Divine Baroque">
-        <img src="samples/06_divine_baroque_seraph_4k.png" alt="Divine Baroque">
-        <div class="card-caption">Divine Baroque</div>
-      </a>
-    </div>
+            <div class="suggestion-card" data-prompt="Cyberpunk neon metropolis at rainy night with holographic billboards, reflections on wet asphalt, soaring sky-cars, high detail 4k">
+              <span class="suggestion-icon">🏙️</span>
+              <div class="suggestion-text">Cyberpunk neon metropolis with rainy reflections and soaring illuminated traffic</div>
+              <span class="suggestion-tag">Sci-Fi &bull; Neon</span>
+            </div>
 
-    <footer>
-      <span>✦ Angel Generator AI v3.0.0</span>
-      <span>•</span>
-      <a href="https://github.com/michaelsweet612/Angel_Generator_AI_Images" target="_blank">GitHub Repository</a>
-      <span>•</span>
-      <a href="https://github.com/michaelsweet612/Angel_Generator_AI_Images/blob/main/LICENSE" target="_blank">MIT License</a>
-      <span>•</span>
-      <span>Crafted by Michael Sweet</span>
-    </footer>
+            <div class="suggestion-card" data-prompt="Emerald crystal dragon coiled on jagged mountain peaks with violet lightning storm, atmospheric fog, fantasy epic">
+              <span class="suggestion-icon">🐉</span>
+              <div class="suggestion-text">Emerald crystal dragon perched on jagged mountain peaks with violet lightning</div>
+              <span class="suggestion-tag">Creature &bull; Epic</span>
+            </div>
+
+            <div class="suggestion-card" data-prompt="Deep space cosmic nebula with glowing spiral accretion disk, swirling purple and cyan dust clouds, stellar horizon">
+              <span class="suggestion-icon">🌌</span>
+              <div class="suggestion-text">Deep space cosmic nebula with glowing spiral accretion disk and star clusters</div>
+              <span class="suggestion-tag">Cosmic &bull; Deep Space</span>
+            </div>
+
+            <div class="suggestion-card" data-prompt="Majestic alpine lake reflecting snow-capped golden hour mountain range with dense pine forest and warm sunset lighting">
+              <span class="suggestion-icon">🏔️</span>
+              <div class="suggestion-text">Majestic alpine lake reflecting snow-capped golden hour mountain range</div>
+              <span class="suggestion-tag">Landscape &bull; Nature</span>
+            </div>
+
+            <div class="suggestion-card" data-prompt="Futuristic hypercar mechanical chassis with glowing titanium exhaust manifolds and aerodynamic carbon fiber splitters">
+              <span class="suggestion-icon">🏎️</span>
+              <div class="suggestion-text">Futuristic hypercar mechanical engine with glowing titanium exhausts</div>
+              <span class="suggestion-tag">Mechanical &bull; Speed</span>
+            </div>
+          </div>
+        </div>
+
+        <!-- Canvas Active Artwork Stage -->
+        <div id="canvasStage" class="canvas-stage" style="display: none;">
+          <div class="canvas-frame">
+            <canvas id="browserCanvas" width="1024" height="1024"></canvas>
+            <img id="resultImage" alt="Generated Artwork" style="display: none;" />
+
+            <!-- Progress Loader Overlay -->
+            <div id="loaderOverlay" class="loader-overlay" style="display: none;">
+              <div class="gemini-spinner"></div>
+              <div class="loader-status" id="loaderStatus">Initializing multi-layer neural field...</div>
+              <div class="loader-timer" id="loaderTimer">Estimated: 1.4s</div>
+            </div>
+          </div>
+
+          <!-- Instant Artwork Action Toolbar -->
+          <div class="artwork-toolbar">
+            <button id="btnArtDownload" class="btn-art-action primary-download" title="Save to AI generated image library folder">
+              <span>💾</span> Download Image
+            </button>
+            <button id="btnArtCopy" class="btn-art-action" title="Copy artwork to clipboard">
+              <span>📋</span> Copy Image
+            </button>
+            <button id="btnArtFullscreen" class="btn-art-action" title="View Fullscreen Lightbox">
+              <span>🔍</span> Enlarge
+            </button>
+            <button id="btnArtRegenerate" class="btn-art-action" title="Regenerate with new neural seed">
+              <span>🔄</span> Variations
+            </button>
+            <div class="art-library-badge">
+              <span>✓</span> Saved to AI generated image library
+            </div>
+          </div>
+
+          <!-- High Thinking Semantic Breakdown (Collapsible Gemini accordion) -->
+          <details id="thinkingAccordion" class="thinking-accordion" open>
+            <summary>
+              <span>🧠</span>
+              <span>High Thinking Semantic Breakdown</span>
+            </summary>
+            <div id="thinkingContentInner" class="thinking-content-inner">
+              <!-- Rendered dynamically by app.js -->
+            </div>
+          </details>
+        </div>
+      </div>
+
+      <!-- Signature Floating Bottom Prompt Bar (Gemini / Claude Floating Pill) -->
+      <div class="floating-input-wrapper">
+        <!-- Quick Control Chips Bar -->
+        <div class="chips-bar">
+          <button class="chip-btn chip-aspect active" data-aspect="landscape" title="Landscape 16:9 ratio">
+            <span>🖥️</span> Landscape (16:9)
+          </button>
+          <button class="chip-btn chip-aspect" data-aspect="square" title="Square 1:1 ratio">
+            <span>⏹️</span> Square (1:1)
+          </button>
+          <button class="chip-btn chip-aspect" data-aspect="portrait" title="Portrait 9:16 ratio">
+            <span>📱</span> Portrait (9:16)
+          </button>
+          <button class="chip-btn chip-aspect" data-aspect="custom" title="Custom aspect ratio dimensions">
+            <span>⚙️</span> Custom
+          </button>
+
+          <select id="selectStyle" class="chip-select" title="Artistic Rendering Style">
+            <option value="cinematic_4k" selected>Cinematic 4K UHD</option>
+            <option value="sacred_oil">Sacred Oil Painting</option>
+            <option value="celestial_glow">Celestial Divine Glow</option>
+            <option value="neon_cyberpunk">Neon Cyberpunk</option>
+            <option value="dark_fantasy">Dark Fantasy Epic</option>
+            <option value="fresco_flemish">Flemish Renaissance</option>
+            <option value="cosmic_astral">Cosmic Astral Field</option>
+          </select>
+
+          <button id="chipThinking" class="chip-btn active" title="Toggle detailed prompt reasoning">
+            <span>🧠</span> High Thinking: ON
+          </button>
+        </div>
+
+        <!-- Custom Dimension Popup (revealed when Custom aspect is selected) -->
+        <div id="customDimPopup" class="custom-dim-popup" style="display: none;">
+          <label for="customWidthInput">Width:</label>
+          <input type="number" id="customWidthInput" class="custom-dim-input" value="1024" min="256" max="4096" step="64" />
+          <label for="customHeightInput">Height:</label>
+          <input type="number" id="customHeightInput" class="custom-dim-input" value="1024" min="256" max="4096" step="64" />
+          <div class="custom-dim-chips">
+            <button type="button" class="btn-mini-chip" data-w="1280" data-h="720">720p</button>
+            <button type="button" class="btn-mini-chip" data-w="1920" data-h="1080">1080p</button>
+            <button type="button" class="btn-mini-chip" data-w="2048" data-h="2048">2K Sq</button>
+            <button type="button" class="btn-mini-chip" data-w="3840" data-h="2160">4K UHD</button>
+          </div>
+        </div>
+
+        <!-- Main Input Card with Dynamic Generate / Stop action button -->
+        <div class="prompt-pill-card">
+          <textarea id="promptInput" class="prompt-textarea" rows="1" placeholder="Ask Angel Generator to create anything... (Press Enter to generate, Shift+Enter for new line)"></textarea>
+          <div class="prompt-actions-right">
+            <button id="btnEnhanceMagic" class="btn-enhance-magic" title="AI Magic Expand Prompt">
+              ✨
+            </button>
+            <button id="btnSubmitAction" class="btn-submit-action state-generate" title="Generate Image (Enter)">
+              <span class="action-icon">➤</span>
+            </button>
+          </div>
+        </div>
+      </div>
+    </main>
   </div>
 
-  <script>
-    // Navigation helper with cache-busting
-    function loadStudio(url) {
-      if (window.location.protocol === 'file:') {
-        window.location.href = url;
-      } else {
-        const sep = url.includes('?') ? '&' : '?';
-        window.location.href = url + sep + 'bust=' + Date.now();
-      }
-    }
+  <!-- Fullscreen Lightbox Modal -->
+  <div id="lightboxModal" class="lightbox-modal" style="display: none;">
+    <button id="btnCloseLightbox" class="lightbox-close" title="Close Lightbox">✕</button>
+    <img id="lightboxImg" class="lightbox-img" alt="Artwork Enlarged" />
+  </div>
 
-    // Auto-launch countdown
-    let countdown = 5;
-    let timer = null;
-    const countdownEl = document.getElementById('countdownSecs');
-    const autoBar = document.getElementById('autoLaunchBar');
-    const btnCancel = document.getElementById('btnCancelAuto');
-
-    timer = setInterval(() => {
-      countdown--;
-      if (countdownEl) countdownEl.textContent = countdown;
-      if (countdown <= 0) {
-        clearInterval(timer);
-        loadStudio('ANGEL_GENERATOR_STUDIO.html');
-      }
-    }, 1000);
-
-    btnCancel.addEventListener('click', () => {
-      clearInterval(timer);
-      autoBar.innerHTML = '<span>✦ Auto-launch paused. Explore options below at your leisure.</span>';
-    });
-
-    // Atmospheric Starfield Canvas
-    const canvas = document.getElementById('starsCanvas');
-    if (canvas) {
-      const ctx = canvas.getContext('2d');
-      let w = canvas.width = window.innerWidth;
-      let h = canvas.height = window.innerHeight;
-      window.addEventListener('resize', () => {
-        w = canvas.width = window.innerWidth;
-        h = canvas.height = window.innerHeight;
-      });
-
-      const stars = Array.from({ length: 90 }, () => ({
-        x: Math.random() * w,
-        y: Math.random() * h,
-        r: Math.random() * 1.6 + 0.4,
-        vy: -(Math.random() * 0.3 + 0.1),
-        alpha: Math.random() * 0.7 + 0.3,
-        color: Math.random() > 0.35 ? '#f5c542' : '#ffffff'
-      }));
-
-      function animate() {
-        ctx.clearRect(0, 0, w, h);
-        stars.forEach(s => {
-          s.y += s.vy;
-          if (s.y < 0) s.y = h;
-          ctx.beginPath();
-          ctx.arc(s.x, s.y, s.r, 0, Math.PI * 2);
-          ctx.fillStyle = s.color;
-          ctx.globalAlpha = s.alpha;
-          ctx.fill();
-        });
-        ctx.globalAlpha = 1.0;
-        requestAnimationFrame(animate);
-      }
-      animate();
-    }
-  </script>
+  <script src="app.js"></script>
 </body>
 </html>

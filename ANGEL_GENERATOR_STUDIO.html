@@ -3,362 +3,246 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>✦ Angel Generator AI — 4K Celestial Masterpiece Studio</title>
+  <title>Angel Generator AI - Universal 4K Studio</title>
   <link rel="stylesheet" href="style.css">
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Cinzel:wght@600;700;800;900&family=Plus+Jakarta+Sans:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
-  <link rel="icon" href="data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 100 100%22><text y=%22.9em%22 font-size=%2290%22>✨</text></svg>">
+  <link rel="icon" href="data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 100 100%22><text y=%22.9em%22 font-size=%2290%22>✦</text></svg>">
   <script src="https://cdnjs.cloudflare.com/ajax/libs/jszip/3.10.1/jszip.min.js"></script>
 </head>
 <body>
-  <!-- Atmospheric Canvas Background -->
+  <!-- Ambient Atmospheric Background -->
   <canvas id="starsCanvas"></canvas>
-  <div class="ambient-glow glow-top"></div>
-  <div class="ambient-glow glow-bottom"></div>
 
-  <!-- Top Navigation Bar -->
-  <header class="app-header">
-    <div class="brand">
-      <div class="brand-halo">
-        <div class="halo-flare"></div>
-      </div>
-      <div class="brand-text">
-        <span class="brand-badge">STUDIO SUITE v3.0 • 4K CELESTIAL</span>
-        <h1>ANGEL GENERATOR AI</h1>
-      </div>
-    </div>
-
-    <!-- Center Navigation Links -->
-    <nav class="nav-links">
-      <a href="index.html" class="nav-btn" style="text-decoration: none;">✦ Portal</a>
-      <button class="nav-btn active" data-tab="studio">✦ Studio</button>
-      <button class="nav-btn" data-tab="showcase">🖼️ 4K Showcase</button>
-      <a href="https://github.com/michaelsweet612/Angel_Generator_AI_Images/releases/tag/v3.0.0" target="_blank" class="nav-btn" style="text-decoration: none; color: #f5c542; border-color: rgba(245, 197, 66, 0.4);">⬇️ Win64 v3.0.0</a>
-    </nav>
-
-    <!-- Right Controls: Audio Mute & Telemetry -->
-    <div class="header-actions">
-      <button id="btnSoundToggle" class="btn-icon" title="Toggle Celestial Sound Effects">
-        <span class="icon">🔔</span>
-      </button>
-      <div class="status-pills">
-        <span class="pill" id="pill-webgl"><span class="dot active"></span> WebGL Core (Active)</span>
-        <span class="pill" id="pill-torch"><span class="dot"></span> PyTorch 4K</span>
-        <span class="pill" id="pill-cnative"><span class="dot"></span> C Native 64-bit</span>
-      </div>
-    </div>
-  </header>
-
-  <!-- Main Container -->
-  <main class="studio-container">
-    <!-- Controls Column -->
-    <section class="controls-card glass-panel">
-      <!-- Section Header with Magic Prompt -->
-      <div class="panel-header">
-        <div class="section-title">
-          <span class="icon-sparkle">✦</span>
-          <h2>Celestial Vision</h2>
-        </div>
-        <button id="btnMagicPrompt" class="btn-magic" title="AI Magic Prompt Expansion">
-          <span>🪄 Magic Enhance</span>
+  <div class="app-layout">
+    <!-- Collapsible Sidebar (Gemini / Claude style drawer) -->
+    <aside id="sidebar" class="sidebar">
+      <div class="sidebar-header">
+        <button id="btnNewCreation" class="btn-new-creation" title="Start new prompt">
+          <span style="font-size:1.1rem;">✦</span> New Creation
         </button>
-      </div>
-
-      <!-- Prompt Textbox & Quick Tools -->
-      <div class="prompt-box">
-        <textarea id="promptInput" rows="3" placeholder="Describe your celestial vision, archangel, or sacred artwork...">Archangel Michael with massive radiant golden feathered wings, golden halo in heavenly clouds, volumetric divine light rays, masterpiece, 4k ultra-hd</textarea>
-        <div class="prompt-toolbar">
-          <div class="prompt-tags-preview">
-            <span class="tag-pill">4K UHD</span>
-            <span class="tag-pill">Volumetric Rays</span>
-            <span class="tag-pill">Gold Leaf</span>
-            <span class="tag-pill">100% Offline</span>
-          </div>
-          <div class="prompt-actions">
-            <button id="btnInspire" class="btn-text" title="Randomize Inspiration">🎲 Randomize</button>
-            <button id="btnClear" class="btn-text">✕ Clear</button>
-          </div>
+        <div class="sidebar-library-title">
+          <h4>AI Image Library</h4>
+          <span class="sidebar-count-badge" id="sidebarCountBadge">0 items</span>
         </div>
-      </div>
-
-      <!-- Quick Preset Cards -->
-      <div class="section-block">
-        <label class="section-label">CURATED MASTERPIECE PRESETS</label>
-        <div class="preset-cards-grid" id="presetCards">
-          <div class="preset-card active" data-preset="archangel">
-            <span class="preset-icon">⚔️</span>
-            <div class="preset-info">
-              <strong>Archangel Michael</strong>
-              <span>Flaming Sword & Golden Wings</span>
-            </div>
-          </div>
-          <div class="preset-card" data-preset="seraphim">
-            <span class="preset-icon">🔥</span>
-            <div class="preset-info">
-              <strong>Six-Winged Seraphim</strong>
-              <span>Sacred Fire & Celestial Dawn</span>
-            </div>
-          </div>
-          <div class="preset-card" data-preset="cathedral">
-            <span class="preset-icon">⛪</span>
-            <div class="preset-info">
-              <strong>Cathedral Guardian</strong>
-              <span>Gothic Spire Twilight</span>
-            </div>
-          </div>
-          <div class="preset-card" data-preset="cyberpunk">
-            <span class="preset-icon">🏙️</span>
-            <div class="preset-info">
-              <strong>Cyberpunk Hologram</strong>
-              <span>Neon Cyan Holographic Wings</span>
-            </div>
-          </div>
-        </div>
-      </div>
-
-      <!-- Generation Engine Selector -->
-      <div class="section-block">
-        <label class="section-label">INFERENCE BACKEND</label>
-        <div class="engine-grid">
-          <div class="engine-card active" data-engine="browser">
-            <div class="engine-icon">🎨</div>
-            <div class="engine-info">
-              <strong>Browser Real-Time</strong>
-              <span>Instant client-side WebGL canvas</span>
-            </div>
-          </div>
-          <div class="engine-card" data-engine="neural">
-            <div class="engine-icon">🧠</div>
-            <div class="engine-info">
-              <strong>PyTorch Neural (4K)</strong>
-              <span>High-res local coordinate field</span>
-            </div>
-          </div>
-          <div class="engine-card" data-engine="c_native">
-            <div class="engine-icon">⚙️</div>
-            <div class="engine-info">
-              <strong>Windows C Native</strong>
-              <span>Standalone 64-bit EXE engine</span>
-            </div>
-          </div>
-        </div>
-      </div>
-
-      <!-- Canvas Orientation & Aspect Ratio -->
-      <div class="section-block">
-        <label class="section-label">CANVAS ORIENTATION & ASPECT RATIO</label>
-        <div class="aspect-grid" id="aspectGrid">
-          <button class="aspect-btn" data-aspect="landscape" title="Landscape Widescreen (16:9)">
-            <div class="aspect-box ratio-16-9"></div>
-            <span>Landscape</span>
+        <div class="sidebar-library-actions">
+          <button id="btnSidebarDownloadZip" class="btn-sidebar-tool" title="Download all library images as a ZIP archive">
+            <span>📦</span> ZIP
           </button>
-          <button class="aspect-btn active" data-aspect="square" title="Square (1:1)">
-            <div class="aspect-box ratio-1-1"></div>
-            <span>Square</span>
+          <button id="btnSidebarSync" class="btn-sidebar-tool" title="Save Library folder to disk">
+            <span>💾</span> Save
           </button>
-          <button class="aspect-btn" data-aspect="portrait" title="Portrait Vertical (9:16)">
-            <div class="aspect-box ratio-9-16"></div>
-            <span>Portrait</span>
-          </button>
-          <button class="aspect-btn" data-aspect="custom" id="btnCustomAspect" title="Custom Dimensions (Width × Height)">
-            <div class="aspect-box ratio-custom">⚙️</div>
-            <span>Custom</span>
+          <button id="btnSidebarClear" class="btn-sidebar-tool btn-danger" title="Clear all local library images">
+            <span>🗑️</span> Clear
           </button>
         </div>
+      </div>
 
-        <!-- Custom Dimensions Inline Box -->
-        <div id="customDimBox" class="custom-dim-box hidden">
-          <div class="custom-dim-label">CUSTOM DIMENSIONS (PIXELS)</div>
-          <div class="dim-inputs-row">
-            <div class="dim-field">
-              <label for="customWidth">Width (px)</label>
-              <input type="number" id="customWidth" value="1024" min="64" max="4096" step="64">
+      <!-- Scrollable Local Library Item List -->
+      <div id="sidebarLibraryList" class="sidebar-library-list">
+        <!-- Rendered dynamically by app.js -->
+      </div>
+
+      <div class="sidebar-footer">
+        <span>Offline Neural Synthesizer</span>
+        <a href="https://github.com/michaelsweet612/Angel_Generator_AI_Images" target="_blank" rel="noopener">v3.5.0</a>
+      </div>
+    </aside>
+
+    <!-- Main Workspace Stage -->
+    <main class="main-stage">
+      <!-- Top Navigation Bar -->
+      <header class="top-navbar">
+        <div class="nav-left">
+          <button id="btnSidebarToggle" class="btn-sidebar-toggle" title="Toggle Library Sidebar (Ctrl+B)">
+            ☰
+          </button>
+          <div class="nav-brand">
+            <h1>ANGEL GENERATOR AI</h1>
+            <span class="brand-chip">v3.5.0 STUDIO</span>
+          </div>
+        </div>
+
+        <div class="nav-center">
+          <div class="engine-status-pill">
+            <span class="status-dot"></span>
+            <span>100% Offline Multi-Category Synthesizer</span>
+          </div>
+        </div>
+
+        <div class="nav-right">
+          <button id="btnSoundToggle" class="btn-nav-action" title="Toggle Audio Sound FX">
+            <span class="nav-icon">🔊</span>
+          </button>
+          <button id="btnFullscreen" class="btn-nav-action" title="Toggle Fullscreen">
+            <span>⛶</span> Fullscreen
+          </button>
+          <a href="https://github.com/michaelsweet612/Angel_Generator_AI_Images/releases" target="_blank" class="btn-nav-action gold-accent" rel="noopener">
+            <span>⚡</span> Win64 App
+          </a>
+        </div>
+      </header>
+
+      <!-- Central Viewport -->
+      <div class="viewport-content">
+        <!-- Welcome Screen (Default empty state like Gemini / Claude) -->
+        <div id="welcomeContainer" class="welcome-container">
+          <h2 class="welcome-title">What will you imagine?</h2>
+          <p class="welcome-subtitle">From-scratch multi-category procedural neural synthesis. 100% private &amp; offline.</p>
+
+          <div class="suggestion-cards-grid">
+            <div class="suggestion-card" data-prompt="Archangel Michael with massive radiant golden feathered wings, golden halo in heavenly clouds, volumetric divine light rays, masterpiece, 4k ultra-hd">
+              <span class="suggestion-icon">✨</span>
+              <div class="suggestion-text">Archangel Michael with massive radiant golden feathered wings and luminous divine rays</div>
+              <span class="suggestion-tag">Celestial &bull; Sacred</span>
             </div>
-            <span class="dim-times">×</span>
-            <div class="dim-field">
-              <label for="customHeight">Height (px)</label>
-              <input type="number" id="customHeight" value="1024" min="64" max="4096" step="64">
+
+            <div class="suggestion-card" data-prompt="Cyberpunk neon metropolis at rainy night with holographic billboards, reflections on wet asphalt, soaring sky-cars, high detail 4k">
+              <span class="suggestion-icon">🏙️</span>
+              <div class="suggestion-text">Cyberpunk neon metropolis with rainy reflections and soaring illuminated traffic</div>
+              <span class="suggestion-tag">Sci-Fi &bull; Neon</span>
             </div>
-          </div>
-          <div class="dim-preset-chips">
-            <button type="button" class="chip-preset" data-w="1024" data-h="1024">1024×1024 (1:1)</button>
-            <button type="button" class="chip-preset" data-w="1920" data-h="1080">1920×1080 (HD)</button>
-            <button type="button" class="chip-preset" data-w="1080" data-h="1920">1080×1920 (Story)</button>
-            <button type="button" class="chip-preset" data-w="3840" data-h="2160">3840×2160 (4K)</button>
-            <button type="button" class="chip-preset" data-w="4096" data-h="4096">4096×4096 (4K UHD)</button>
-          </div>
-        </div>
-      </div>
 
-      <!-- Artistic Style Selector -->
-      <div class="section-block">
-        <label class="section-label">ARTISTIC MASTERY STYLE</label>
-        <select id="styleSelect" class="styled-select gold-select">
-          <option value="renaissance" selected>Renaissance Divine (Da Vinci & Michelangelo Chiaroscuro)</option>
-          <option value="divine_gold">Golden Baroque (24K Gold Leaf & Radiant Light)</option>
-          <option value="celestial">Celestial Cosmic (Starlight Nebula & Deep Space)</option>
-          <option value="cyberpunk">Cyberpunk Hologram (Neon Cyan & Rainy Skyline)</option>
-          <option value="default">Classic Ethereal Vision (Sacred White Feathers)</option>
-        </select>
-      </div>
+            <div class="suggestion-card" data-prompt="Emerald crystal dragon coiled on jagged mountain peaks with violet lightning storm, atmospheric fog, fantasy epic">
+              <span class="suggestion-icon">🐉</span>
+              <div class="suggestion-text">Emerald crystal dragon perched on jagged mountain peaks with violet lightning</div>
+              <span class="suggestion-tag">Creature &bull; Epic</span>
+            </div>
 
-      <!-- High Thinking Mode Switch -->
-      <div class="thinking-box">
-        <div class="thinking-header">
-          <label class="switch">
-            <input type="checkbox" id="highThinkingToggle" checked>
-            <span class="slider round"></span>
-          </label>
-          <div class="thinking-label">
-            <strong>🧠 High Thinking Mode</strong>
-            <span>Deep theological decomposition & anatomical wing flight planning</span>
-          </div>
-        </div>
-      </div>
+            <div class="suggestion-card" data-prompt="Deep space cosmic nebula with glowing spiral accretion disk, swirling purple and cyan dust clouds, stellar horizon">
+              <span class="suggestion-icon">🌌</span>
+              <div class="suggestion-text">Deep space cosmic nebula with glowing spiral accretion disk and star clusters</div>
+              <span class="suggestion-tag">Cosmic &bull; Deep Space</span>
+            </div>
 
-      <!-- Detail Slider & Resolution -->
-      <div class="detail-control-box">
-        <div class="detail-header">
-          <label for="detailSlider">DETAIL & MICRO-STRIATIONS</label>
-          <span id="detailValBadge" class="badge">Level 5 (4K Masterpiece)</span>
-        </div>
-        <input type="range" id="detailSlider" min="1" max="5" value="5" step="1" class="styled-range">
-        <div class="range-marks">
-          <span>Level 1 (Draft)</span>
-          <span>Level 3 (Balanced)</span>
-          <span>Level 5 (4K Masterpiece)</span>
-        </div>
-      </div>
+            <div class="suggestion-card" data-prompt="Majestic alpine lake reflecting snow-capped golden hour mountain range with dense pine forest and warm sunset lighting">
+              <span class="suggestion-icon">🏔️</span>
+              <div class="suggestion-text">Majestic alpine lake reflecting snow-capped golden hour mountain range</div>
+              <span class="suggestion-tag">Landscape &bull; Nature</span>
+            </div>
 
-      <!-- Hidden standard resolution select for programmatic binding -->
-      <select id="resolutionSelect" class="hidden">
-        <option value="512x512">512x512</option>
-        <option value="768x768">768x768</option>
-        <option value="1024x1024" selected>1024x1024</option>
-        <option value="2048x2048">2048x2048</option>
-        <option value="3840x2160">3840x2160</option>
-        <option value="4096x4096">4096x4096</option>
-      </select>
-      <input type="number" id="seedInput" class="hidden" placeholder="Random">
-      <input type="text" id="negativeInput" class="hidden" value="blurry, distorted, dark, ugly">
-
-      <!-- Action Buttons: Generate & Stop -->
-      <div class="action-buttons-dual">
-        <button id="btnGenerate" class="btn-primary">
-          <span class="btn-sparkle">✦</span> GENERATE 4K ARTWORK
-        </button>
-        <button id="btnStop" class="btn-stop" disabled title="Cancel or Stop Generation">
-          ⏹ STOP
-        </button>
-      </div>
-
-      <!-- Live Progress & Time Remaining -->
-      <div id="progressContainer" class="progress-box hidden">
-        <div class="progress-bar-track">
-          <div id="progressBar" class="progress-bar-fill"></div>
-        </div>
-        <div class="progress-meta">
-          <span id="progressStatus" class="progress-status">Calculating volumetric Mie rays...</span>
-          <span id="timeRemaining" class="time-remaining">Estimated time: ~1.8s</span>
-        </div>
-      </div>
-    </section>
-
-    <!-- Preview & Gallery Column -->
-    <section class="preview-card glass-panel">
-      <!-- Preview Header with Toolbar -->
-      <div class="preview-header">
-        <div class="section-title">
-          <span class="icon-sparkle">🖼️</span>
-          <h2>Celestial Canvas</h2>
-        </div>
-        <div class="preview-toolbar">
-          <span id="genStats" class="gen-stats">Ready for 4K Synthesis</span>
-          <button id="btnCopyPrompt" class="btn-tool" title="Copy Prompt to Clipboard">📋 Copy</button>
-          <button id="btnFullscreen" class="btn-tool" title="Fullscreen Lightbox">⛶ Fullscreen</button>
-          <div class="download-dropdown">
-            <button id="btnDownload" class="btn-secondary">⬇ Download 4K</button>
-          </div>
-        </div>
-      </div>
-
-      <!-- Canvas Frame -->
-      <div class="canvas-wrapper" id="canvasWrapper">
-        <div id="loader" class="loader-overlay hidden">
-          <div class="celestial-spinner">
-            <div class="halo-ring"></div>
-            <div class="halo-ring inner"></div>
-          </div>
-          <p id="loaderText">Synthesizing 4K celestial rays & wings...</p>
-        </div>
-
-        <img id="resultImage" class="preview-media hidden" alt="Generated Artwork">
-        <canvas id="browserCanvas" class="preview-media" width="1024" height="1024"></canvas>
-      </div>
-
-      <!-- High Thinking Reasoning Accordion Box -->
-      <div id="thinkingPanel" class="thinking-panel">
-        <details id="thinkingDetails" open>
-          <summary>🧠 High Thinking Reasoning Log</summary>
-          <div id="thinkingLogContent" class="thinking-content">
-            <p>1. [Theological Iconography]: Militant Archangel (Warrior of Light with Flaming Blade & Celestial Aegis).</p>
-            <p>2. [Wing Aerodynamics & Anatomy]: Constructing 3-tier feather canopy: primary flight remiges, secondary fans, and downy covert plumes.</p>
-            <p>3. [Sacred Geometric Halo]: Rendering concentric dual gold rings (R1=0.155, R2=0.185) with 8-fold cruciform starlight flares.</p>
-            <p>4. [Volumetric Atmospheric Optics]: Simulating 28 Mie-scattered god-ray shafts radiating from celestial zenith.</p>
-          </div>
-        </details>
-      </div>
-
-      <!-- AI Generated Image Library Section -->
-      <div class="library-section">
-        <div class="library-header">
-          <div class="library-title-group">
-            <span class="library-folder-icon">📂</span>
-            <div>
-              <h3>AI Generated Image Library</h3>
-              <span class="library-subtitle">Target Folder: <code>AI generated image library/</code></span>
+            <div class="suggestion-card" data-prompt="Futuristic hypercar mechanical chassis with glowing titanium exhaust manifolds and aerodynamic carbon fiber splitters">
+              <span class="suggestion-icon">🏎️</span>
+              <div class="suggestion-text">Futuristic hypercar mechanical engine with glowing titanium exhausts</div>
+              <span class="suggestion-tag">Mechanical &bull; Speed</span>
             </div>
           </div>
-          <div class="library-actions">
-            <span class="library-count-badge" id="libraryCountBadge">0 Files</span>
-            <button id="btnDownloadZip" class="btn-lib-action" title="Download all images in this library as a ZIP folder">
-              📦 Save All (.ZIP)
+        </div>
+
+        <!-- Canvas Active Artwork Stage -->
+        <div id="canvasStage" class="canvas-stage" style="display: none;">
+          <div class="canvas-frame">
+            <canvas id="browserCanvas" width="1024" height="1024"></canvas>
+            <img id="resultImage" alt="Generated Artwork" style="display: none;" />
+
+            <!-- Progress Loader Overlay -->
+            <div id="loaderOverlay" class="loader-overlay" style="display: none;">
+              <div class="gemini-spinner"></div>
+              <div class="loader-status" id="loaderStatus">Initializing multi-layer neural field...</div>
+              <div class="loader-timer" id="loaderTimer">Estimated: 1.4s</div>
+            </div>
+          </div>
+
+          <!-- Instant Artwork Action Toolbar -->
+          <div class="artwork-toolbar">
+            <button id="btnArtDownload" class="btn-art-action primary-download" title="Save to AI generated image library folder">
+              <span>💾</span> Download Image
             </button>
-            <button id="btnSyncFolder" class="btn-lib-action" title="Connect to actual local folder on your computer">
-              📁 Sync Local PC Folder
+            <button id="btnArtCopy" class="btn-art-action" title="Copy artwork to clipboard">
+              <span>📋</span> Copy Image
             </button>
-            <button id="btnClearLibrary" class="btn-lib-action btn-danger" title="Clear all saved library items">
-              🗑️ Clear
+            <button id="btnArtFullscreen" class="btn-art-action" title="View Fullscreen Lightbox">
+              <span>🔍</span> Enlarge
+            </button>
+            <button id="btnArtRegenerate" class="btn-art-action" title="Regenerate with new neural seed">
+              <span>🔄</span> Variations
+            </button>
+            <div class="art-library-badge">
+              <span>✓</span> Saved to AI generated image library
+            </div>
+          </div>
+
+          <!-- High Thinking Semantic Breakdown (Collapsible Gemini accordion) -->
+          <details id="thinkingAccordion" class="thinking-accordion" open>
+            <summary>
+              <span>🧠</span>
+              <span>High Thinking Semantic Breakdown</span>
+            </summary>
+            <div id="thinkingContentInner" class="thinking-content-inner">
+              <!-- Rendered dynamically by app.js -->
+            </div>
+          </details>
+        </div>
+      </div>
+
+      <!-- Signature Floating Bottom Prompt Bar (Gemini / Claude Floating Pill) -->
+      <div class="floating-input-wrapper">
+        <!-- Quick Control Chips Bar -->
+        <div class="chips-bar">
+          <button class="chip-btn chip-aspect active" data-aspect="landscape" title="Landscape 16:9 ratio">
+            <span>🖥️</span> Landscape (16:9)
+          </button>
+          <button class="chip-btn chip-aspect" data-aspect="square" title="Square 1:1 ratio">
+            <span>⏹️</span> Square (1:1)
+          </button>
+          <button class="chip-btn chip-aspect" data-aspect="portrait" title="Portrait 9:16 ratio">
+            <span>📱</span> Portrait (9:16)
+          </button>
+          <button class="chip-btn chip-aspect" data-aspect="custom" title="Custom aspect ratio dimensions">
+            <span>⚙️</span> Custom
+          </button>
+
+          <select id="selectStyle" class="chip-select" title="Artistic Rendering Style">
+            <option value="cinematic_4k" selected>Cinematic 4K UHD</option>
+            <option value="sacred_oil">Sacred Oil Painting</option>
+            <option value="celestial_glow">Celestial Divine Glow</option>
+            <option value="neon_cyberpunk">Neon Cyberpunk</option>
+            <option value="dark_fantasy">Dark Fantasy Epic</option>
+            <option value="fresco_flemish">Flemish Renaissance</option>
+            <option value="cosmic_astral">Cosmic Astral Field</option>
+          </select>
+
+          <button id="chipThinking" class="chip-btn active" title="Toggle detailed prompt reasoning">
+            <span>🧠</span> High Thinking: ON
+          </button>
+        </div>
+
+        <!-- Custom Dimension Popup (revealed when Custom aspect is selected) -->
+        <div id="customDimPopup" class="custom-dim-popup" style="display: none;">
+          <label for="customWidthInput">Width:</label>
+          <input type="number" id="customWidthInput" class="custom-dim-input" value="1024" min="256" max="4096" step="64" />
+          <label for="customHeightInput">Height:</label>
+          <input type="number" id="customHeightInput" class="custom-dim-input" value="1024" min="256" max="4096" step="64" />
+          <div class="custom-dim-chips">
+            <button type="button" class="btn-mini-chip" data-w="1280" data-h="720">720p</button>
+            <button type="button" class="btn-mini-chip" data-w="1920" data-h="1080">1080p</button>
+            <button type="button" class="btn-mini-chip" data-w="2048" data-h="2048">2K Sq</button>
+            <button type="button" class="btn-mini-chip" data-w="3840" data-h="2160">4K UHD</button>
+          </div>
+        </div>
+
+        <!-- Main Input Card with Dynamic Generate / Stop action button -->
+        <div class="prompt-pill-card">
+          <textarea id="promptInput" class="prompt-textarea" rows="1" placeholder="Ask Angel Generator to create anything... (Press Enter to generate, Shift+Enter for new line)"></textarea>
+          <div class="prompt-actions-right">
+            <button id="btnEnhanceMagic" class="btn-enhance-magic" title="AI Magic Expand Prompt">
+              ✨
+            </button>
+            <button id="btnSubmitAction" class="btn-submit-action state-generate" title="Generate Image (Enter)">
+              <span class="action-icon">➤</span>
             </button>
           </div>
         </div>
-
-        <div class="library-grid-scroll" id="libraryContainer">
-          <!-- Dynamically populated with all synthesized artworks -->
-        </div>
       </div>
-    </section>
-  </main>
-
-  <!-- Fullscreen Lightbox Modal -->
-  <div id="lightboxModal" class="lightbox-modal hidden">
-    <button id="btnCloseLightbox" class="lightbox-close">✕</button>
-    <img id="lightboxImg" class="lightbox-img" alt="Enlarged Artwork">
+    </main>
   </div>
 
-  <footer class="app-footer">
-    <div class="footer-content">
-      <p>✦ Angel Generator AI Studio v3.0 — 4K Ultra-HD, Deep High Thinking Reasoning, and Instant Stop Control</p>
-      <div class="footer-links">
-        <a href="https://github.com/michaelsweet612/Angel_Generator_AI_Images" target="_blank">GitHub Repository</a>
-        <span>•</span>
-        <a href="https://github.com/michaelsweet612/Angel_Generator_AI_Images/releases/tag/v3.0.0" target="_blank">Win64 Standalone Release</a>
-        <span>•</span>
-        <span>100% Offline Autonomous</span>
-      </div>
-    </div>
-  </footer>
+  <!-- Fullscreen Lightbox Modal -->
+  <div id="lightboxModal" class="lightbox-modal" style="display: none;">
+    <button id="btnCloseLightbox" class="lightbox-close" title="Close Lightbox">✕</button>
+    <img id="lightboxImg" class="lightbox-img" alt="Artwork Enlarged" />
+  </div>
 
   <script src="app.js"></script>
 </body>

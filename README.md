@@ -6,10 +6,10 @@
 
 <p align="center">
   <a href="https://michaelsweet612.github.io/Angel_Generator_AI_Images/"><img src="https://img.shields.io/badge/Live%20Web%20Studio-GitHub%20Pages-gold?style=for-the-badge&logo=githubpages&logoColor=black" alt="Live Web Studio"></a>
-  <a href="https://github.com/michaelsweet612/Angel_Generator_AI_Images"><img src="https://img.shields.io/badge/version-3.0.0-gold?style=for-the-badge&logo=sparkles" alt="Version 3.0.0"></a>
+  <a href="https://github.com/michaelsweet612/Angel_Generator_AI_Images/releases"><img src="https://img.shields.io/badge/version-3.5.0-gold?style=for-the-badge&logo=sparkles" alt="Version 3.5.0"></a>
+  <a href="https://github.com/michaelsweet612/Angel_Generator_AI_Images"><img src="https://img.shields.io/badge/UI-Gemini%20%7C%20Claude%20Style-purple?style=for-the-badge" alt="Gemini Style UI"></a>
   <a href="https://github.com/michaelsweet612/Angel_Generator_AI_Images"><img src="https://img.shields.io/badge/resolution-4K%20Ultra--HD%20(4096x4096)-red?style=for-the-badge" alt="4K Resolution"></a>
-  <a href="https://github.com/michaelsweet612/Angel_Generator_AI_Images"><img src="https://img.shields.io/badge/mode-High%20Thinking%20AI-purple?style=for-the-badge&logo=openai" alt="High Thinking"></a>
-  <a href="https://github.com/michaelsweet612/Angel_Generator_AI_Images"><img src="https://img.shields.io/badge/platform-Windows%20x64%20%7C%20Web-blue?style=for-the-badge&logo=windows" alt="Platform"></a>
+  <a href="https://github.com/michaelsweet612/Angel_Generator_AI_Images"><img src="https://img.shields.io/badge/mode-Universal%20Synthesizer-blue?style=for-the-badge" alt="Universal Synthesizer"></a>
   <a href="https://github.com/michaelsweet612/Angel_Generator_AI_Images"><img src="https://img.shields.io/badge/license-MIT-green?style=for-the-badge" alt="MIT License"></a>
 </p>
 
@@ -19,7 +19,9 @@
 
 > 🌐 **Live Web Version on GitHub Pages**: [Launch Portal](https://michaelsweet612.github.io/Angel_Generator_AI_Images/) • [Widescreen Studio Terminal](https://michaelsweet612.github.io/Angel_Generator_AI_Images/ANGEL_GENERATOR_STUDIO.html)
 
-**Angel Generator AI** is a state-of-the-art **Text-to-Image AI Generative Studio** specialized in **Angel, Celestial, Fantasy, and Sacred Masterpiece Artwork**. 
+**Angel Generator AI v3.5.0** is an offline, from-scratch **Generative Art Studio** featuring a sleek **Gemini / Claude dark-mode interface**, **universal multi-category procedural neural synthesis**, and an integrated **AI Generated Image Library**.
+
+Built with an innovative offline architecture, it synthesizes everything from **majestic landscapes**, **neon cyberpunk cities**, **mythological dragons**, **deep space nebulae**, **high-speed mechanical engineering**, and **expressive portraits** to breathtaking **sacred archangels and celestial masterpieces**. 
 
 Built with an innovative multi-backend architecture, it combines **deep PyTorch neural coordinate fields**, **volumetric Mie atmospheric scattering**, **multi-tiered anatomical feather wing geometry**, and **concentric sacred geometry halos** to synthesize breathtaking, museum-quality images in seconds.
 

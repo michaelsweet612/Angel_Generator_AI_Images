@@ -39,9 +39,18 @@ ANGELIC_KEYWORDS = {
     "celestial": {"stars": 0.9, "nebula": 0.8, "glow": 0.95, "cosmic": 0.85},
     "ethereal": {"glow": 1.1, "mist": 0.85, "clouds": 0.85, "wing_power": 0.95},
     "radiant": {"glow": 1.1, "divine_rays": 1.05, "halo_power": 1.0},
-    "cyberpunk": {"neon_cyan": 0.95, "neon_magenta": 0.9, "darkness": 0.85, "grid": 0.6, "wing_power": 0.9},
+    "cyberpunk": {"neon_cyan": 0.95, "neon_magenta": 0.9, "darkness": 0.85, "grid": 0.6, "glow": 1.1},
     "neon": {"neon_cyan": 0.85, "neon_magenta": 0.85, "glow": 1.0},
+    "city": {"neon_cyan": 0.8, "neon_magenta": 0.7, "darkness": 0.8, "grid": 0.8},
     "cosmic": {"stars": 1.0, "nebula": 0.95, "darkness": 0.8, "cosmic": 0.95},
+    "space": {"stars": 1.0, "nebula": 0.9, "darkness": 0.9, "cosmic": 0.95},
+    "nebula": {"stars": 0.9, "nebula": 1.0, "darkness": 0.85, "glow": 1.1},
+    "landscape": {"clouds": 0.8, "warmth": 0.7, "nature": 1.0, "darkness": 0.2},
+    "mountain": {"clouds": 0.8, "nature": 1.0, "chiaroscuro": 0.7},
+    "lake": {"nature": 0.9, "reflection": 0.9, "warmth": 0.6},
+    "dragon": {"flame": 0.9, "darkness": 0.7, "glow": 1.1, "wings": 0.8},
+    "car": {"neon_cyan": 0.6, "darkness": 0.7, "metallic": 1.0, "glow": 0.8},
+    "mechanical": {"metallic": 1.0, "grid": 0.7, "darkness": 0.6},
     "renaissance": {"renaissance_tone": 0.95, "warmth": 0.7, "chiaroscuro": 0.9},
     "dark": {"darkness": 0.9, "chiaroscuro": 0.95},
     "flame": {"flame": 1.0, "warmth": 1.0, "red_hue": 0.95},
@@ -51,17 +60,75 @@ ANGELIC_KEYWORDS = {
 
 
 def generate_high_thinking_analysis(prompt: str, style: str, detail_level: int, width: int, height: int) -> List[str]:
-    """Generates deep theological and compositional reasoning steps."""
+    """Generates deep theological, compositional, and thematic reasoning steps."""
     tokens = re.findall(r'[a-zA-Z]+', prompt.lower())
-    is_arch = "archangel" in tokens or "michael" in tokens
-    is_seraph = "seraphim" in tokens or "six" in tokens
+    prompt_lower = prompt.lower()
+
+    if any(w in prompt_lower for w in ['cyberpunk', 'city', 'neon', 'metropolis']):
+        arch_type = 'Cyberpunk Neon Megacity Architecture (Holographic Volumetrics & Rain Reflections)'
+        return [
+            f"1. [Thematic Decomposition]: Mapping subject to '{arch_type}'.",
+            f"2. [Structural Raymarching]: Generating multi-tiered skyscraper grid geometry across {width}x{height} raster field.",
+            f"3. [Radiance Field Synthesis]: Computing dual-spectrum neon illumination (Cyan & Magenta) with specular wet surface diffusion.",
+            f"4. [Atmospheric Optics]: Simulating localized volumetric haze, neon scatter, and reflective ground planes.",
+            f"5. [Compositional Chiaroscuro]: Balancing high-contrast silhouettes against vibrant chromatic skylines.",
+            f"6. [Detail Multi-Pass]: Detail Level {detail_level}/5 - synthesizing micro-window luminescence and light trails.",
+            f"7. [ACES Filmic Color Grading]: Harmonizing {style.upper()} palette with dynamic range compression and anamorphic bloom."
+        ]
+    elif any(w in prompt_lower for w in ['landscape', 'mountain', 'lake', 'forest', 'nature']):
+        arch_type = 'Majestic Alpine Vista & Natural Terrain (Golden Hour Atmospheric Perspective)'
+        return [
+            f"1. [Thematic Decomposition]: Mapping subject to '{arch_type}'.",
+            f"2. [Terrain Synthesis]: Generating multi-layer mountain silhouette ridges with fractional Brownian elevation noise.",
+            f"3. [Optical Perspective]: Simulating Rayleigh aerial perspective haze and golden hour sky gradient.",
+            f"4. [Water & Surface Optics]: Computing specular lake mirror reflections and rippling water normals.",
+            f"5. [Foliage Decoders]: Distributing evergreen pine needle micro-textures and alpine foothills.",
+            f"6. [Detail Multi-Pass]: Detail Level {detail_level}/5 - rendering crag detail and atmospheric light shafts.",
+            f"7. [ACES Filmic Color Grading]: Harmonizing {style.upper()} palette with golden sunlight and cool mountain shadows."
+        ]
+    elif any(w in prompt_lower for w in ['space', 'cosmic', 'nebula', 'galaxy', 'black hole', 'star']):
+        arch_type = 'Deep Space Cosmic Nebula & Stellar Accretion Field'
+        return [
+            f"1. [Thematic Decomposition]: Mapping subject to '{arch_type}'.",
+            f"2. [Cosmological Dynamics]: Synthesizing logarithmic spiral accretion disk and event horizon radiance.",
+            f"3. [Starfield Distribution]: Rendering multi-magnitude star clusters across {width}x{height} with diffraction spikes.",
+            f"4. [Interstellar Gas Optics]: Simulating multi-octave plasma clouds with violet, magenta, and cyan emission spectra.",
+            f"5. [Gravitational Lensing]: Applying relativistic photon deflection curvature around dense cosmic core.",
+            f"6. [Detail Multi-Pass]: Detail Level {detail_level}/5 - generating cosmic dust striations and star motes.",
+            f"7. [ACES Filmic Color Grading]: Harmonizing {style.upper()} palette with deep astronomical contrast."
+        ]
+    elif any(w in prompt_lower for w in ['dragon', 'creature', 'beast', 'monster']):
+        arch_type = 'Mythological Dragon & Draconic Beast Anatomy'
+        return [
+            f"1. [Thematic Decomposition]: Mapping subject to '{arch_type}'.",
+            f"2. [Anatomical Modeling]: Constructing horned draconic crest, serpentine snout, and membranous wingspan.",
+            f"3. [Bioluminescent & Flame Decoders]: Simulating internal core plasma fire and glowing serpentine eyes.",
+            f"4. [Environmental Atmosphere]: Generating billowing smoke embers, craggy perches, and lightning flashes.",
+            f"5. [Scale & Texture Synthesis]: Applying serpentine scale patterns with specular highlight reflections.",
+            f"6. [Detail Multi-Pass]: Detail Level {detail_level}/5 - rendering fine claw talons and horn striations.",
+            f"7. [ACES Filmic Color Grading]: Harmonizing {style.upper()} palette with cinematic contrast and specular highlights."
+        ]
+    elif any(w in prompt_lower for w in ['car', 'vehicle', 'mechanical', 'robot', 'engine']):
+        arch_type = 'Aerodynamic Mechanical & Automotive Engineering'
+        return [
+            f"1. [Thematic Decomposition]: Mapping subject to '{arch_type}'.",
+            f"2. [Chassis Dynamics]: Constructing low-drag silhouette with aerodynamic front splitter and cockpit canopy.",
+            f"3. [Surface Materials]: Computing metallic automotive paint with dual-coat specular reflection and carbon fiber weave.",
+            f"4. [Speed Optics]: Generating asphalt ground reflection, motion light trails, and illuminated headlamp beams.",
+            f"5. [Mechanical Exposition]: Revealing titanium exhaust manifolds and aero wheel rims with brake disc heat bloom.",
+            f"6. [Detail Multi-Pass]: Detail Level {detail_level}/5 - computing high-frequency metal flakes and tire tread textures.",
+            f"7. [ACES Filmic Color Grading]: Harmonizing {style.upper()} palette with high-octane cinematic color grading."
+        ]
+
+    is_arch = 'archangel' in tokens or 'michael' in tokens
+    is_seraph = 'seraphim' in tokens or 'six' in tokens
 
     if is_arch:
-        arch_type = "Militant Archangel (Warrior of Light with Flaming Blade & Celestial Aegis)"
+        arch_type = 'Militant Archangel (Warrior of Light with Flaming Blade & Celestial Aegis)'
     elif is_seraph:
-        arch_type = "Highest Seraphic Choir (Six Wings of Living Fire & Eternal Radiance)"
+        arch_type = 'Highest Seraphic Choir (Six Wings of Living Fire & Eternal Radiance)'
     else:
-        arch_type = "Heavenly Guardian Angel (Protector of Souls with Sacred Halo)"
+        arch_type = 'Heavenly Guardian Angel (Protector of Souls with Sacred Halo)'
 
     return [
         f"1. [Theological Iconography]: Mapping subject to '{arch_type}'.",
@@ -69,7 +136,7 @@ def generate_high_thinking_analysis(prompt: str, style: str, detail_level: int, 
         f"3. [Sacred Geometric Halo]: Rendering concentric dual gold rings (R1=0.155, R2=0.185) with 8-fold cruciform starlight flares.",
         f"4. [Volumetric Atmospheric Optics]: Simulating 28 Mie-scattered god-ray shafts radiating from celestial zenith (Y=-1.18) with exponential haze falloff.",
         f"5. [Classical Chiaroscuro Draping]: Applying Da Vinci / Caravaggio shadow modeling to flowing ivory robes with golden filigree embroidery.",
-        f"6. [Detail Multi-Pass Synthesis]: Detail Level {detail_level}/5 — computing {detail_level * 6} octave fractal micro-striations for individual feather barbs.",
+        f"6. [Detail Multi-Pass Synthesis]: Detail Level {detail_level}/5 - computing {detail_level * 6} octave fractal micro-striations for individual feather barbs.",
         f"7. [ACES Filmic Color Grading]: Harmonizing {style.upper()} palette with dynamic range compression, golden specular bloom, and fine canvas texture at {width}x{height}."
     ]
 
@@ -105,12 +172,36 @@ def parse_prompt_semantics(prompt: str) -> Dict[str, float]:
                 params[k] = max(params.get(k, 0.0), v)
                 
     if not matched_any:
-        params["wing_power"] = 1.05
-        params["halo_power"] = 0.95
-        params["divine_rays"] = 0.85
-        params["glow"] = 0.95
-        params["clouds"] = 0.65
-        params["gold_hue"] = 0.6
+        prompt_l = prompt.lower()
+        if any(w in prompt_l for w in ["city", "cyberpunk", "future", "neon", "metropolis"]):
+            params["neon_cyan"] = 0.95
+            params["neon_magenta"] = 0.9
+            params["darkness"] = 0.85
+            params["glow"] = 1.05
+        elif any(w in prompt_l for w in ["space", "galaxy", "cosmic", "star", "nebula"]):
+            params["stars"] = 1.0
+            params["nebula"] = 0.95
+            params["darkness"] = 0.85
+            params["glow"] = 1.0
+        elif any(w in prompt_l for w in ["mountain", "lake", "landscape", "tree", "forest", "nature"]):
+            params["clouds"] = 0.85
+            params["warmth"] = 0.7
+            params["glow"] = 0.6
+        elif any(w in prompt_l for w in ["dragon", "monster", "beast", "creature"]):
+            params["flame"] = 0.85
+            params["darkness"] = 0.75
+            params["glow"] = 0.95
+        elif any(w in prompt_l for w in ["car", "vehicle", "auto", "race", "speed"]):
+            params["neon_cyan"] = 0.8
+            params["darkness"] = 0.75
+            params["glow"] = 0.85
+        else:
+            params["wing_power"] = 1.05
+            params["halo_power"] = 0.95
+            params["divine_rays"] = 0.85
+            params["glow"] = 0.95
+            params["clouds"] = 0.65
+            params["gold_hue"] = 0.6
 
     return params
 
