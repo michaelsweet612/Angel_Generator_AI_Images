@@ -22,7 +22,6 @@ BASE_DIR = Path(__file__).resolve().parent.parent
 sys.path.insert(0, str(BASE_DIR / "src"))
 
 from neural_engine import synthesize_angel_art, generate_high_thinking_analysis
-from cloud_engine import generate_cloud_image
 from angel_generator import run_c_executable, PRESETS
 
 app = Flask(__name__, static_folder=str(BASE_DIR / "web"))
@@ -56,11 +55,11 @@ def api_status():
     return jsonify({
         "success": True,
         "pytorch": True,
-        "cloud": True,
         "c_native": has_exe,
-        "version": "2.5.0",
+        "version": "3.0.0",
         "supports_4k": True,
-        "supports_high_thinking": True
+        "supports_high_thinking": True,
+        "offline_autonomous": True
     })
 
 
@@ -116,17 +115,8 @@ def api_generate():
                 provider_used = "Windows C Native (PE32+)"
             else:
                 raise RuntimeError("C executable generation failed")
-        elif engine == "cloud":
-            img, provider_used = generate_cloud_image(
-                prompt=prompt,
-                width=width,
-                height=height,
-                seed=seed,
-                style=style
-            )
-            img.save(str(out_file))
         else:
-            # Neural PyTorch with cancellation token
+            # Proprietary Neural PyTorch Coordinate Fourier Field with cancellation token
             img = synthesize_angel_art(
                 prompt=prompt,
                 width=width,

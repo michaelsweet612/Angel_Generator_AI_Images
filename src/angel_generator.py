@@ -15,13 +15,11 @@ import time
 from pathlib import Path
 from PIL import Image
 
-# Import our custom engines
+# Import our custom proprietary neural engines
 try:
     from neural_engine import synthesize_angel_art
-    from cloud_engine import generate_cloud_image
 except ImportError:
     from src.neural_engine import synthesize_angel_art
-    from src.cloud_engine import generate_cloud_image
 
 
 PRESETS = [
@@ -93,9 +91,9 @@ def main():
     parser.add_argument(
         "-e", "--engine",
         type=str,
-        choices=["neural", "cloud", "c_native", "auto"],
+        choices=["neural", "c_native", "auto"],
         default="auto",
-        help="Generation engine: 'neural' (PyTorch), 'cloud' (Diffusion/API), 'c_native' (EXE), or 'auto'"
+        help="Proprietary generation engine: 'neural' (PyTorch 4K), 'c_native' (Native 64-bit EXE), or 'auto'"
     )
     parser.add_argument(
         "-s", "--style",
@@ -148,19 +146,8 @@ def main():
                 print(f"[Conversion] Saved PNG version to: {out_path}")
             except Exception as e:
                 print(f"[Conversion Warning] Could not convert to PNG: {e}")
-    elif args.engine == "cloud":
-        img, provider = generate_cloud_image(
-            prompt=args.prompt,
-            width=args.width,
-            height=args.height,
-            seed=args.seed,
-            style=args.style
-        )
-        img.save(str(out_path))
-        print(f"[Success] Generated with {provider} in {time.time() - t0:.2f}s")
-        success = True
     else:
-        # Default / Neural PyTorch
+        # Default / Neural PyTorch (Proprietary Coordinate Fourier Neural Field)
         print("[Neural Engine] Synthesizing high-resolution celestial artwork...")
         img = synthesize_angel_art(
             prompt=args.prompt,

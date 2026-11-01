@@ -79,7 +79,7 @@ function New-AngelImage {
         [string]$Prompt = "Archangel Michael with glowing white feathered wings and golden halo in heavenly clouds, divine light rays",
 
         [Parameter(Mandatory = $false)]
-        [ValidateSet("Auto", "Neural", "Cloud", "C_Native")]
+        [ValidateSet("Auto", "Neural", "C_Native")]
         [string]$Engine = "Auto",
 
         [Parameter(Mandatory = $false)]

@@ -89,7 +89,7 @@ const btnCloseLightbox = document.getElementById("btnCloseLightbox");
 
 const pillTorch = document.getElementById("pill-torch");
 const pillWebgl = document.getElementById("pill-webgl");
-const pillCloud = document.getElementById("pill-cloud");
+const pillCnative = document.getElementById("pill-cnative");
 
 // Initialize
 document.addEventListener("DOMContentLoaded", () => {
@@ -246,8 +246,8 @@ async function checkBackendHealth() {
     if (res.ok) {
       const data = await res.json();
       isBackendAvailable = true;
-      if (data.pytorch) pillTorch.querySelector(".dot").classList.add("active");
-      if (data.cloud) pillCloud.querySelector(".dot").classList.add("active");
+      if (data.pytorch && pillTorch) pillTorch.querySelector(".dot").classList.add("active");
+      if (data.c_native && pillCnative) pillCnative.querySelector(".dot").classList.add("active");
     }
   } catch (err) {
     console.log("[Angel AI] Standalone browser mode active.");
