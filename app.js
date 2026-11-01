@@ -1435,3 +1435,116 @@ function openLightbox() {
   lightboxImg.src = src;
   lightboxModal.classList.remove("hidden");
 }
+
+
+// ===========================================================
+// POPUP NOTIFICATION & EXIT CONFIRMATION
+// ===========================================================
+const sidebarWarningBanner = document.getElementById("sidebarWarningBanner");
+const imageReadyToast = document.getElementById("imageReadyToast");
+const toastThumb = document.getElementById("toastThumb");
+const btnCloseToast = document.getElementById("btnCloseToast");
+const btnToastDownload = document.getElementById("btnToastDownload");
+const btnToastLibrary = document.getElementById("btnToastLibrary");
+
+const exitWarningModal = document.getElementById("exitWarningModal");
+const exitModalStat = document.getElementById("exitModalStat");
+const btnExitDownloadZip = document.getElementById("btnExitDownloadZip");
+const btnExitStay = document.getElementById("btnExitStay");
+const btnExitLeave = document.getElementById("btnExitLeave");
+
+let toastDismissTimeout = null;
+let currentToastItem = null;
+let pendingExitUrl = null;
+
+function showImageReadyToast(item) {
+  currentToastItem = item;
+  if (!imageReadyToast) return;
+
+  if (toastThumb && item && item.url) {
+    toastThumb.src = item.url;
+  }
+
+  imageReadyToast.style.display = "block";
+  imageReadyToast.style.animation = "none";
+  imageReadyToast.offsetHeight; // trigger reflow
+  imageReadyToast.style.animation = "toastSlideIn 0.35s cubic-bezier(0.16, 1, 0.3, 1)";
+
+  if (btnToastDownload) {
+    btnToastDownload.innerHTML = "<span>💾</span> Download Image";
+  }
+
+  if (soundEnabled && typeof audioCtx !== "undefined" && audioCtx) {
+    playNotificationChime();
+  }
+
+  if (toastDismissTimeout) {
+    clearTimeout(toastDismissTimeout);
+  }
+  toastDismissTimeout = setTimeout(() => {
+    hideImageReadyToast();
+  }, 12000);
+}
+
+function hideImageReadyToast() {
+  if (!imageReadyToast) return;
+  imageReadyToast.style.display = "none";
+  if (toastDismissTimeout) {
+    clearTimeout(toastDismissTimeout);
+    toastDismissTimeout = null;
+  }
+}
+
+function playNotificationChime() {
+  try {
+    const osc = audioCtx.createOscillator();
+    const gain = audioCtx.createGain();
+    osc.type = "sine";
+    osc.frequency.setValueAtTime(587.33, audioCtx.currentTime);
+    osc.frequency.exponentialRampToValueAtTime(880, audioCtx.currentTime + 0.18);
+    gain.gain.setValueAtTime(0.08, audioCtx.currentTime);
+    gain.gain.exponentialRampToValueAtTime(0.001, audioCtx.currentTime + 0.35);
+    osc.connect(gain);
+    gain.connect(audioCtx.destination);
+    osc.start();
+    osc.stop(audioCtx.currentTime + 0.36);
+  } catch (e) {}
+}
+
+function showExitWarningModal(targetUrl) {
+  pendingExitUrl = targetUrl;
+  if (!exitWarningModal) return;
+  if (exitModalStat) {
+    exitModalStat.textContent = `You have ${imageLibrary.length} image(s) in your current session that will be deleted!`;
+  }
+  exitWarningModal.style.display = "flex";
+}
+
+function hideExitWarningModal() {
+  if (!exitWarningModal) return;
+  exitWarningModal.style.display = "none";
+  pendingExitUrl = null;
+}
+
+// Intercept browser window / tab closure
+window.addEventListener("beforeunload", function (e) {
+  if (imageLibrary && imageLibrary.length > 0) {
+    const msg = "Are you sure you want to close this website? By closing you delete all your images and will have to manually regenerate every single one again!";
+    e.preventDefault();
+    e.returnValue = msg;
+    return msg;
+  }
+});
+
+// Intercept internal page navigation links when images exist
+document.addEventListener("click", function (e) {
+  const link = e.target.closest("a");
+  if (!link) return;
+  const href = link.getAttribute("href");
+  if (!href || href.startsWith("#") || href.startsWith("javascript:")) return;
+
+  if (imageLibrary && imageLibrary.length > 0) {
+    e.preventDefault();
+    showExitWarningModal(href);
+  }
+});
