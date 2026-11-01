@@ -1,23 +1,27 @@
 #!/usr/bin/env python3
 """
-Angel Generator AI - Web Server & REST API
-Hosts the interactive Angel Generator AI Studio and REST endpoints.
+Angel Generator AI - Web Server & REST API v2.5
+Features:
+  - 4K Ultra-HD Resolution Handling
+  - High Thinking Deep Reasoning Mode
+  - Cancellation / Stop Endpoint (/api/stop)
+  - Detail Level Customization
 """
 
 import argparse
 import os
 import sys
 import time
+import threading
 import webbrowser
 from pathlib import Path
 from flask import Flask, request, jsonify, send_from_directory
 from flask_cors import CORS
 
-# Local imports
 BASE_DIR = Path(__file__).resolve().parent.parent
 sys.path.insert(0, str(BASE_DIR / "src"))
 
-from neural_engine import synthesize_angel_art
+from neural_engine import synthesize_angel_art, generate_high_thinking_analysis
 from cloud_engine import generate_cloud_image
 from angel_generator import run_c_executable, PRESETS
 
@@ -26,6 +30,9 @@ CORS(app)
 
 OUTPUTS_DIR = BASE_DIR / "outputs"
 OUTPUTS_DIR.mkdir(parents=True, exist_ok=True)
+
+# Global cancellation event
+current_cancel_event = threading.Event()
 
 
 @app.route("/")
@@ -51,7 +58,9 @@ def api_status():
         "pytorch": True,
         "cloud": True,
         "c_native": has_exe,
-        "version": "2.0.0"
+        "version": "2.5.0",
+        "supports_4k": True,
+        "supports_high_thinking": True
     })
 
 
@@ -63,14 +72,26 @@ def api_presets():
     })
 
 
+@app.route("/api/stop", methods=["POST"])
+def api_stop():
+    global current_cancel_event
+    current_cancel_event.set()
+    return jsonify({"success": True, "message": "Cancellation signal sent."})
+
+
 @app.route("/api/generate", methods=["POST"])
 def api_generate():
+    global current_cancel_event
+    current_cancel_event.clear()
+
     data = request.get_json(force=True) or {}
     prompt = data.get("prompt", "Archangel with golden wings")
     engine = data.get("engine", "neural")
     style = data.get("style", "renaissance")
     width = int(data.get("width", 512))
     height = int(data.get("height", 512))
+    detail_level = int(data.get("detail_level", 3))
+    high_thinking = bool(data.get("high_thinking", False))
     seed = data.get("seed")
     if seed is None:
         seed = int(time.time() * 1000) % 999999
@@ -78,6 +99,11 @@ def api_generate():
     filename = f"angel_{int(time.time())}_{seed}.png"
     out_file = OUTPUTS_DIR / filename
     provider_used = engine
+
+    # Generate high thinking thought chain
+    thinking_log = []
+    if high_thinking:
+        thinking_log = generate_high_thinking_analysis(prompt, style, detail_level, width, height)
 
     try:
         t0 = time.time()
@@ -100,16 +126,20 @@ def api_generate():
             )
             img.save(str(out_file))
         else:
-            # Neural PyTorch
+            # Neural PyTorch with cancellation token
             img = synthesize_angel_art(
                 prompt=prompt,
                 width=width,
                 height=height,
                 seed=seed,
-                style=style
+                style=style,
+                detail_level=detail_level,
+                high_thinking=high_thinking,
+                cancel_check=lambda: current_cancel_event.is_set()
             )
             img.save(str(out_file))
-            provider_used = "PyTorch Neural Coordinate Field"
+            res_label = "4K Ultra-HD " if width >= 3840 else ("2K QHD " if width >= 2048 else "")
+            provider_used = f"PyTorch Neural {res_label}Coordinate Field"
 
         duration = round(time.time() - t0, 2)
         return jsonify({
@@ -117,9 +147,18 @@ def api_generate():
             "image_url": f"/outputs/{filename}",
             "provider": provider_used,
             "seed": seed,
-            "duration_sec": duration
+            "duration_sec": duration,
+            "thinking_log": thinking_log,
+            "resolution": f"{width}x{height}",
+            "detail_level": detail_level
         })
 
+    except InterruptedError:
+        return jsonify({
+            "success": False,
+            "cancelled": True,
+            "error": "Generation stopped by user."
+        }), 200
     except Exception as e:
         return jsonify({
             "success": False,

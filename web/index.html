@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Angel Generator AI — Celestial Studio</title>
+  <title>Angel Generator AI — 4K Celestial Studio</title>
   <link rel="stylesheet" href="style.css">
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -18,12 +18,12 @@
     <div class="brand">
       <div class="brand-halo"></div>
       <div class="brand-text">
-        <span class="brand-sub">FROM-SCRATCH & CLOUD TEXT-TO-IMAGE</span>
+        <span class="brand-sub">4K ULTRA-HD & HIGH THINKING TEXT-TO-IMAGE</span>
         <h1>ANGEL GENERATOR AI</h1>
       </div>
     </div>
     <div class="status-pills">
-      <span class="pill" id="pill-torch"><span class="dot"></span> PyTorch Neural</span>
+      <span class="pill" id="pill-torch"><span class="dot"></span> PyTorch 4K</span>
       <span class="pill" id="pill-webgl"><span class="dot active"></span> WebGL Canvas</span>
       <span class="pill" id="pill-cloud"><span class="dot"></span> Cloud AI</span>
     </div>
@@ -38,7 +38,7 @@
       </div>
 
       <div class="prompt-box">
-        <textarea id="promptInput" rows="3" placeholder="Describe your celestial vision, archangel, or sacred scene...">Archangel Michael with massive glowing white feathered wings and golden halo in heavenly clouds, divine light rays</textarea>
+        <textarea id="promptInput" rows="3" placeholder="Describe your celestial vision, archangel, or sacred scene...">Archangel Michael with massive glowing white feathered wings and golden halo in heavenly clouds, divine light rays, 4k masterpiece</textarea>
         <div class="prompt-actions">
           <button id="btnInspire" class="btn-text">🎲 Inspire Me</button>
           <button id="btnClear" class="btn-text">✕ Clear</button>
@@ -64,7 +64,7 @@
           <div class="engine-card active" data-engine="neural">
             <div class="engine-icon">🧠</div>
             <div class="engine-info">
-              <strong>PyTorch Neural</strong>
+              <strong>PyTorch Neural (4K)</strong>
               <span>High-res offline coordinate field</span>
             </div>
           </div>
@@ -92,7 +92,7 @@
         </div>
       </div>
 
-      <!-- Style Presets -->
+      <!-- Style & Thinking Controls -->
       <div class="style-section">
         <label>Artistic Style</label>
         <select id="styleSelect" class="styled-select">
@@ -104,34 +104,81 @@
         </select>
       </div>
 
+      <!-- High Thinking Toggle -->
+      <div class="thinking-box">
+        <div class="thinking-header">
+          <label class="switch">
+            <input type="checkbox" id="highThinkingToggle" checked>
+            <span class="slider round"></span>
+          </label>
+          <div class="thinking-label">
+            <strong>🧠 High Thinking Mode</strong>
+            <span>Deep compositional reasoning & theological decomposition</span>
+          </div>
+        </div>
+      </div>
+
+      <!-- Detail Slider & Resolution -->
+      <div class="detail-control-box">
+        <div class="detail-header">
+          <label for="detailSlider">Detail & Micro-Passes</label>
+          <span id="detailValBadge" class="badge">Level 4 (Ultra Detail)</span>
+        </div>
+        <input type="range" id="detailSlider" min="1" max="5" value="4" step="1" class="styled-range">
+        <div class="range-marks">
+          <span>1 (Fast)</span>
+          <span>3 (Balanced)</span>
+          <span>5 (4K Masterpiece)</span>
+        </div>
+      </div>
+
+      <!-- Resolution Selector up to 4K -->
+      <div class="control-group">
+        <label for="resolutionSelect">Resolution & Quality</label>
+        <select id="resolutionSelect" class="styled-select gold-border">
+          <option value="512x512">512 x 512 (Standard Draft)</option>
+          <option value="768x768">768 x 768 (Detailed)</option>
+          <option value="1024x1024" selected>1024 x 1024 (HD Masterpiece)</option>
+          <option value="2048x2048">2048 x 2048 (2K Quad HD)</option>
+          <option value="3840x2160">3840 x 2160 (4K Widescreen UHD)</option>
+          <option value="4096x4096">4096 x 4096 (4K Ultra-HD Maximum Detail)</option>
+        </select>
+      </div>
+
       <!-- Advanced Settings Accordion -->
       <details class="advanced-details">
-        <summary>Advanced Generation Parameters</summary>
+        <summary>Advanced Seeds & Negatives</summary>
         <div class="advanced-grid">
-          <div class="control-group">
-            <label for="resolutionSelect">Resolution</label>
-            <select id="resolutionSelect" class="styled-select">
-              <option value="512x512" selected>512 x 512 (Standard)</option>
-              <option value="768x768">768 x 768 (Detailed)</option>
-              <option value="1024x1024">1024 x 1024 (HD Masterpiece)</option>
-            </select>
-          </div>
           <div class="control-group">
             <label for="seedInput">Seed (Blank for Random)</label>
             <input type="number" id="seedInput" class="styled-input" placeholder="Random">
           </div>
-          <div class="control-group full-width">
-            <label for="negativeInput">Negative Prompt (What to Avoid)</label>
-            <input type="text" id="negativeInput" class="styled-input" placeholder="blurry, distorted, dark, muddy, ugly">
+          <div class="control-group">
+            <label for="negativeInput">Negative Prompt</label>
+            <input type="text" id="negativeInput" class="styled-input" placeholder="blurry, distorted, dark, ugly">
           </div>
         </div>
       </details>
 
-      <!-- Generate Buttons -->
-      <div class="action-buttons">
+      <!-- Action Buttons: Generate & Stop -->
+      <div class="action-buttons-dual">
         <button id="btnGenerate" class="btn-primary">
-          <span class="btn-sparkle">✦</span> Generate Artwork
+          <span class="btn-sparkle">✦</span> Generate
         </button>
+        <button id="btnStop" class="btn-stop" disabled title="Cancel or Stop Generation">
+          ⏹ Stop
+        </button>
+      </div>
+
+      <!-- Live Progress & Time Remaining -->
+      <div id="progressContainer" class="progress-box hidden">
+        <div class="progress-bar-track">
+          <div id="progressBar" class="progress-bar-fill"></div>
+        </div>
+        <div class="progress-meta">
+          <span id="progressStatus" class="progress-status">Calculating rays...</span>
+          <span id="timeRemaining" class="time-remaining">Estimated time: ~2.4s</span>
+        </div>
       </div>
     </section>
 
@@ -143,11 +190,12 @@
           <h2>Celestial Canvas</h2>
         </div>
         <div class="preview-actions">
-          <span id="genStats" class="gen-stats">Ready</span>
+          <span id="genStats" class="gen-stats">Ready for 4K Synthesis</span>
           <button id="btnDownload" class="btn-secondary" title="Download Image">⬇ Download</button>
         </div>
       </div>
 
+      <!-- Live Canvas / Output Media -->
       <div class="canvas-wrapper">
         <div id="loader" class="loader-overlay hidden">
           <div class="celestial-spinner">
@@ -158,7 +206,19 @@
         </div>
 
         <img id="resultImage" class="preview-media hidden" alt="Generated Artwork">
-        <canvas id="browserCanvas" class="preview-media" width="512" height="512"></canvas>
+        <canvas id="browserCanvas" class="preview-media" width="1024" height="1024"></canvas>
+      </div>
+
+      <!-- High Thinking Reasoning Accordion -->
+      <div id="thinkingPanel" class="thinking-panel">
+        <details id="thinkingDetails" open>
+          <summary>🧠 High Thinking Reasoning Log</summary>
+          <div id="thinkingLogContent" class="thinking-content">
+            <p>1. [Theological & Archetype Analysis]: Ready to decompose prompt composition.</p>
+            <p>2. [Anatomical Architecture]: Multi-tiered feather flight dynamics configured.</p>
+            <p>3. [Volumetric Lighting Plan]: Chiaroscuro raymarching initialized.</p>
+          </div>
+        </details>
       </div>
 
       <!-- Gallery / History Section -->
@@ -172,7 +232,7 @@
   </main>
 
   <footer class="app-footer">
-    <p>Angel Generator AI Studio — Powered by Deep Coordinate Neural Fields, C Standalone Engine, and Cloud Diffusion</p>
+    <p>Angel Generator AI Studio v2.5 — 4K Ultra-HD, High Thinking Reasoning, and Instant Stop Control</p>
   </footer>
 
   <script src="app.js"></script>

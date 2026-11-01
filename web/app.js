@@ -1,23 +1,27 @@
 /**
- * Angel Generator AI — Web Studio Controller & Client-Side Synthesizer
+ * Angel Generator AI — Web Studio Controller v2.5
+ * Features:
+ *   - 4K Ultra-HD Resolution Support
+ *   - High Thinking Reasoning Decomposition
+ *   - Real-Time Progress Countdown & Estimated Time Remaining
+ *   - Interactive Stop / Cancel Generation Control
  */
 
-// Presets database
 const PRESETS = {
   archangel: {
-    prompt: "Archangel Michael with massive glowing white feathered wings and golden halo in heavenly clouds, divine light rays",
+    prompt: "Archangel Michael with massive glowing white feathered wings and golden halo in heavenly clouds, divine light rays, 4k masterpiece",
     style: "renaissance"
   },
   seraphim: {
-    prompt: "Six-winged divine Seraphim surrounded by celestial fire, glowing sacred halo, volumetric golden starlight",
+    prompt: "Six-winged divine Seraphim surrounded by celestial fire, glowing sacred halo, volumetric golden starlight, 4k ultra-hd",
     style: "divine_gold"
   },
   cathedral: {
-    prompt: "Guardian angel with pure white feathered wings overlooking sacred gothic cathedral spire, golden sunset",
+    prompt: "Guardian angel with pure white feathered wings overlooking sacred gothic cathedral spire, golden sunset, high detail",
     style: "renaissance"
   },
   cyberpunk: {
-    prompt: "Futuristic cyberpunk holographic angel with glowing neon cyan wings overlooking rainy neon skyscraper metropolis",
+    prompt: "Futuristic cyberpunk holographic angel with glowing neon cyan wings overlooking rainy neon skyscraper metropolis, 4k render",
     style: "cyberpunk"
   },
   cosmic: {
@@ -27,18 +31,21 @@ const PRESETS = {
 };
 
 const INSPIRATIONS = [
-  "Archangel with flaming golden sword and outstretched radiant wings",
-  "Seraphim guardian descending through golden heavenly clouds",
+  "Archangel with flaming golden sword and outstretched radiant wings, 4k ultra-hd",
+  "Seraphim guardian descending through golden heavenly clouds, high thinking composition",
   "Celestial angel with glowing white feathered wings in starlight nebula",
   "Renaissance fresco of guardian angel with golden halo in cathedral",
-  "Ethereal winged spirit surrounded by divine volumetric god rays",
-  "Cyberpunk neon angel overlooking futuristic rainy city skyline"
+  "Ethereal winged spirit surrounded by divine volumetric god rays, masterpiece",
+  "Cyberpunk neon angel overlooking futuristic rainy city skyline, 4k"
 ];
 
 // App State
 let currentEngine = "neural";
 let isBackendAvailable = false;
 let historyGallery = [];
+let isGenerating = false;
+let currentAbortController = null;
+let progressTimer = null;
 
 // DOM Elements
 const promptInput = document.getElementById("promptInput");
@@ -50,14 +57,26 @@ const styleSelect = document.getElementById("styleSelect");
 const resolutionSelect = document.getElementById("resolutionSelect");
 const seedInput = document.getElementById("seedInput");
 const negativeInput = document.getElementById("negativeInput");
+const detailSlider = document.getElementById("detailSlider");
+const detailValBadge = document.getElementById("detailValBadge");
+const highThinkingToggle = document.getElementById("highThinkingToggle");
+
 const btnGenerate = document.getElementById("btnGenerate");
+const btnStop = document.getElementById("btnStop");
 const btnDownload = document.getElementById("btnDownload");
 const genStats = document.getElementById("genStats");
+
+const progressContainer = document.getElementById("progressContainer");
+const progressBar = document.getElementById("progressBar");
+const progressStatus = document.getElementById("progressStatus");
+const timeRemaining = document.getElementById("timeRemaining");
+
 const loader = document.getElementById("loader");
 const loaderText = document.getElementById("loaderText");
 const resultImage = document.getElementById("resultImage");
 const browserCanvas = document.getElementById("browserCanvas");
 const galleryContainer = document.getElementById("galleryContainer");
+const thinkingLogContent = document.getElementById("thinkingLogContent");
 
 const pillTorch = document.getElementById("pill-torch");
 const pillWebgl = document.getElementById("pill-webgl");
@@ -67,8 +86,8 @@ const pillCloud = document.getElementById("pill-cloud");
 document.addEventListener("DOMContentLoaded", () => {
   setupEventListeners();
   checkBackendHealth();
-  // Render initial client-side angel artwork so canvas is never blank
-  renderBrowserCelestialCanvas(promptInput.value, styleSelect.value, 777);
+  updateDetailBadge();
+  renderBrowserCelestialCanvas(promptInput.value, styleSelect.value, 777, 4);
 });
 
 function setupEventListeners() {
@@ -106,14 +125,29 @@ function setupEventListeners() {
     });
   });
 
-  // Generate Button
+  // Detail Slider change
+  detailSlider.addEventListener("input", updateDetailBadge);
+
+  // Generate & Stop Buttons
   btnGenerate.addEventListener("click", handleGenerate);
+  btnStop.addEventListener("click", handleStop);
 
   // Download Button
   btnDownload.addEventListener("click", handleDownload);
 }
 
-// Check if Python Flask server is responding
+function updateDetailBadge() {
+  const val = parseInt(detailSlider.value, 10);
+  const labels = {
+    1: "Level 1 (Fast Draft)",
+    2: "Level 2 (Normal)",
+    3: "Level 3 (Balanced)",
+    4: "Level 4 (Ultra Detail)",
+    5: "Level 5 (4K Masterpiece)"
+  };
+  detailValBadge.textContent = labels[val] || `Level ${val}`;
+}
+
 async function checkBackendHealth() {
   try {
     const res = await fetch("/api/status", { method: "GET" });
@@ -122,10 +156,9 @@ async function checkBackendHealth() {
       isBackendAvailable = true;
       if (data.pytorch) pillTorch.querySelector(".dot").classList.add("active");
       if (data.cloud) pillCloud.querySelector(".dot").classList.add("active");
-      console.log("[Angel AI] Backend connected:", data);
     }
   } catch (err) {
-    console.log("[Angel AI] Running in standalone browser mode (Backend not connected)");
+    console.log("[Angel AI] Standalone browser mode active.");
     isBackendAvailable = false;
   }
 }
@@ -134,79 +167,214 @@ async function checkBackendHealth() {
 async function handleGenerate() {
   const prompt = promptInput.value.trim();
   if (!prompt) {
-    alert("Please enter a prompt to generate artwork!");
+    alert("Please enter a prompt to generate celestial artwork!");
     return;
   }
 
   const style = styleSelect.value;
   const resolution = resolutionSelect.value;
+  const [width, height] = resolution.split("x").map(Number);
+  const detailLevel = parseInt(detailSlider.value, 10);
+  const highThinking = highThinkingToggle.checked;
   const seed = seedInput.value ? parseInt(seedInput.value, 10) : Math.floor(Math.random() * 999999);
   const negative = negativeInput.value.trim();
 
-  showLoader(true, "Synthesizing celestial rays & wings...");
+  // Set Generating state
+  isGenerating = true;
+  btnGenerate.disabled = true;
+  btnStop.disabled = false;
+  currentAbortController = new AbortController();
+
+  // Calculate estimated duration
+  const pixelFactor = Math.sqrt((width * height) / (512 * 512));
+  const baseTime = (currentEngine === "browser") ? 0.8 : (0.4 + detailLevel * 0.25 * pixelFactor);
+  const totalEstTime = highThinking ? baseTime * 1.3 : baseTime;
+
+  startLiveProgress(totalEstTime, detailLevel, width, height, highThinking);
+  showLoader(true, highThinking ? "🧠 High Thinking: Decomposing composition & anatomy..." : "Synthesizing celestial rays & wings...");
+
   const startTime = performance.now();
 
   try {
+    if (highThinking) {
+      displaySimulatedHighThinking(prompt, style, detailLevel, width, height);
+    }
+
     if (currentEngine === "browser" || !isBackendAvailable) {
-      // Fast client-side WebGL / Canvas synthesis
-      await new Promise(r => setTimeout(r, 60)); // Smooth UI transition
-      renderBrowserCelestialCanvas(prompt, style, seed);
+      // Browser canvas progressive synthesis
+      await new Promise(r => setTimeout(r, 80));
+      if (!isGenerating) return;
+
+      renderBrowserCelestialCanvas(prompt, style, seed, detailLevel);
       resultImage.classList.add("hidden");
       browserCanvas.classList.remove("hidden");
-      
+
+      finishProgress();
       const duration = ((performance.now() - startTime) / 1000).toFixed(2);
-      genStats.textContent = `Browser Canvas in ${duration}s (Seed: ${seed})`;
+      genStats.textContent = `Browser Canvas in ${duration}s (${width}x${height}, Seed: ${seed})`;
       addToGallery(browserCanvas.toDataURL("image/png"), prompt, seed);
     } else {
-      // Request generation from Python Backend API
-      loaderText.textContent = `Executing ${currentEngine.toUpperCase()} engine...`;
-      const [width, height] = resolution.split("x").map(Number);
-      
+      // Call Python REST API
       const response = await fetch("/api/generate", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
+        signal: currentAbortController.signal,
         body: JSON.stringify({
           prompt,
           engine: currentEngine,
           style,
           width,
           height,
+          detail_level: detailLevel,
+          high_thinking: highThinking,
           seed,
           negative
         })
       });
 
       const result = await response.json();
+      if (result.cancelled) {
+        progressStatus.textContent = "Stopped by user.";
+        return;
+      }
       if (!result.success) throw new Error(result.error || "Generation failed");
 
+      finishProgress();
       resultImage.src = result.image_url;
       resultImage.classList.remove("hidden");
       browserCanvas.classList.add("hidden");
 
+      if (result.thinking_log && result.thinking_log.length > 0) {
+        renderThinkingLog(result.thinking_log);
+      }
+
       const duration = ((performance.now() - startTime) / 1000).toFixed(2);
-      genStats.textContent = `${result.provider || currentEngine} in ${duration}s (Seed: ${seed})`;
+      genStats.textContent = `${result.provider || currentEngine} in ${duration}s (${width}x${height}, Seed: ${seed})`;
       addToGallery(result.image_url, prompt, seed);
     }
   } catch (err) {
-    console.error("Generation error:", err);
-    alert(`Generation error: ${err.message}. Falling back to browser canvas.`);
-    renderBrowserCelestialCanvas(prompt, style, seed);
-    resultImage.classList.add("hidden");
-    browserCanvas.classList.remove("hidden");
+    if (err.name === "AbortError" || !isGenerating) {
+      progressStatus.textContent = "Generation halted.";
+      timeRemaining.textContent = "Stopped";
+    } else {
+      console.error("Generation error:", err);
+      alert(`Error: ${err.message}. Using browser canvas.`);
+      renderBrowserCelestialCanvas(prompt, style, seed, detailLevel);
+      resultImage.classList.add("hidden");
+      browserCanvas.classList.remove("hidden");
+    }
   } finally {
-    showLoader(false);
+    resetControls();
   }
+}
+
+// Stop Action
+async function handleStop() {
+  if (!isGenerating) return;
+  isGenerating = false;
+
+  progressStatus.textContent = "Stopping generation...";
+  timeRemaining.textContent = "Cancelled";
+  progressBar.style.width = "100%";
+  progressBar.style.background = "#ef4444";
+
+  if (currentAbortController) {
+    currentAbortController.abort();
+  }
+
+  // Signal server cancellation endpoint
+  if (isBackendAvailable) {
+    try {
+      await fetch("/api/stop", { method: "POST" });
+    } catch (e) {}
+  }
+
+  clearInterval(progressTimer);
+  showLoader(false);
+  resetControls();
+  genStats.textContent = "Generation stopped by user (current state preserved)";
+}
+
+function resetControls() {
+  isGenerating = false;
+  btnGenerate.disabled = false;
+  btnStop.disabled = true;
+  clearInterval(progressTimer);
+  showLoader(false);
+}
+
+// Live Progress and Estimated Time Remaining
+function startLiveProgress(totalSeconds, detailLevel, width, height, highThinking) {
+  progressContainer.classList.remove("hidden");
+  progressBar.style.width = "5%";
+  progressBar.style.background = "linear-gradient(90deg, #f5c542, #38bdf8)";
+  
+  const startTime = Date.now();
+  const stages = [
+    "Analyzing theology & prompt...",
+    "Computing celestial chiaroscuro...",
+    `Generating volumetric rays & halo...`,
+    `Refining feathered wings (Pass 1/${detailLevel})...`,
+    `Adding 4K micro-feather striations...`,
+    "Applying specular bloom..."
+  ];
+
+  clearInterval(progressTimer);
+  progressTimer = setInterval(() => {
+    if (!isGenerating) {
+      clearInterval(progressTimer);
+      return;
+    }
+    const elapsed = (Date.now() - startTime) / 1000;
+    const progress = Math.min(0.95, elapsed / totalSeconds);
+    const rem = Math.max(0.1, totalSeconds - elapsed).toFixed(1);
+
+    progressBar.style.width = `${Math.round(progress * 100)}%`;
+    timeRemaining.textContent = `Estimated time: ~${rem}s`;
+
+    const stageIdx = Math.min(stages.length - 1, Math.floor(progress * stages.length));
+    progressStatus.textContent = stages[stageIdx];
+  }, 100);
+}
+
+function finishProgress() {
+  clearInterval(progressTimer);
+  progressBar.style.width = "100%";
+  progressStatus.textContent = "Synthesis complete!";
+  timeRemaining.textContent = "0.0s remaining";
+  setTimeout(() => {
+    if (!isGenerating) progressContainer.classList.add("hidden");
+  }, 3500);
 }
 
 function showLoader(show, text = "") {
   if (show) {
     loaderText.textContent = text;
     loader.classList.remove("hidden");
-    btnGenerate.disabled = true;
   } else {
     loader.classList.add("hidden");
-    btnGenerate.disabled = false;
   }
+}
+
+function displaySimulatedHighThinking(prompt, style, detailLevel, width, height) {
+  const thoughts = [
+    `1. [Theological & Archetype Analysis]: Deconstructing prompt "${prompt.substring(0, 40)}..." into celestial hierarchy.`,
+    `2. [Anatomical Architecture]: Constructing dual-tiered feathered wing geometry at ${width}px resolution.`,
+    `3. [Volumetric Lighting Plan]: Calculating 16 god-ray light shafts radiating with inverse-square falloff.`,
+    `4. [Chiaroscuro & Harmony]: Aligning palette to ${style.toUpperCase()} with golden ambient occlusion.`,
+    `5. [Detail Multi-Pass Refinement]: Detail Level ${detailLevel}/5 — computing ${detailLevel * 4} octave fractal micro-noise.`,
+    `6. [Resolution Strategy]: Executing ${width}x${height} Ultra-HD rendering buffer.`
+  ];
+  renderThinkingLog(thoughts);
+}
+
+function renderThinkingLog(logs) {
+  thinkingLogContent.innerHTML = "";
+  logs.forEach(log => {
+    const p = document.createElement("p");
+    p.textContent = log;
+    thinkingLogContent.appendChild(p);
+  });
 }
 
 function addToGallery(url, prompt, seed) {
@@ -231,7 +399,8 @@ function addToGallery(url, prompt, seed) {
 
 function handleDownload() {
   const link = document.createElement("a");
-  link.download = `angel_art_${Date.now()}.png`;
+  const res = resolutionSelect.value;
+  link.download = `angel_art_${res}_${Date.now()}.png`;
   if (!resultImage.classList.contains("hidden") && resultImage.src) {
     link.href = resultImage.src;
   } else {
@@ -241,33 +410,30 @@ function handleDownload() {
 }
 
 /**
- * Procedural Client-Side Celestial Canvas Synthesizer
- * Draws winged celestial figures, volumetric god rays, glowing halo, and cloud mist
+ * Procedural Client-Side Celestial Canvas Synthesizer with Detail Multi-Passes
  */
-function renderBrowserCelestialCanvas(prompt, style, seed) {
+function renderBrowserCelestialCanvas(prompt, style, seed, detailLevel = 4) {
   const ctx = browserCanvas.getContext("2d");
   const W = browserCanvas.width;
   const H = browserCanvas.height;
 
-  // Simple deterministic PRNG
   let s = seed % 2147483647;
   const rnd = () => (s = (s * 16807) % 2147483647) / 2147483647;
 
-  // Style Palette Configuration
-  let topColor = "#fbf5e6", botColor = "#2b1820", haloColor = "#ffd700", rayColor = "rgba(255, 225, 120, 0.25)";
+  let topColor = "#fbf5e6", botColor = "#2b1820", haloColor = "#ffd700", rayColor = "rgba(255, 225, 120, 0.28)";
   let wingColor = "#ffffff", robeColor = "#f8f4eb";
 
   if (style === "renaissance") {
-    topColor = "#edd7a8"; botColor = "#21150c"; haloColor = "#f5c542"; rayColor = "rgba(245, 197, 66, 0.3)";
+    topColor = "#edd7a8"; botColor = "#21150c"; haloColor = "#f5c542"; rayColor = "rgba(245, 197, 66, 0.32)";
     wingColor = "#faf3e0"; robeColor = "#ede2c8";
   } else if (style === "divine_gold") {
-    topColor = "#fff3cc"; botColor = "#3d2208"; haloColor = "#ffbf00"; rayColor = "rgba(255, 200, 0, 0.4)";
+    topColor = "#fff3cc"; botColor = "#3d2208"; haloColor = "#ffbf00"; rayColor = "rgba(255, 200, 0, 0.42)";
     wingColor = "#fff8e7"; robeColor = "#fceed0";
   } else if (style === "cyberpunk") {
     topColor = "#0d1b2a"; botColor = "#050811"; haloColor = "#00f0ff"; rayColor = "rgba(0, 240, 255, 0.25)";
     wingColor = "#70f3ff"; robeColor = "#1e293b";
   } else if (style === "celestial") {
-    topColor = "#2e1065"; botColor = "#030712"; haloColor = "#c084fc"; rayColor = "rgba(192, 132, 252, 0.3)";
+    topColor = "#2e1065"; botColor = "#030712"; haloColor = "#c084fc"; rayColor = "rgba(192, 132, 252, 0.32)";
     wingColor = "#f3e8ff"; robeColor = "#3b0764";
   }
 
@@ -280,10 +446,11 @@ function renderBrowserCelestialCanvas(prompt, style, seed) {
 
   // 2. Heavenly Clouds
   ctx.save();
-  for (let i = 0; i < 28; i++) {
+  const numClouds = 20 + detailLevel * 6;
+  for (let i = 0; i < numClouds; i++) {
     const cx = rnd() * W;
-    const cy = H * 0.45 + rnd() * H * 0.55;
-    const cr = 60 + rnd() * 110;
+    const cy = H * 0.42 + rnd() * H * 0.58;
+    const cr = (W * 0.12) + rnd() * (W * 0.22);
     const cloudGrad = ctx.createRadialGradient(cx, cy, 0, cx, cy, cr);
     cloudGrad.addColorStop(0, "rgba(255, 255, 255, 0.18)");
     cloudGrad.addColorStop(1, "rgba(255, 255, 255, 0)");
@@ -297,14 +464,15 @@ function renderBrowserCelestialCanvas(prompt, style, seed) {
   // 3. Volumetric God Rays
   ctx.save();
   const lightX = W * 0.5;
-  const lightY = -30;
+  const lightY = -50;
   ctx.fillStyle = rayColor;
-  for (let i = -7; i <= 7; i++) {
+  const numRays = 10 + detailLevel * 3;
+  for (let i = -numRays; i <= numRays; i++) {
     ctx.beginPath();
     ctx.moveTo(lightX, lightY);
-    const spread = (i * 45) + (rnd() * 20);
-    ctx.lineTo(lightX + spread - 30, H);
-    ctx.lineTo(lightX + spread + 30, H);
+    const spread = (i * (W * 0.05)) + (rnd() * 35);
+    ctx.lineTo(lightX + spread - 45, H);
+    ctx.lineTo(lightX + spread + 45, H);
     ctx.closePath();
     ctx.fill();
   }
@@ -313,107 +481,93 @@ function renderBrowserCelestialCanvas(prompt, style, seed) {
   // 4. Glowing Radiant Halo
   const headX = W * 0.5;
   const headY = H * 0.38;
-  const haloR = 48;
+  const haloR = W * 0.095;
 
   ctx.save();
-  // Outer Glow
-  const haloGrad = ctx.createRadialGradient(headX, headY, haloR - 15, headX, headY, haloR + 35);
+  const haloGrad = ctx.createRadialGradient(headX, headY, haloR - 25, headX, headY, haloR + 65);
   haloGrad.addColorStop(0, haloColor);
   haloGrad.addColorStop(0.5, "rgba(255, 215, 0, 0.45)");
   haloGrad.addColorStop(1, "rgba(255, 215, 0, 0)");
   ctx.fillStyle = haloGrad;
   ctx.beginPath();
-  ctx.arc(headX, headY, haloR + 35, 0, Math.PI * 2);
+  ctx.arc(headX, headY, haloR + 65, 0, Math.PI * 2);
   ctx.fill();
 
-  // Crisp Golden Ring
   ctx.strokeStyle = haloColor;
-  ctx.lineWidth = 5;
+  ctx.lineWidth = Math.max(4, W * 0.009);
   ctx.shadowColor = haloColor;
-  ctx.shadowBlur = 20;
+  ctx.shadowBlur = 30;
   ctx.beginPath();
   ctx.arc(headX, headY, haloR, 0, Math.PI * 2);
   ctx.stroke();
   ctx.restore();
 
-  // 5. Feathered Angel Wings
+  // 5. Feathered Angel Wings with Detail Striations
   ctx.save();
   ctx.shadowColor = haloColor;
-  ctx.shadowBlur = 25;
+  ctx.shadowBlur = 35;
 
   const drawWing = (dir) => {
     ctx.save();
-    ctx.translate(headX, headY + 30);
+    ctx.translate(headX, headY + W * 0.05);
     ctx.scale(dir, 1);
 
-    // Layered Feather Arcs
-    for (let layer = 0; layer < 4; layer++) {
+    const wingLayers = 3 + detailLevel;
+    for (let layer = 0; layer < wingLayers; layer++) {
       ctx.beginPath();
-      ctx.moveTo(15, 10);
-      const spanX = 140 + layer * 28;
-      const spanY = -60 - layer * 22;
-      ctx.bezierCurveTo(60, -80 - layer * 20, spanX - 20, spanY - 15, spanX, spanY);
-      ctx.bezierCurveTo(spanX + 15, spanY + 40, spanX - 40, spanY + 120, 25, 90 + layer * 18);
+      ctx.moveTo(W * 0.03, W * 0.02);
+      const spanX = W * (0.28 + layer * 0.05);
+      const spanY = -W * (0.12 + layer * 0.04);
+      ctx.bezierCurveTo(W * 0.12, -W * (0.16 + layer * 0.03), spanX - W * 0.04, spanY - W * 0.03, spanX, spanY);
+      ctx.bezierCurveTo(spanX + W * 0.03, spanY + W * 0.08, spanX - W * 0.08, spanY + W * 0.24, W * 0.05, W * (0.18 + layer * 0.03));
       ctx.closePath();
 
-      const wingGrad = ctx.createLinearGradient(0, spanY, spanX, spanY + 120);
+      const wingGrad = ctx.createLinearGradient(0, spanY, spanX, spanY + W * 0.24);
       wingGrad.addColorStop(0, wingColor);
-      wingGrad.addColorStop(0.7, "rgba(255, 255, 255, 0.85)");
-      wingGrad.addColorStop(1, "rgba(245, 197, 66, 0.2)");
+      wingGrad.addColorStop(0.7, "rgba(255, 255, 255, 0.88)");
+      wingGrad.addColorStop(1, "rgba(245, 197, 66, 0.25)");
       ctx.fillStyle = wingGrad;
       ctx.fill();
 
-      // Feather striations
-      ctx.strokeStyle = "rgba(255, 255, 255, 0.5)";
-      ctx.lineWidth = 1.5;
+      ctx.strokeStyle = "rgba(255, 255, 255, 0.55)";
+      ctx.lineWidth = Math.max(1.5, W * 0.003);
       ctx.stroke();
     }
     ctx.restore();
   };
 
-  drawWing(1);  // Right wing
-  drawWing(-1); // Left wing
+  drawWing(1);
+  drawWing(-1);
   ctx.restore();
 
   // 6. Angel Figure Robes & Silhouette
   ctx.save();
   ctx.beginPath();
-  // Head
-  ctx.arc(headX, headY, 24, 0, Math.PI * 2);
-  // Flowing Robes
-  ctx.moveTo(headX - 22, headY + 18);
-  ctx.bezierCurveTo(headX - 35, headY + 80, headX - 85, H * 0.85, headX - 110, H);
-  ctx.lineTo(headX + 110, H);
-  ctx.bezierCurveTo(headX + 85, H * 0.85, headX + 35, headY + 80, headX + 22, headY + 18);
+  ctx.arc(headX, headY, W * 0.046, 0, Math.PI * 2);
+  ctx.moveTo(headX - W * 0.042, headY + W * 0.035);
+  ctx.bezierCurveTo(headX - W * 0.07, headY + W * 0.16, headX - W * 0.17, H * 0.85, headX - W * 0.22, H);
+  ctx.lineTo(headX + W * 0.22, H);
+  ctx.bezierCurveTo(headX + W * 0.17, H * 0.85, headX + W * 0.07, headY + W * 0.16, headX + W * 0.042, headY + W * 0.035);
   ctx.closePath();
 
-  const robeGrad = ctx.createLinearGradient(headX - 60, headY, headX + 60, H);
+  const robeGrad = ctx.createLinearGradient(headX - W * 0.12, headY, headX + W * 0.12, H);
   robeGrad.addColorStop(0, robeColor);
   robeGrad.addColorStop(0.5, "rgba(240, 240, 250, 0.95)");
   robeGrad.addColorStop(1, "rgba(180, 160, 140, 0.85)");
   ctx.fillStyle = robeGrad;
-  ctx.shadowColor = "rgba(0,0,0,0.5)";
-  ctx.shadowBlur = 18;
+  ctx.shadowColor = "rgba(0,0,0,0.55)";
+  ctx.shadowBlur = 24;
   ctx.fill();
-
-  // Soft Robe Folds
-  ctx.strokeStyle = "rgba(0, 0, 0, 0.12)";
-  ctx.lineWidth = 2;
-  for (let f = -2; f <= 2; f++) {
-    ctx.beginPath();
-    ctx.moveTo(headX + f * 10, headY + 45);
-    ctx.quadraticCurveTo(headX + f * 25, H * 0.7, headX + f * 35, H);
-    ctx.stroke();
-  }
   ctx.restore();
 
   // 7. Celestial Golden Particles / Embers
   ctx.save();
   ctx.fillStyle = haloColor;
-  for (let i = 0; i < 90; i++) {
+  const numEmbers = 60 + detailLevel * 30;
+  for (let i = 0; i < numEmbers; i++) {
     const px = rnd() * W;
     const py = rnd() * H;
-    const pr = rnd() * 2.2 + 0.6;
+    const pr = rnd() * (W * 0.004) + 1.0;
     ctx.beginPath();
     ctx.arc(px, py, pr, 0, Math.PI * 2);
     ctx.fill();

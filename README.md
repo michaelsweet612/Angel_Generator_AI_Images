@@ -1,78 +1,74 @@
-# Angel Generator AI — Multi-Engine Text-to-Image Generation Studio
+# Angel Generator AI — Multi-Engine 4K Text-to-Image Studio
 
-![Version](https://img.shields.io/badge/version-2.0.0-gold)
+![Version](https://img.shields.io/badge/version-2.5.0-gold)
+![Resolution](https://img.shields.io/badge/quality-up%20to%204K%20UHD%20(4096x4096)-red)
+![Reasoning](https://img.shields.io/badge/mode-High%20Thinking%20AI-purple)
 ![Engines](https://img.shields.io/badge/engines-PyTorch%20%7C%20WebGL%20%7C%20Cloud%20Diffusion%20%7C%20Win64%20C-brightgreen)
-![Platform](https://img.shields.io/badge/platform-Windows%20x64%20%7C%20Web-blue)
-![License](https://img.shields.io/badge/license-MIT-purple)
+![Platform](https://img.shields.io/badge/platform-Windows%20x64%20%7C%20Web%20%7C%20Desktop%20GUI-blue)
 
-A complete, high-performance **Text-to-Image AI Generative Studio** specialized in **Angel, Celestial, Fantasy, and Sacred Artwork**, built with multiple generation methods:
-1. **PyTorch Neural Coordinate Engine** — Ultra-fast, high-resolution offline synthesis with volumetric god rays, layered feathered wings, and golden radiant halos.
-2. **Interactive Web Studio** — Modern, responsive dark-and-gold UI with real-time in-browser WebGL canvas rendering, preset selectors, and live gallery.
-3. **PowerShell Automation Suite & `AngelAI` Module** — Native PowerShell cmdlets (`New-AngelImage`, `Start-AngelWeb`, `Invoke-AngelBatch`, `Test-AngelAI`).
-4. **Cloud Diffusion Engine** — High-definition AI generation with support for FLUX, SDXL, DALL-E 3, and free community endpoints.
-5. **Native 64-bit Windows C Executable (`AI_Image_Generator.exe`)** — Zero-dependency standalone PE32+ inference engine with expanded 115-word semantic embeddings.
+A complete, high-performance **Text-to-Image AI Generative Studio** specialized in **Angel, Celestial, Fantasy, and Sacred Artwork**, built with multiple generation methods, **instant stop control**, **live countdown timer**, **up to 4K Ultra-HD quality**, and **🧠 High Thinking** reasoning decomposition.
 
 ---
 
-## 🌟 Why the Upgraded Multi-Method Architecture?
+## 🌟 Key Features (v2.5)
 
-The initial v1.0 release used a minimal 98-word procedural landscape CPPN written in raw C. While compact, it was limited to geometric terrain and demoscene noise, meaning prompts for angels, characters, or fine art generated indistinct muddy shapes. 
-
-**Angel Generator AI v2.0 fixes this completely** by providing a comprehensive multi-backend pipeline:
-- Dedicated **Celestial Coordinate Fields** with analytical wing curves, feather striations, volumetric rays, and radiant halos.
-- **Instant Web Studio** that runs either standalone in your browser or connected to the Python backend.
-- Full **PowerShell cmdlets** for automation, scripting, and pipeline integration.
-- Multiple coding interfaces: Python, PowerShell, REST API, HTML5/Canvas/WebGL, and C.
+- **Dual Interactive Interfaces**:
+  - 🌐 **Interactive Web Studio** (`Start-AngelWeb.ps1` or double-click `web/index.html`)
+  - 🖥️ **Native Desktop Window Studio** (`Start-AngelGUI.ps1`)
+- **Generate & Stop Control**: Start generation with one click, or hit **⏹ Stop** at any moment to cancel or freeze the render at its current detail pass.
+- **Live Progress & Estimated Time Remaining**: Real-time progress bar with live countdown display (`Estimated time: ~X.Xs remaining`).
+- **Quality up to 4K Ultra-HD**:
+  - `512 x 512` (Standard Draft)
+  - `768 x 768` (Detailed)
+  - `1024 x 1024` (HD Masterpiece)
+  - `2048 x 2048` (2K Quad HD)
+  - `3840 x 2160` (4K Widescreen UHD)
+  - `4096 x 4096` (4K Ultra-HD Maximum Detail)
+- **🧠 High Thinking Deep Reasoning Mode**:
+  - Decomposes the prompt into theological archetypes.
+  - Constructs multi-tiered feathered wing aerodynamics.
+  - Computes volumetric god-ray light shafts with inverse-square falloff.
+  - Synthesizes 4K micro-feather striations and displays the reasoning thoughts in real time.
+- **Detail Level Multi-Pass Refinement**: Detail slider from Level 1 (Fast Draft) to Level 5 (4K Masterpiece).
+- **PowerShell Automation Suite**: Native `AngelAI` module with pipeline cmdlets.
 
 ---
 
-## 🚀 Quick Start Guide
+## 🚀 Quick Launch
 
-### 1. Launch the Interactive Web Studio
-Double-click or run from PowerShell:
+### 1. Interactive Web Studio
 ```powershell
 .\Start-AngelWeb.ps1
 ```
-This starts the local web server on `http://127.0.0.1:5050` and automatically opens the studio in your default browser.
+> Or open `web/index.html` directly in any web browser for offline client-side synthesis!
 
-> **Offline / No Python Server?** You can also directly double-click `web/index.html` in Windows Explorer! The client-side WebGL canvas engine will run right in your browser with zero server setup!
-
----
-
-### 2. Generate from PowerShell
-Import the included PowerShell module and generate celestial artwork directly from your console:
-
+### 2. Native Desktop Window Studio
 ```powershell
-# Import the AngelAI Module
+.\Start-AngelGUI.ps1
+```
+
+### 3. Generate from PowerShell CLI
+```powershell
 Import-Module .\AngelAI.psm1
 
-# Generate an Archangel artwork and open it immediately
-New-AngelImage -Prompt "Archangel Michael with glowing white feathered wings and golden halo" -Style Renaissance -Open
+# 4K Ultra-HD Archangel with High Thinking
+New-AngelImage -Prompt "Archangel Michael with glowing white feathered wings and golden halo" -Style Renaissance -Width 4096 -Height 4096 -Open
 
-# Generate high-resolution 1024x1024 artwork
-New-AngelImage -Prompt "Six-winged Seraphim in divine dawn" -Style Divine_Gold -Width 1024 -Height 1024 -Open
+# Launch the Desktop GUI
+Start-AngelGUI
 
-# Run diagnostic health check
-Test-AngelAI
+# Launch the Web Studio
+Start-AngelWeb
 ```
 
-Or run the standalone script without importing:
-```powershell
-.\New-AngelImage.ps1 -Prompt "Guardian angel overlooking cathedral" -Style Renaissance -Open
+### 4. Interactive Windows Launcher
+Double-click `run_windows.bat` for an interactive menu with all choices:
 ```
-
----
-
-### 3. Generate from Python CLI
-```bash
-# High-resolution neural synthesis
-python src/angel_generator.py --prompt "Archangel Michael with golden wings" --style renaissance --out michael.png
-
-# List curated celestial presets
-python src/angel_generator.py --list-presets
-
-# Native Win64 C engine execution
-python src/angel_generator.py --prompt "mountains and sunset" --engine c_native --out mountain.bmp
+  [1] Launch Interactive Web Studio (Browser + Real-time Canvas)
+  [2] Launch Desktop Window Studio (4K Ultra-HD & High Thinking GUI)
+  [3] Generate 4K Archangel Artwork Now (PowerShell CLI)
+  [4] Run Comprehensive Diagnostic Health Check
+  [5] Run Native 64-bit Windows C Binary (AI_Image_Generator.exe)
 ```
 
 ---
@@ -82,31 +78,33 @@ python src/angel_generator.py --prompt "mountains and sunset" --engine c_native 
 ```
 Angel_Generator_AI/
 ├── web/                           # 🌐 Interactive Web Studio
-│   ├── index.html                 # Modern glassmorphism web interface
-│   ├── style.css                  # Celestial dark-and-gold styling
-│   └── app.js                     # Real-time WebGL canvas synthesizer & API client
+│   ├── index.html                 # Web interface with Generate/Stop, 4K, & High Thinking
+│   ├── style.css                  # Celestial dark-and-gold styling & progress bars
+│   └── app.js                     # Dual-mode synthesizer with live time countdown
 │
-├── src/                           # 🧠 Multi-Method Codebases
-│   ├── neural_engine.py           # PyTorch deep coordinate field & celestial renderer
+├── src/                           # 🧠 Multi-Engine & Multi-Method Core
+│   ├── gui_app.py                 # Native Desktop Window Studio (CustomTkinter)
+│   ├── neural_engine.py           # PyTorch 4K coordinate field & High Thinking engine
 │   ├── cloud_engine.py            # Diffusion API & Cloud provider integration
 │   ├── angel_generator.py         # Master CLI tool & multi-engine bridge
-│   ├── web_server.py              # Flask REST API server for Web Studio
+│   ├── web_server.py              # Flask REST API server with /api/stop endpoint
 │   ├── train_and_export_weights.py# Neural weight generator & vocabulary builder
 │   └── ai_image_generator.c       # Native C source code for standalone PE32+ EXE
 │
-├── AngelAI.psm1                   # ⚡ Native PowerShell Module
+├── AngelAI.psm1                   # ⚡ Native PowerShell Module (New-AngelImage, Start-AngelGUI, etc.)
 ├── Start-AngelWeb.ps1             # One-click launcher for the Web Studio
-├── New-AngelImage.ps1             # CLI image generator script
+├── Start-AngelGUI.ps1             # One-click launcher for the Desktop Window Studio
+├── New-AngelImage.ps1             # Standalone CLI image generator script
 ├── Invoke-BatchGenerator.ps1      # Batch generation script
 ├── Test-AngelGenerator.ps1        # Diagnostics and system test runner
 ├── Install-Dependencies.ps1       # Dependency installer & verifier
 ├── Export-AngelModel.ps1          # Re-exports model weights and JSON config
+├── run_windows.bat                # Windows interactive batch menu
 │
 ├── AI_Image_Generator.exe         # Standalone 64-bit Windows Executable (PE32+)
 ├── model_weights.txt              # Plain-text neural weights (115 words + 3-layer MLP)
 ├── model_config.json              # Model configuration metadata
 ├── MODEL_ARCHITECTURE.txt         # Technical coordinate field specification
-├── samples/                       # Sample generated reference images
 └── outputs/                       # Default destination for generated images
 ```
 
@@ -116,11 +114,12 @@ Angel_Generator_AI/
 
 | Cmdlet | Description | Example |
 | :--- | :--- | :--- |
-| `New-AngelImage` | Generates an AI image with full style, resolution, and engine control. | `New-AngelImage -Prompt "Seraphim" -Open` |
+| `New-AngelImage` | Generates an AI image with style, resolution up to 4K, and engine control. | `New-AngelImage -Prompt "Seraphim" -Width 2048 -Height 2048 -Open` |
+| `Start-AngelGUI` | Launches the Native Desktop Window Studio. | `Start-AngelGUI` |
 | `Start-AngelWeb` | Launches the local Web Studio and opens your browser. | `Start-AngelWeb -Port 5050` |
 | `Get-AngelPresets` | Lists all built-in curated prompts and style presets. | `Get-AngelPresets` |
 | `Invoke-AngelBatch` | Generates multiple images from a list or text file. | `Invoke-AngelBatch -Style Renaissance` |
-| `Test-AngelAI` | Verifies Python, PyTorch, Pillow, Flask, C binary, and weights. | `Test-AngelAI` |
+| `Test-AngelAI` | Verifies Python, PyTorch, CustomTkinter, Flask, and weights. | `Test-AngelAI` |
 | `Export-AngelModel` | Re-exports plain-text weights and JSON config. | `Export-AngelModel` |
 
 ---
@@ -139,13 +138,8 @@ Angel_Generator_AI/
 
 - **Operating System:** Windows 10 or 11 (64-bit)
 - **PowerShell:** Version 5.1 or PowerShell Core 7+
-- **Python:** Python 3.10+ (Recommended for PyTorch Neural & Web API)
-- **Optional Python Libraries:**
-  ```powershell
-  pip install torch pillow flask flask-cors requests
-  ```
-  *(Or simply run `.\Install-Dependencies.ps1` to configure everything automatically!)*
-- **Zero-Dependency Fallback:** If Python is not installed, double-clicking `web/index.html` runs entirely in any modern browser using WebGL!
+- **Python:** Python 3.10+ (Recommended for PyTorch Neural & Desktop/Web GUI)
+- **Zero-Dependency Fallback:** If Python is not installed, double-clicking `web/index.html` runs client-side in any modern browser!
 
 ---
 

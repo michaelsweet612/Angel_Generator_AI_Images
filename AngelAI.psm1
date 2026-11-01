@@ -160,6 +160,25 @@ function New-AngelImage {
     }
 }
 
+function Start-AngelGUI {
+    <#
+    .SYNOPSIS
+        Launches the Angel Generator AI Native Desktop Window Studio.
+    #>
+    [CmdletBinding()]
+    param()
+
+    $py = Get-AngelPythonPath
+    $guiScript = Join-Path $Script:ModuleRoot "src\gui_app.py"
+
+    Write-Host "==================================================" -ForegroundColor Yellow
+    Write-Host "    LAUNCHING ANGEL GENERATOR AI DESKTOP STUDIO   " -ForegroundColor Yellow
+    Write-Host "==================================================" -ForegroundColor Yellow
+    Write-Host " Initializing 4K Ultra-HD & High Thinking Desktop Window..." -ForegroundColor Cyan
+
+    & $py $guiScript
+}
+
 function Start-AngelWeb {
     <#
     .SYNOPSIS
@@ -326,4 +345,4 @@ function Export-AngelModel {
     }
 }
 
-Export-ModuleMember -Function New-AngelImage, Start-AngelWeb, Get-AngelPresets, Invoke-AngelBatch, Test-AngelAI, Export-AngelModel
+Export-ModuleMember -Function New-AngelImage, Start-AngelWeb, Start-AngelGUI, Get-AngelPresets, Invoke-AngelBatch, Test-AngelAI, Export-AngelModel
