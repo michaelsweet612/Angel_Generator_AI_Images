@@ -24,6 +24,13 @@
   - Showcase Gallery: The `samples/` directory must contain high-resolution (1024x1024 / 4K) rendered artworks showcasing the from-scratch model's capabilities.
 
 ## 4. Release & Packaging Discipline
+- **Mandatory Detailed Release on Every Change**: For every modification (large or small):
+  - Always publish a new GitHub release and synchronize the standalone `.zip` distribution.
+  - Write comprehensive, highly detailed release notes itemizing:
+    1. **What Changed / Added**: Every specific feature, UI element, or algorithm addition.
+    2. **What Was Removed / Replaced**: Exact templates, legacy logic, or bugs eliminated.
+    3. **Why the Change Was Made**: Root cause and design rationale.
+    4. **How It Helps**: Direct benefits to the user in usability, speed, stability, or visual quality.
 - When preparing new releases:
   - Ensure standalone binaries (`AI_Image_Generator.exe`), model weights (`model_weights.txt`), and batch scripts (`run_windows.bat`, `.ps1`) are synchronized and functional offline.
   - Maintain a visual showcase table in `README.md` embedding actual rendered samples with their exact prompts and render benchmarks.
