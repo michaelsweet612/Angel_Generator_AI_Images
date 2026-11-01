@@ -1,0 +1,34 @@
+{
+  "model_name": "ScratchGen-T2I-v1.0",
+  "architecture": "Hybrid Text-Conditioned Neural Field (CPPN) + Multi-Scale Latent Scene Decoder",
+  "created_from_scratch": true,
+  "vocabulary_size": 98,
+  "latent_embedding_dim": 16,
+  "coord_fourier_features": 8,
+  "mlp_layers": [
+    {
+      "name": "fc1",
+      "in_features": 24,
+      "out_features": 32,
+      "activation": "tanh"
+    },
+    {
+      "name": "fc2_residual",
+      "in_features": 32,
+      "out_features": 32,
+      "activation": "gelu_tanh"
+    },
+    {
+      "name": "fc3_head",
+      "in_features": 32,
+      "out_features": 6,
+      "activation": "tanh"
+    }
+  ],
+  "default_resolution": [
+    512,
+    512
+  ],
+  "weights_file": "model_weights.txt",
+  "windows_executable": "AI_Image_Generator.exe"
+}

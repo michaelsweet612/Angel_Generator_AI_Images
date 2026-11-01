@@ -1,0 +1,70 @@
+================================================================================
+ScratchGen-T2I v1.0 — From-Scratch Neural Text-to-Image Architecture
+================================================================================
+
+1. OVERVIEW
+-----------
+ScratchGen-T2I is a self-contained, zero-dependency Text-to-Image generative
+model and inference engine built entirely from scratch in C. It compiles to a
+native 64-bit Windows executable (`AI_Image_Generator.exe`) that reads its
+vocabulary embeddings and neural network weights from a plain-text model file
+(`model_weights.txt`) and synthesizes 512x512 24-bit BMP images from natural
+language prompts.
+
+2. PIPELINE STAGES
+------------------
+Stage 1: Tokenizer & 16-D Semantic Embedding Layer (`encode_text_prompt`)
+  - Splits the input text prompt into lowercase alphanumeric tokens and strips
+    common English stopwords.
+  - Looks up each token (with automatic plural-to-singular stemming) in the
+    98-token semantic embedding matrix E in R^(98 x 16) loaded from
+    `model_weights.txt`.
+  - Any out-of-vocabulary (OOV) word is deterministically projected into R^16
+    via an FNV-1a + LCG hash embedding so arbitrary unseen words still produce
+    repeatable, coherent visual variations.
+  - Token vectors are combined via L2-normalized attention pooling into a 16-D
+    scene conditioning latent vector z in R^16:
+      z[0]  : Thermal palette balance (-1 = icy/blue, +1 = warm/sunset/volcanic)
+      z[1]  : Illumination / Time of Day (-1 = midnight, +1 = bright noon)
+      z[2..4]: RGB/Magenta/Emerald/Cyan chromatic accents
+      z[5]  : Alpine mountain ridge elevation & 3D slope shading
+      z[6]  : Urban / Cyberpunk skyscraper skyline & illuminated window grid
+      z[7]  : Reflective ocean / mountain lake water ripples & Fresnel reflection
+      z[8]  : Foreground pine forest silhouette density
+      z[9]  : Celestial orb (Sun, cratered Moon, glowing Planet, Synthwave Sun)
+      z[10] : Deep-space starfield & multi-octave cosmic nebula density
+      z[11] : Aurora Borealis curtains & neon plasma glow
+      z[12] : Volumetric atmospheric clouds & mist
+      z[13] : Retro synthwave perspective laser grid horizon
+      z[14] : Full-canvas Compositional Pattern Producing Network (CPPN) swirl
+      z[15] : Surface roughness / fBm octave persistence
+
+Stage 2: Coordinate Fourier Feature CPPN (`eval_neural_field`)
+  - Maps normalized pixel coordinates (nx, ny) in [-1, 1]^2 and radial distance
+    r = sqrt(nx^2 + ny^2) into 8 sinusoidal Fourier features:
+      gamma(x, y) = [nx, ny, r, sin(pi*nx), cos(pi*ny),
+                     sin(2*pi*(nx+ny)), cos(2*pi*(nx-ny)), sin(3*pi*r)]
+  - Concatenates gamma(x, y) (8-D) with the text latent vector z (16-D) to form
+    a 24-D input vector.
+  - Passes the 24-D input through a 3-layer residual Multi-Layer Perceptron
+    loaded from `model_weights.txt`:
+      h1  = tanh(W1 * x_in + b1)                in R^32   (W1: 32 x 24)
+      h2  = tanh(W2 * h1 + b2 + 0.35 * h1)      in R^32   (W2: 32 x 32)
+      out = tanh(W3 * h2 + b3)                  in R^6    (W3: 6 x 32)
+
+Stage 3: Multi-Octave fBm & Latent Scene Decoder (`render_image`)
+  - Combines the continuous neural field outputs `out[0..5]` with 5-octave
+    2D Fractional Brownian Motion (fBm) and analytical signed distance fields
+    to render sky gradients, stars, nebulae, aurora curtains, celestial bodies,
+    3D-shaded mountain ranges, lit city skylines, forest treelines, and water
+    or synthwave grid reflections into a 512x512 24-bit uncompressed BMP file.
+
+3. CUSTOMIZING `model_weights.txt`
+----------------------------------
+Because `model_weights.txt` is stored in plain ASCII text, you can open it in
+Notepad or any text editor to:
+  - Add new words to the `VOCAB <count> 16` section (remember to increment the
+    vocabulary count header if adding lines), or
+  - Modify the 16 float weights of any word or the MLP weight matrices
+    (`LAYER1`, `BIAS1`, `LAYER2`, `BIAS2`, `LAYER3`, `BIAS3`) and re-run
+    `AI_Image_Generator.exe` to immediately see the effect!
