@@ -1,0 +1,323 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>✦ Angel Generator AI — 4K Celestial Masterpiece Studio</title>
+  <link rel="stylesheet" href="style.css">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Cinzel:wght@600;700;800;900&family=Plus+Jakarta+Sans:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+  <link rel="icon" href="data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 100 100%22><text y=%22.9em%22 font-size=%2290%22>✨</text></svg>">
+</head>
+<body>
+  <!-- Atmospheric Canvas Background -->
+  <canvas id="starsCanvas"></canvas>
+  <div class="ambient-glow glow-top"></div>
+  <div class="ambient-glow glow-bottom"></div>
+
+  <!-- Top Navigation Bar -->
+  <header class="app-header">
+    <div class="brand">
+      <div class="brand-halo">
+        <div class="halo-flare"></div>
+      </div>
+      <div class="brand-text">
+        <span class="brand-badge">STUDIO SUITE v3.0 • 4K CELESTIAL</span>
+        <h1>ANGEL GENERATOR AI</h1>
+      </div>
+    </div>
+
+    <!-- Center Navigation Links -->
+    <nav class="nav-links">
+      <a href="index.html" class="nav-btn" style="text-decoration: none;">✦ Portal</a>
+      <button class="nav-btn active" data-tab="studio">✦ Studio</button>
+      <button class="nav-btn" data-tab="showcase">🖼️ 4K Showcase</button>
+      <a href="https://github.com/michaelsweet612/Angel_Generator_AI_Images/releases/tag/v3.0.0" target="_blank" class="nav-btn" style="text-decoration: none; color: #f5c542; border-color: rgba(245, 197, 66, 0.4);">⬇️ Win64 v3.0.0</a>
+    </nav>
+
+    <!-- Right Controls: Audio Mute & Telemetry -->
+    <div class="header-actions">
+      <button id="btnSoundToggle" class="btn-icon" title="Toggle Celestial Sound Effects">
+        <span class="icon">🔔</span>
+      </button>
+      <div class="status-pills">
+        <span class="pill" id="pill-webgl"><span class="dot active"></span> WebGL Core (Active)</span>
+        <span class="pill" id="pill-torch"><span class="dot"></span> PyTorch 4K</span>
+        <span class="pill" id="pill-cnative"><span class="dot"></span> C Native 64-bit</span>
+      </div>
+    </div>
+  </header>
+
+  <!-- Main Container -->
+  <main class="studio-container">
+    <!-- Controls Column -->
+    <section class="controls-card glass-panel">
+      <!-- Section Header with Magic Prompt -->
+      <div class="panel-header">
+        <div class="section-title">
+          <span class="icon-sparkle">✦</span>
+          <h2>Celestial Vision</h2>
+        </div>
+        <button id="btnMagicPrompt" class="btn-magic" title="AI Magic Prompt Expansion">
+          <span>🪄 Magic Enhance</span>
+        </button>
+      </div>
+
+      <!-- Prompt Textbox & Quick Tools -->
+      <div class="prompt-box">
+        <textarea id="promptInput" rows="3" placeholder="Describe your celestial vision, archangel, or sacred artwork...">Archangel Michael with massive radiant golden feathered wings, golden halo in heavenly clouds, volumetric divine light rays, masterpiece, 4k ultra-hd</textarea>
+        <div class="prompt-toolbar">
+          <div class="prompt-tags-preview">
+            <span class="tag-pill">4K UHD</span>
+            <span class="tag-pill">Volumetric Rays</span>
+            <span class="tag-pill">Gold Leaf</span>
+            <span class="tag-pill">100% Offline</span>
+          </div>
+          <div class="prompt-actions">
+            <button id="btnInspire" class="btn-text" title="Randomize Inspiration">🎲 Randomize</button>
+            <button id="btnClear" class="btn-text">✕ Clear</button>
+          </div>
+        </div>
+      </div>
+
+      <!-- Quick Preset Cards -->
+      <div class="section-block">
+        <label class="section-label">CURATED MASTERPIECE PRESETS</label>
+        <div class="preset-cards-grid" id="presetCards">
+          <div class="preset-card active" data-preset="archangel">
+            <span class="preset-icon">⚔️</span>
+            <div class="preset-info">
+              <strong>Archangel Michael</strong>
+              <span>Flaming Sword & Golden Wings</span>
+            </div>
+          </div>
+          <div class="preset-card" data-preset="seraphim">
+            <span class="preset-icon">🔥</span>
+            <div class="preset-info">
+              <strong>Six-Winged Seraphim</strong>
+              <span>Sacred Fire & Celestial Dawn</span>
+            </div>
+          </div>
+          <div class="preset-card" data-preset="cathedral">
+            <span class="preset-icon">⛪</span>
+            <div class="preset-info">
+              <strong>Cathedral Guardian</strong>
+              <span>Gothic Spire Twilight</span>
+            </div>
+          </div>
+          <div class="preset-card" data-preset="cyberpunk">
+            <span class="preset-icon">🏙️</span>
+            <div class="preset-info">
+              <strong>Cyberpunk Hologram</strong>
+              <span>Neon Cyan Holographic Wings</span>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Generation Engine Selector -->
+      <div class="section-block">
+        <label class="section-label">INFERENCE BACKEND</label>
+        <div class="engine-grid">
+          <div class="engine-card active" data-engine="browser">
+            <div class="engine-icon">🎨</div>
+            <div class="engine-info">
+              <strong>Browser Real-Time</strong>
+              <span>Instant client-side WebGL canvas</span>
+            </div>
+          </div>
+          <div class="engine-card" data-engine="neural">
+            <div class="engine-icon">🧠</div>
+            <div class="engine-info">
+              <strong>PyTorch Neural (4K)</strong>
+              <span>High-res local coordinate field</span>
+            </div>
+          </div>
+          <div class="engine-card" data-engine="c_native">
+            <div class="engine-icon">⚙️</div>
+            <div class="engine-info">
+              <strong>Windows C Native</strong>
+              <span>Standalone 64-bit EXE engine</span>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Aspect Ratio Cards -->
+      <div class="section-block">
+        <label class="section-label">ASPECT RATIO & CANVAS</label>
+        <div class="aspect-grid" id="aspectGrid">
+          <button class="aspect-btn active" data-aspect="1:1" data-res="1024x1024">
+            <div class="aspect-box ratio-1-1"></div>
+            <span>1:1 Square</span>
+          </button>
+          <button class="aspect-btn" data-aspect="16:9" data-res="3840x2160">
+            <div class="aspect-box ratio-16-9"></div>
+            <span>16:9 (4K UHD)</span>
+          </button>
+          <button class="aspect-btn" data-aspect="9:16" data-res="768x1366">
+            <div class="aspect-box ratio-9-16"></div>
+            <span>9:16 Portrait</span>
+          </button>
+          <button class="aspect-btn" data-aspect="4:3" data-res="2048x1536">
+            <div class="aspect-box ratio-4-3"></div>
+            <span>4:3 Classic</span>
+          </button>
+        </div>
+      </div>
+
+      <!-- Artistic Style Selector -->
+      <div class="section-block">
+        <label class="section-label">ARTISTIC MASTERY STYLE</label>
+        <select id="styleSelect" class="styled-select gold-select">
+          <option value="renaissance" selected>Renaissance Divine (Da Vinci & Michelangelo Chiaroscuro)</option>
+          <option value="divine_gold">Golden Baroque (24K Gold Leaf & Radiant Light)</option>
+          <option value="celestial">Celestial Cosmic (Starlight Nebula & Deep Space)</option>
+          <option value="cyberpunk">Cyberpunk Hologram (Neon Cyan & Rainy Skyline)</option>
+          <option value="default">Classic Ethereal Vision (Sacred White Feathers)</option>
+        </select>
+      </div>
+
+      <!-- High Thinking Mode Switch -->
+      <div class="thinking-box">
+        <div class="thinking-header">
+          <label class="switch">
+            <input type="checkbox" id="highThinkingToggle" checked>
+            <span class="slider round"></span>
+          </label>
+          <div class="thinking-label">
+            <strong>🧠 High Thinking Mode</strong>
+            <span>Deep theological decomposition & anatomical wing flight planning</span>
+          </div>
+        </div>
+      </div>
+
+      <!-- Detail Slider & Resolution -->
+      <div class="detail-control-box">
+        <div class="detail-header">
+          <label for="detailSlider">DETAIL & MICRO-STRIATIONS</label>
+          <span id="detailValBadge" class="badge">Level 5 (4K Masterpiece)</span>
+        </div>
+        <input type="range" id="detailSlider" min="1" max="5" value="5" step="1" class="styled-range">
+        <div class="range-marks">
+          <span>Level 1 (Draft)</span>
+          <span>Level 3 (Balanced)</span>
+          <span>Level 5 (4K Masterpiece)</span>
+        </div>
+      </div>
+
+      <!-- Hidden standard resolution select for programmatic binding -->
+      <select id="resolutionSelect" class="hidden">
+        <option value="512x512">512x512</option>
+        <option value="768x768">768x768</option>
+        <option value="1024x1024" selected>1024x1024</option>
+        <option value="2048x2048">2048x2048</option>
+        <option value="3840x2160">3840x2160</option>
+        <option value="4096x4096">4096x4096</option>
+      </select>
+      <input type="number" id="seedInput" class="hidden" placeholder="Random">
+      <input type="text" id="negativeInput" class="hidden" value="blurry, distorted, dark, ugly">
+
+      <!-- Action Buttons: Generate & Stop -->
+      <div class="action-buttons-dual">
+        <button id="btnGenerate" class="btn-primary">
+          <span class="btn-sparkle">✦</span> GENERATE 4K ARTWORK
+        </button>
+        <button id="btnStop" class="btn-stop" disabled title="Cancel or Stop Generation">
+          ⏹ STOP
+        </button>
+      </div>
+
+      <!-- Live Progress & Time Remaining -->
+      <div id="progressContainer" class="progress-box hidden">
+        <div class="progress-bar-track">
+          <div id="progressBar" class="progress-bar-fill"></div>
+        </div>
+        <div class="progress-meta">
+          <span id="progressStatus" class="progress-status">Calculating volumetric Mie rays...</span>
+          <span id="timeRemaining" class="time-remaining">Estimated time: ~1.8s</span>
+        </div>
+      </div>
+    </section>
+
+    <!-- Preview & Gallery Column -->
+    <section class="preview-card glass-panel">
+      <!-- Preview Header with Toolbar -->
+      <div class="preview-header">
+        <div class="section-title">
+          <span class="icon-sparkle">🖼️</span>
+          <h2>Celestial Canvas</h2>
+        </div>
+        <div class="preview-toolbar">
+          <span id="genStats" class="gen-stats">Ready for 4K Synthesis</span>
+          <button id="btnCopyPrompt" class="btn-tool" title="Copy Prompt to Clipboard">📋 Copy</button>
+          <button id="btnFullscreen" class="btn-tool" title="Fullscreen Lightbox">⛶ Fullscreen</button>
+          <div class="download-dropdown">
+            <button id="btnDownload" class="btn-secondary">⬇ Download 4K</button>
+          </div>
+        </div>
+      </div>
+
+      <!-- Canvas Frame -->
+      <div class="canvas-wrapper" id="canvasWrapper">
+        <div id="loader" class="loader-overlay hidden">
+          <div class="celestial-spinner">
+            <div class="halo-ring"></div>
+            <div class="halo-ring inner"></div>
+          </div>
+          <p id="loaderText">Synthesizing 4K celestial rays & wings...</p>
+        </div>
+
+        <img id="resultImage" class="preview-media hidden" alt="Generated Artwork">
+        <canvas id="browserCanvas" class="preview-media" width="1024" height="1024"></canvas>
+      </div>
+
+      <!-- High Thinking Reasoning Accordion Box -->
+      <div id="thinkingPanel" class="thinking-panel">
+        <details id="thinkingDetails" open>
+          <summary>🧠 High Thinking Reasoning Log</summary>
+          <div id="thinkingLogContent" class="thinking-content">
+            <p>1. [Theological Iconography]: Militant Archangel (Warrior of Light with Flaming Blade & Celestial Aegis).</p>
+            <p>2. [Wing Aerodynamics & Anatomy]: Constructing 3-tier feather canopy: primary flight remiges, secondary fans, and downy covert plumes.</p>
+            <p>3. [Sacred Geometric Halo]: Rendering concentric dual gold rings (R1=0.155, R2=0.185) with 8-fold cruciform starlight flares.</p>
+            <p>4. [Volumetric Atmospheric Optics]: Simulating 28 Mie-scattered god-ray shafts radiating from celestial zenith.</p>
+          </div>
+        </details>
+      </div>
+
+      <!-- Recent Creations Gallery -->
+      <div class="gallery-section">
+        <div class="gallery-header">
+          <h3>Recent Creations</h3>
+          <span class="gallery-count" id="galleryCount">Showcase Gallery</span>
+        </div>
+        <div class="gallery-scroll" id="galleryContainer">
+          <!-- Dynamically populated -->
+        </div>
+      </div>
+    </section>
+  </main>
+
+  <!-- Fullscreen Lightbox Modal -->
+  <div id="lightboxModal" class="lightbox-modal hidden">
+    <button id="btnCloseLightbox" class="lightbox-close">✕</button>
+    <img id="lightboxImg" class="lightbox-img" alt="Enlarged Artwork">
+  </div>
+
+  <footer class="app-footer">
+    <div class="footer-content">
+      <p>✦ Angel Generator AI Studio v3.0 — 4K Ultra-HD, Deep High Thinking Reasoning, and Instant Stop Control</p>
+      <div class="footer-links">
+        <a href="https://github.com/michaelsweet612/Angel_Generator_AI_Images" target="_blank">GitHub Repository</a>
+        <span>•</span>
+        <a href="https://github.com/michaelsweet612/Angel_Generator_AI_Images/releases/tag/v3.0.0" target="_blank">Win64 Standalone Release</a>
+        <span>•</span>
+        <span>100% Offline Autonomous</span>
+      </div>
+    </div>
+  </footer>
+
+  <script src="app.js"></script>
+</body>
+</html>

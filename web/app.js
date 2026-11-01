@@ -30,13 +30,15 @@ const INSPIRATIONS = [
   "Renaissance fresco of winged angel in cathedral with 24k gold leaf filigree, masterpiece"
 ];
 
+const SAMPLES_PREFIX = window.location.pathname.includes("/web/") ? "../samples/" : "samples/";
+
 const SHOWCASE_SAMPLES = [
-  { url: "/samples/01_archangel_michael_4k.png", prompt: "Archangel Michael with massive radiant golden feathered wings, golden halo in heavenly clouds", seed: 777 },
-  { url: "/samples/02_seraphim_celestial_dawn_4k.png", prompt: "Six-winged Seraphim surrounded by celestial divine light and golden starlight dawn", seed: 888 },
-  { url: "/samples/03_cathedral_guardian_angel_4k.png", prompt: "Guardian angel with pure white feathered wings overlooking sacred gothic cathedral, golden sunset", seed: 999 },
-  { url: "/samples/04_cyberpunk_holographic_angel_4k.png", prompt: "Cyberpunk holographic angel with glowing neon cyan wings overlooking rainy neon skyscraper metropolis", seed: 444 },
-  { url: "/samples/05_cosmic_starlight_angel_4k.png", prompt: "Celestial divine angel silhouette emerging from deep space galaxy nebula, glowing starlight", seed: 555 },
-  { url: "/samples/06_divine_baroque_seraph_4k.png", prompt: "Golden baroque sacred angel painting with radiant halo and divine volumetric god rays", seed: 123 }
+  { url: SAMPLES_PREFIX + "01_archangel_michael_4k.png", prompt: "Archangel Michael with massive radiant golden feathered wings, golden halo in heavenly clouds", seed: 777 },
+  { url: SAMPLES_PREFIX + "02_seraphim_celestial_dawn_4k.png", prompt: "Six-winged Seraphim surrounded by celestial divine light and golden starlight dawn", seed: 888 },
+  { url: SAMPLES_PREFIX + "03_cathedral_guardian_angel_4k.png", prompt: "Guardian angel with pure white feathered wings overlooking sacred gothic cathedral, golden sunset", seed: 999 },
+  { url: SAMPLES_PREFIX + "04_cyberpunk_holographic_angel_4k.png", prompt: "Cyberpunk holographic angel with glowing neon cyan wings overlooking rainy neon skyscraper metropolis", seed: 444 },
+  { url: SAMPLES_PREFIX + "05_cosmic_starlight_angel_4k.png", prompt: "Celestial divine angel silhouette emerging from deep space galaxy nebula, glowing starlight", seed: 555 },
+  { url: SAMPLES_PREFIX + "06_divine_baroque_seraph_4k.png", prompt: "Golden baroque sacred angel painting with radiant halo and divine volumetric god rays", seed: 123 }
 ];
 
 // App State
@@ -248,10 +250,16 @@ async function checkBackendHealth() {
       isBackendAvailable = true;
       if (data.pytorch && pillTorch) pillTorch.querySelector(".dot").classList.add("active");
       if (data.c_native && pillCnative) pillCnative.querySelector(".dot").classList.add("active");
+    } else {
+      throw new Error("Backend not OK");
     }
   } catch (err) {
-    console.log("[Angel AI] Standalone browser mode active.");
+    console.log("[Angel AI] Operating in client-side WebGL / Canvas autonomous mode.");
     isBackendAvailable = false;
+    currentEngine = "browser";
+    engineCards.forEach(c => {
+      c.classList.toggle("active", c.dataset.engine === "browser");
+    });
   }
 }
 
@@ -293,6 +301,8 @@ async function handleGenerate() {
       await new Promise(r => setTimeout(r, 90));
       if (!isGenerating) return;
 
+      browserCanvas.width = width;
+      browserCanvas.height = height;
       renderBrowserCelestialCanvas(prompt, style, seed, detailLevel);
       resultImage.classList.add("hidden");
       browserCanvas.classList.remove("hidden");
