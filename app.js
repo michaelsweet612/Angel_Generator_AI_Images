@@ -2030,27 +2030,17 @@ function loadStoredLibrary() {
   try {
     const saved = localStorage.getItem(LIBRARY_STORAGE_KEY);
     if (saved) {
-      imageLibrary = JSON.parse(saved);
+      const parsed = JSON.parse(saved);
+      // Filter out any legacy showcase placeholders so the user starts with a clean empty library
+      imageLibrary = Array.isArray(parsed) ? parsed.filter(item => !item.id || !item.id.startsWith("showcase_")) : [];
+    } else {
+      imageLibrary = [];
     }
   } catch (e) {
     imageLibrary = [];
   }
 
-  if (!imageLibrary || imageLibrary.length === 0) {
-    imageLibrary = SHOWCASE_SAMPLES.map((s, idx) => ({
-      id: "showcase_" + idx,
-      filename: `AI_generated_image_library_${s.url.split("/").pop()}`,
-      folder: "AI generated image library",
-      url: s.url,
-      prompt: s.prompt,
-      seed: s.seed,
-      width: s.width || 1024,
-      height: s.height || 1024,
-      aspect: s.aspect || "square",
-      timestamp: "Showcase"
-    }));
-  }
-
+  // Never pre-populate library with random images! User starts with 0 files.
   renderLibrarySidebar();
 }
 
@@ -2075,7 +2065,24 @@ function renderLibrarySidebar() {
 
   if (sidebarCountBadge) {
     sidebarCountBadge.textContent = `${imageLibrary.length} Files`;
-  if (sidebarWarningBanner) sidebarWarningBanner.style.display = imageLibrary.length > 0 ? 'flex' : 'none';
+  }
+  if (sidebarWarningBanner) {
+    sidebarWarningBanner.style.display = imageLibrary.length > 0 ? "flex" : "none";
+  }
+
+  if (imageLibrary.length === 0) {
+    const emptyEl = document.createElement("div");
+    emptyEl.className = "sidebar-empty-state";
+    emptyEl.style.cssText = "padding: 24px 16px; text-align: center; color: var(--text-muted);";
+    emptyEl.innerHTML = `
+      <div style="font-size: 2.2rem; margin-bottom: 8px; opacity: 0.4;">📁</div>
+      <div style="font-size: 0.88rem; font-weight: 600; color: #fff; margin-bottom: 4px;">Library is Empty</div>
+      <div style="font-size: 0.74rem; line-height: 1.45; opacity: 0.75;">
+        Your generated images will automatically appear here. Try a prompt below to get started!
+      </div>
+    `;
+    sidebarLibraryList.appendChild(emptyEl);
+    return;
   }
 
   imageLibrary.forEach(item => {
