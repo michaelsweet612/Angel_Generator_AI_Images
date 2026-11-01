@@ -1556,3 +1556,58 @@ body {
   transform: translateY(-2px);
   box-shadow: 0 0 30px rgba(245, 197, 66, 0.8);
 }
+
+
+/* -------------------------------------------------------------
+ * NSW Filter & Good Boy Quick Action Styling
+ * ------------------------------------------------------------- */
+.chip-nsw-filter {
+  border-color: rgba(34, 197, 94, 0.45);
+  color: #86efac;
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  cursor: pointer;
+  transition: all 0.2s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+.chip-nsw-filter .nsw-dot {
+  width: 7px;
+  height: 7px;
+  border-radius: 50%;
+  background: #22c55e;
+  box-shadow: 0 0 8px #22c55e;
+  display: inline-block;
+  animation: pulseDot 2s infinite ease-in-out;
+}
+
+.chip-nsw-filter.unrestricted {
+  background: rgba(239, 68, 68, 0.22) !important;
+  border-color: #ef4444 !important;
+  color: #fca5a5 !important;
+  box-shadow: 0 0 14px rgba(239, 68, 68, 0.35) !important;
+}
+
+.chip-nsw-filter.unrestricted .nsw-dot {
+  background: #ef4444 !important;
+  box-shadow: 0 0 8px #ef4444 !important;
+}
+
+.btn-good-boy {
+  background: linear-gradient(135deg, rgba(245, 197, 66, 0.16), rgba(217, 119, 6, 0.12));
+  border: 1px solid rgba(245, 197, 66, 0.45);
+  color: var(--gold-light);
+  font-weight: 700;
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  cursor: pointer;
+  transition: all 0.2s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+.btn-good-boy:hover {
+  background: linear-gradient(135deg, rgba(245, 197, 66, 0.32), rgba(217, 119, 6, 0.24));
+  border-color: var(--gold-primary);
+  box-shadow: 0 0 16px rgba(245, 197, 66, 0.35);
+  transform: translateY(-1px);
+}

@@ -1,10 +1,9 @@
 #!/usr/bin/env python3
 """
-Angel Generator AI - Master Multi-Method CLI & Library
+Angel Generator AI - Master Multi-Method CLI & Universal Synthesizer
 Supports:
-  1. Neural PyTorch High-Res Synthesis
-  2. Cloud Diffusion (DALL-E 3, Hugging Face FLUX, Pollinations)
-  3. Native Windows C Executable (AI_Image_Generator.exe)
+  1. Neural PyTorch High-Res Synthesis (100% From-Scratch Coordinate Field)
+  2. Native Windows C Executable (AI_Image_Generator.exe)
 """
 
 import argparse

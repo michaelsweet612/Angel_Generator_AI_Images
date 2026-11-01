@@ -153,6 +153,16 @@
             <div class="suggestion-card" data-prompt="Futuristic hypercar mechanical chassis with glowing titanium exhaust manifolds and aerodynamic carbon fiber splitters">
               <span class="suggestion-icon">🏎️</span>
               <div class="suggestion-text">Futuristic hypercar mechanical engine with glowing titanium exhausts</div>
+
+            <div class="suggestion-card" data-prompt="Majestic anthropomorphic wolf warrior in glowing celestial gold armor with pointed ears and luminous amber eyes">
+              <span class="suggestion-icon">🐾</span>
+              <div class="suggestion-text">Celestial anthropomorphic wolf warrior with pointed ears and radiant amber eyes</div>
+              <div class="suggestion-tag">
+                <span>Character • Anthro</span>
+                <span class="suggestion-cta">Try Prompt ↗</span>
+              </div>
+            </div>
+
               <div class="suggestion-tag">
                 <span>Mechanical • Speed</span>
                 <span class="suggestion-cta">Try Prompt ↗</span>
@@ -237,6 +247,13 @@
           <button id="chipThinking" class="chip-btn active" title="Toggle detailed prompt reasoning">
             <span>🧠</span> High Thinking: ON
           </button>
+          <button id="chipNswFilter" type="button" class="chip-btn chip-nsw-filter active" title="New South Wales (NSW) Safety Filter">
+            <span class="nsw-dot"></span> NSW Filter: <strong id="nswFilterStateText">ON</strong>
+          </button>
+          <button id="btnGoodBoy" type="button" class="chip-btn btn-good-boy" title="Generate random furry character (Requires NSW Filter OFF)">
+            <span>🐾</span> Good Boy
+          </button>
+
         </div>
 
         <!-- Custom Dimension Popup (revealed when Custom aspect is selected) -->
@@ -310,7 +327,27 @@
 
   <!-- Fullscreen Lightbox Modal -->
   
-  <!-- April Fools Fake Upgrade Easter Egg Modal -->
+    <!-- New South Wales (NSW) Safety Filter Modal -->
+  <div id="nswSafetyModal" class="fake-upgrade-modal" style="display: none;">
+    <div class="fake-upgrade-card" style="max-width: 480px; text-align: center;">
+      <div style="font-size: 3.2rem; margin-bottom: 8px;">🛡️</div>
+      <h3 style="font-family: var(--font-serif); font-size: 1.4rem; color: #f5c542; margin-bottom: 10px;">
+        New South Wales (NSW) Safety Notice
+      </h3>
+      <p style="font-size: 0.94rem; color: var(--text-main); line-height: 1.55; margin-bottom: 16px;">
+        For everyone's safety, the <strong>New South Wales (NSW)</strong> filter feature is currently <strong>ON</strong>.
+      </p>
+      <div style="background: rgba(239, 68, 68, 0.12); border: 1px solid rgba(239, 68, 68, 0.35); border-radius: 8px; padding: 12px; margin-bottom: 20px; font-size: 0.88rem; color: #fca5a5; line-height: 1.5;">
+        By turning it off, you are automatically agreeing that you are <strong>18+ or higher</strong>.
+      </div>
+      <div style="display: flex; gap: 12px; justify-content: center; width: 100%;">
+        <button id="btnNswKeepOn" class="btn-fake-ok" style="flex: 1; background: #1e293b; color: #fff;">Keep Filter ON (Safe)</button>
+        <button id="btnNswTurnOff" class="btn-fake-ok" style="flex: 1; background: linear-gradient(135deg, #ef4444, #b91c1c); color: #fff;">Turn Off Filter (I am 18+)</button>
+      </div>
+    </div>
+  </div>
+
+<!-- April Fools Fake Upgrade Easter Egg Modal -->
   <div id="fakeUpgradeModal" class="fake-upgrade-modal" style="display: none;">
     <div id="fakeUpgradeCard" class="fake-upgrade-card">
       <div id="upgradeStageInput">

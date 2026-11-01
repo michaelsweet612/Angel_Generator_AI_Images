@@ -12,7 +12,8 @@ const SHOWCASE_SAMPLES = [
   { url: SAMPLES_PREFIX + "03_cathedral_guardian_angel_4k.png", prompt: "Guardian angel overlooking sacred gothic cathedral with golden sunset reflections", seed: 999, aspect: "landscape", width: 1920, height: 1080 },
   { url: SAMPLES_PREFIX + "04_cyberpunk_holographic_angel_4k.png", prompt: "Cyberpunk holographic angel with glowing neon cyan wings overlooking rainy neon metropolis", seed: 444, aspect: "portrait", width: 1080, height: 1920 },
   { url: SAMPLES_PREFIX + "05_cosmic_starlight_angel_4k.png", prompt: "Celestial divine angel silhouette emerging from deep space galaxy nebula with glowing stars", seed: 555, aspect: "square", width: 1024, height: 1024 },
-  { url: SAMPLES_PREFIX + "06_divine_baroque_seraph_4k.png", prompt: "Golden baroque sacred angel painting with radiant halo and volumetric god rays", seed: 123, aspect: "square", width: 1024, height: 1024 }
+  { url: SAMPLES_PREFIX + "06_divine_baroque_seraph_4k.png", prompt: "Golden baroque sacred angel painting with radiant halo and volumetric god rays", seed: 123, aspect: "square", width: 1024, height: 1024 },
+  { url: SAMPLES_PREFIX + "07_celestial_wolf_guardian_4k.png", prompt: "Majestic anthropomorphic wolf warrior in glowing celestial gold armor with pointed ears and luminous amber eyes", seed: 777, aspect: "square", width: 1024, height: 1024 }
 ];
 
 const INSPIRATION_PROMPTS = [
@@ -91,6 +92,7 @@ const starsCanvas = document.getElementById("starsCanvas");
 document.addEventListener("DOMContentLoaded", () => {
   initBackgroundStars();
   initFakeUpgradeEasterEgg();
+  initNswFilterAndGoodBoy();
   setupEventListeners();
   checkBackendHealth();
   loadStoredLibrary();
@@ -389,6 +391,12 @@ async function handleGenerate() {
     return;
   }
 
+  // NSW Filter Safety Gate
+  if (nswFilterActive && /\b(furry|anthro|anthropomorphic|good boy|nsfw|18\+|fursona)\b/i.test(prompt)) {
+    showNswSafetyModal(true);
+    return;
+  }
+
   const style = selectStyle ? selectStyle.value : "auto";
   const res = getSelectedResolution();
   const width = res.width;
@@ -597,6 +605,7 @@ function playChime() {
 
 function detectPromptTheme(prompt) {
   const p = prompt.toLowerCase();
+  if (/\b(furry|anthro|anthropomorphic|good boy|wolf warrior|fox warrior|fursona|canine|feline)\b/.test(p)) return "furry";
   if (/\b(mountain|forest|ocean|sea|river|lake|sunset|sunrise|nature|landscape|valley|tree|clouds|beach|hills|desert|waterfall)\b/.test(p)) return "landscape";
   if (/\b(cyberpunk|neon|city|metropolis|scifi|futuristic|skyscraper|rain|cyber|tokyo|street|hologram|downtown)\b/.test(p)) return "cyberpunk";
   if (/\b(space|galaxy|nebula|cosmic|planet|stars|star|universe|astronomy|solar|black hole|orbit)\b/.test(p)) return "cosmic";
@@ -724,6 +733,8 @@ function renderUniversalSynthesizer(ctx, W, H, prompt, style, seed) {
     renderPortraitScene(ctx, W, H, baseDim, palette, rnd, noise);
   } else if (theme === "mechanical") {
     renderMechanicalScene(ctx, W, H, baseDim, palette, rnd, noise);
+  } else if (theme === "furry") {
+    renderFurryScene(ctx, W, H, baseDim, palette, rnd, noise, prompt);
   } else if (theme === "angelic") {
     renderAngelicScene(ctx, W, H, baseDim, palette, rnd, noise);
   } else {
@@ -1751,6 +1762,211 @@ function renderAngelicScene(ctx, W, H, baseDim, pal, rnd, noise) {
   ctx.restore();
 }
 
+
+// -------------------------------------------------------------
+// 8. MASTERPIECE ANTHROPOMORPHIC CELESTIAL GUARDIAN (FURRY)
+// -------------------------------------------------------------
+function renderFurryScene(ctx, W, H, baseDim, pal, rnd, noise, prompt) {
+  // Midnight twilight backdrop with warm radial halo
+  const bgGrad = ctx.createRadialGradient(W * 0.5, H * 0.42, 0, W * 0.5, H * 0.42, baseDim * 0.72);
+  bgGrad.addColorStop(0, "#2a1538");
+  bgGrad.addColorStop(0.5, "#140a1c");
+  bgGrad.addColorStop(1, "#060309");
+  ctx.fillStyle = bgGrad;
+  ctx.fillRect(0, 0, W, H);
+
+  const cx = W * 0.5;
+  const cy = H * 0.45;
+
+  // Luminous Starlight Aura behind character
+  ctx.save();
+  const auraGrad = ctx.createRadialGradient(cx, cy - baseDim * 0.05, 0, cx, cy - baseDim * 0.05, baseDim * 0.38);
+  auraGrad.addColorStop(0, "rgba(245, 197, 66, 0.45)");
+  auraGrad.addColorStop(0.5, "rgba(180, 80, 220, 0.20)");
+  auraGrad.addColorStop(1, "transparent");
+  ctx.fillStyle = auraGrad;
+  ctx.beginPath();
+  ctx.arc(cx, cy - baseDim * 0.05, baseDim * 0.38, 0, Math.PI * 2);
+  ctx.fill();
+  ctx.restore();
+
+  // Celestial Mantle / Shoulders
+  ctx.save();
+  const mantleGrad = ctx.createLinearGradient(cx - baseDim * 0.35, 0, cx + baseDim * 0.35, 0);
+  mantleGrad.addColorStop(0, "#1a1226");
+  mantleGrad.addColorStop(0.5, "#2d1f42");
+  mantleGrad.addColorStop(1, "#150e20");
+  ctx.fillStyle = mantleGrad;
+
+  ctx.beginPath();
+  ctx.moveTo(cx - baseDim * 0.34, H);
+  ctx.quadraticCurveTo(cx - baseDim * 0.24, cy + baseDim * 0.22, cx, cy + baseDim * 0.16);
+  ctx.quadraticCurveTo(cx + baseDim * 0.24, cy + baseDim * 0.22, cx + baseDim * 0.34, H);
+  ctx.closePath();
+  ctx.fill();
+
+  // 24K Gold Embroidered Collar Trim
+  ctx.strokeStyle = "#f5c542";
+  ctx.lineWidth = 3;
+  ctx.beginPath();
+  ctx.moveTo(cx - baseDim * 0.16, cy + baseDim * 0.18);
+  ctx.quadraticCurveTo(cx, cy + baseDim * 0.24, cx + baseDim * 0.16, cy + baseDim * 0.18);
+  ctx.stroke();
+
+  // Fluffy Chest Fur (Ivory / Cream)
+  ctx.fillStyle = "#f3ede2";
+  ctx.beginPath();
+  ctx.moveTo(cx - baseDim * 0.08, cy + baseDim * 0.14);
+  ctx.quadraticCurveTo(cx - baseDim * 0.12, cy + baseDim * 0.26, cx, cy + baseDim * 0.32);
+  ctx.quadraticCurveTo(cx + baseDim * 0.12, cy + baseDim * 0.26, cx + baseDim * 0.08, cy + baseDim * 0.14);
+  ctx.closePath();
+  ctx.fill();
+
+  // Anthro Head Base & Cheek Tufts
+  const headGrad = ctx.createRadialGradient(cx, cy - baseDim * 0.02, 0, cx, cy, baseDim * 0.18);
+  headGrad.addColorStop(0, "#e8d8c3");
+  headGrad.addColorStop(0.65, "#c9b397");
+  headGrad.addColorStop(1, "#8a745c");
+  ctx.fillStyle = headGrad;
+
+  // Head Oval
+  ctx.beginPath();
+  ctx.ellipse(cx, cy - baseDim * 0.02, baseDim * 0.13, baseDim * 0.14, 0, 0, Math.PI * 2);
+  ctx.fill();
+
+  // Cheek Fur Tufts (Symmetrical)
+  [-1, 1].forEach(side => {
+    ctx.beginPath();
+    ctx.moveTo(cx + side * baseDim * 0.10, cy + baseDim * 0.02);
+    ctx.lineTo(cx + side * baseDim * 0.19, cy + baseDim * 0.04);
+    ctx.lineTo(cx + side * baseDim * 0.12, cy + baseDim * 0.08);
+    ctx.lineTo(cx + side * baseDim * 0.18, cy + baseDim * 0.11);
+    ctx.lineTo(cx + side * baseDim * 0.08, cy + baseDim * 0.13);
+    ctx.closePath();
+    ctx.fill();
+  });
+
+  // Tall Pointed Canine / Fox Ears with Inner Fluff
+  [-1, 1].forEach(side => {
+    const earBaseX = cx + side * (baseDim * 0.085);
+    const earBaseY = cy - baseDim * 0.12;
+    const earTipX = cx + side * (baseDim * 0.14);
+    const earTipY = cy - baseDim * 0.32;
+
+    // Outer Ear
+    ctx.fillStyle = "#8a745c";
+    ctx.beginPath();
+    ctx.moveTo(earBaseX - side * (baseDim * 0.04), earBaseY);
+    ctx.quadraticCurveTo(cx + side * (baseDim * 0.06), cy - baseDim * 0.22, earTipX, earTipY);
+    ctx.quadraticCurveTo(cx + side * (baseDim * 0.18), cy - baseDim * 0.20, earBaseX + side * (baseDim * 0.05), earBaseY);
+    ctx.closePath();
+    ctx.fill();
+
+    // Inner Ear Fluff (Soft Pinkish Peach)
+    ctx.fillStyle = "#f6c4ba";
+    ctx.beginPath();
+    ctx.moveTo(earBaseX - side * (baseDim * 0.02), earBaseY);
+    ctx.quadraticCurveTo(cx + side * (baseDim * 0.07), cy - baseDim * 0.20, earTipX - side * 4, earTipY + 12);
+    ctx.quadraticCurveTo(cx + side * (baseDim * 0.14), cy - baseDim * 0.18, earBaseX + side * (baseDim * 0.03), earBaseY);
+    ctx.closePath();
+    ctx.fill();
+
+    // White fur wisps in ear
+    ctx.strokeStyle = "rgba(255, 255, 255, 0.85)";
+    ctx.lineWidth = 1.5;
+    for (let w = 0; w < 4; w++) {
+      ctx.beginPath();
+      ctx.moveTo(earBaseX + side * (baseDim * 0.01), earBaseY - w * 6);
+      ctx.quadraticCurveTo(cx + side * (baseDim * 0.08), cy - baseDim * 0.20 + w * 4, earBaseX + side * (baseDim * 0.06), earBaseY - 14 - w * 4);
+      ctx.stroke();
+    }
+  });
+
+  // Muzzle (Snout)
+  const muzzleY = cy + baseDim * 0.035;
+  ctx.fillStyle = "#f3ede2";
+  ctx.beginPath();
+  ctx.ellipse(cx, muzzleY, baseDim * 0.065, baseDim * 0.048, 0, 0, Math.PI * 2);
+  ctx.fill();
+
+  // Cute Dark Rounded Nose
+  ctx.fillStyle = "#2a1f1d";
+  ctx.beginPath();
+  ctx.ellipse(cx, muzzleY - baseDim * 0.016, baseDim * 0.022, baseDim * 0.014, 0, 0, Math.PI * 2);
+  ctx.fill();
+
+  // Gentle Mouth & Whisker Dots
+  ctx.strokeStyle = "#4a3b35";
+  ctx.lineWidth = 1.8;
+  ctx.beginPath();
+  ctx.moveTo(cx, muzzleY - baseDim * 0.002);
+  ctx.lineTo(cx, muzzleY + baseDim * 0.014);
+  ctx.quadraticCurveTo(cx - baseDim * 0.025, muzzleY + baseDim * 0.024, cx - baseDim * 0.035, muzzleY + baseDim * 0.016);
+  ctx.moveTo(cx, muzzleY + baseDim * 0.014);
+  ctx.quadraticCurveTo(cx + baseDim * 0.025, muzzleY + baseDim * 0.024, cx + baseDim * 0.035, muzzleY + baseDim * 0.016);
+  ctx.stroke();
+
+  // Large Expressive Eyes (Anime / Celestial Stylized)
+  const eyeY = cy - baseDim * 0.032;
+  [-1, 1].forEach(side => {
+    const eyeX = cx + side * (baseDim * 0.065);
+    const eyeW = baseDim * 0.034;
+    const eyeH = baseDim * 0.042;
+
+    // White Sclera
+    ctx.fillStyle = "#ffffff";
+    ctx.beginPath();
+    ctx.ellipse(eyeX, eyeY, eyeW, eyeH, side * 0.12, 0, Math.PI * 2);
+    ctx.fill();
+
+    // Vibrant Amber / Topaz Iris Gradient
+    const irisGrad = ctx.createLinearGradient(eyeX, eyeY - eyeH, eyeX, eyeY + eyeH);
+    irisGrad.addColorStop(0, "#d97706");
+    irisGrad.addColorStop(0.5, "#f59e0b");
+    irisGrad.addColorStop(1, "#fef08a");
+    ctx.fillStyle = irisGrad;
+    ctx.beginPath();
+    ctx.ellipse(eyeX, eyeY, eyeW * 0.78, eyeH * 0.85, 0, 0, Math.PI * 2);
+    ctx.fill();
+
+    // Dark Pupil
+    ctx.fillStyle = "#1e140a";
+    ctx.beginPath();
+    ctx.ellipse(eyeX, eyeY, eyeW * 0.42, eyeH * 0.52, 0, 0, Math.PI * 2);
+    ctx.fill();
+
+    // Dual Specular Catchlights (Large primary + small secondary)
+    ctx.fillStyle = "#ffffff";
+    ctx.beginPath();
+    ctx.arc(eyeX - side * (eyeW * 0.22), eyeY - eyeH * 0.25, eyeW * 0.26, 0, Math.PI * 2);
+    ctx.fill();
+
+    ctx.beginPath();
+    ctx.arc(eyeX + side * (eyeW * 0.20), eyeY + eyeH * 0.20, eyeW * 0.14, 0, Math.PI * 2);
+    ctx.fill();
+
+    // Eyelash Contour
+    ctx.strokeStyle = "#2b1810";
+    ctx.lineWidth = 2.5;
+    ctx.beginPath();
+    ctx.arc(eyeX, eyeY, eyeW * 1.05, Math.PI * 1.1, Math.PI * 1.9);
+    ctx.stroke();
+  });
+
+  // Floating Golden Starlight Sparkles
+  for (let s = 0; s < 45; s++) {
+    const sx = rnd() * W;
+    const sy = rnd() * H;
+    const sr = rnd() * 2.2 + 0.6;
+    ctx.fillStyle = rnd() > 0.4 ? "rgba(245, 197, 66, 0.8)" : "rgba(255, 255, 255, 0.9)";
+    ctx.beginPath();
+    ctx.arc(sx, sy, sr, 0, Math.PI * 2);
+    ctx.fill();
+  }
+
+  ctx.restore();
+}
+
 // -------------------------------------------------------------
 // 8. MASTERPIECE ABSTRACT SACRED FLUID HARMONICS
 // -------------------------------------------------------------
@@ -2208,4 +2424,104 @@ function initFakeUpgradeEasterEgg() {
 
   if (btnFakeCancel) btnFakeCancel.addEventListener("click", closeFakeUpgrade);
   if (btnFakeOkDismiss) btnFakeOkDismiss.addEventListener("click", closeFakeUpgrade);
+}
+
+
+// -----------------------------------------------------------
+// NSW FILTER & GOOD BOY RANDOM ANTHRO GENERATOR
+// -----------------------------------------------------------
+let nswFilterActive = true;
+let pendingFurryGeneration = false;
+
+const FURRY_PROMPTS = [
+  "Majestic anthropomorphic wolf warrior in glowing celestial gold armor with pointed ears and luminous amber eyes",
+  "Playful anthropomorphic fox rogue with fluffy tail, celestial cape, expressive emerald eyes and pointed fox ears",
+  "Noble anthropomorphic snow leopard guardian with soft rosette fur, pointed feline ears and starry aura",
+  "Heroic anthropomorphic canine paladin with golden halo, flowing celestial scarf and soft muzzle",
+  "Mystical anthropomorphic fox mage with twin glowing tails, arcane starlight glyphs and soft inner ear fluff",
+  "Sleek anthropomorphic shadow wolf with glowing cyan tribal markings, pointed wolf ears and intense gaze"
+];
+
+function updateNswFilterUI() {
+  const chip = document.getElementById("chipNswFilter");
+  const stateText = document.getElementById("nswFilterStateText");
+  if (!chip || !stateText) return;
+
+  if (nswFilterActive) {
+    chip.classList.add("active");
+    chip.classList.remove("unrestricted");
+    stateText.textContent = "ON";
+  } else {
+    chip.classList.remove("active");
+    chip.classList.add("unrestricted");
+    stateText.textContent = "OFF (18+)";
+  }
+}
+
+function showNswSafetyModal(forGoodBoy = false) {
+  pendingFurryGeneration = forGoodBoy;
+  const modal = document.getElementById("nswSafetyModal");
+  if (modal) modal.style.display = "flex";
+}
+
+function closeNswSafetyModal() {
+  const modal = document.getElementById("nswSafetyModal");
+  if (modal) modal.style.display = "none";
+}
+
+function initNswFilterAndGoodBoy() {
+  const chipNsw = document.getElementById("chipNswFilter");
+  const btnGoodBoy = document.getElementById("btnGoodBoy");
+  const btnNswKeepOn = document.getElementById("btnNswKeepOn");
+  const btnNswTurnOff = document.getElementById("btnNswTurnOff");
+
+  if (chipNsw) {
+    chipNsw.addEventListener("click", () => {
+      if (nswFilterActive) {
+        showNswSafetyModal(false);
+      } else {
+        nswFilterActive = true;
+        updateNswFilterUI();
+      }
+    });
+  }
+
+  if (btnNswKeepOn) {
+    btnNswKeepOn.addEventListener("click", () => {
+      closeNswSafetyModal();
+      pendingFurryGeneration = false;
+    });
+  }
+
+  if (btnNswTurnOff) {
+    btnNswTurnOff.addEventListener("click", () => {
+      nswFilterActive = false;
+      updateNswFilterUI();
+      closeNswSafetyModal();
+
+      if (pendingFurryGeneration) {
+        pendingFurryGeneration = false;
+        triggerGoodBoyFurry();
+      }
+    });
+  }
+
+  if (btnGoodBoy) {
+    btnGoodBoy.addEventListener("click", () => {
+      if (nswFilterActive) {
+        showNswSafetyModal(true);
+      } else {
+        triggerGoodBoyFurry();
+      }
+    });
+  }
+}
+
+function triggerGoodBoyFurry() {
+  const rndPrompt = FURRY_PROMPTS[Math.floor(Math.random() * FURRY_PROMPTS.length)];
+  if (promptInput) {
+    promptInput.value = rndPrompt;
+    promptInput.focus();
+  }
+  handleGenerate();
 }

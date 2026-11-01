@@ -6,7 +6,7 @@
 
 <p align="center">
   <a href="https://michaelsweet612.github.io/Angel_Generator_AI_Images/"><img src="https://img.shields.io/badge/Live%20Web%20Studio-GitHub%20Pages-gold?style=for-the-badge&logo=githubpages&logoColor=black" alt="Live Web Studio"></a>
-  <a href="https://github.com/michaelsweet612/Angel_Generator_AI_Images/releases"><img src="https://img.shields.io/badge/version-3.5.0-gold?style=for-the-badge&logo=sparkles" alt="Version 3.5.0"></a>
+  <a href="https://github.com/michaelsweet612/Angel_Generator_AI_Images/releases"><img src="https://img.shields.io/badge/version-3.8.0-gold?style=for-the-badge&logo=sparkles" alt="Version 3.5.0"></a>
   <a href="https://github.com/michaelsweet612/Angel_Generator_AI_Images"><img src="https://img.shields.io/badge/UI-Gemini%20%7C%20Claude%20Style-purple?style=for-the-badge" alt="Gemini Style UI"></a>
   <a href="https://github.com/michaelsweet612/Angel_Generator_AI_Images"><img src="https://img.shields.io/badge/resolution-4K%20Ultra--HD%20(4096x4096)-red?style=for-the-badge" alt="4K Resolution"></a>
   <a href="https://github.com/michaelsweet612/Angel_Generator_AI_Images"><img src="https://img.shields.io/badge/mode-Universal%20Synthesizer-blue?style=for-the-badge" alt="Universal Synthesizer"></a>
@@ -19,7 +19,7 @@
 
 > 🌐 **Live Web Version on GitHub Pages**: [Launch Portal](https://michaelsweet612.github.io/Angel_Generator_AI_Images/) • [Widescreen Studio Terminal](https://michaelsweet612.github.io/Angel_Generator_AI_Images/ANGEL_GENERATOR_STUDIO.html)
 
-**Angel Generator AI v3.5.0** is an offline, from-scratch **Generative Art Studio** featuring a sleek **Gemini / Claude dark-mode interface**, **universal multi-category procedural neural synthesis**, and an integrated **AI Generated Image Library**.
+**Angel Generator AI v3.8.0** is an offline, from-scratch **Generative Art Studio** featuring a sleek **Gemini / Claude dark-mode interface**, **universal multi-category procedural neural synthesis**, and an integrated **AI Generated Image Library**.
 
 Built with an innovative offline architecture, it synthesizes everything from **majestic landscapes**, **neon cyberpunk cities**, **mythological dragons**, **deep space nebulae**, **high-speed mechanical engineering**, and **expressive portraits** to breathtaking **sacred archangels and celestial masterpieces**. 
 
@@ -47,6 +47,11 @@ Every artwork below was synthesized locally using the Angel Generator AI Studio:
 |:---:|:---:|
 | <img src="samples/05_cosmic_starlight_angel_4k.png" width="400" alt="Cosmic Starlight" /> | <img src="samples/06_divine_baroque_seraph_4k.png" width="400" alt="Golden Baroque Seraph" /> |
 | *"Celestial divine angel silhouette emerging from deep space galaxy nebula, glowing starlight aura"* | *"Golden baroque sacred angel painting with radiant halo and divine volumetric god rays"* |
+
+| **Celestial Wolf Guardian (Good Boy)** | **April Fools & Multi-Domain Neural Core** |
+|:---:|:---:|
+| <img src="samples/07_celestial_wolf_guardian_4k.png" width="400" alt="Celestial Wolf Guardian" /> | <img src="samples/01_cyberpunk_neon_city.png" width="400" alt="Cyberpunk Metropolis" /> |
+| *"Majestic anthropomorphic wolf warrior in glowing celestial gold armor with pointed ears and luminous amber eyes"* | *"Universal Multi-Category Procedural Neural Synthesizer: Landscapes, Cyberpunk, Cosmic, Draconic, Automotive & Anthro"* |
 
 ---
 
