@@ -1,0 +1,180 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Angel Generator AI — Celestial Studio</title>
+  <link rel="stylesheet" href="style.css">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Cinzel:wght@600;700;900&family=Plus+Jakarta+Sans:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+</head>
+<body>
+  <div class="stars-bg"></div>
+  <div class="glow-orb glow-top"></div>
+  <div class="glow-orb glow-bot"></div>
+
+  <header class="app-header">
+    <div class="brand">
+      <div class="brand-halo"></div>
+      <div class="brand-text">
+        <span class="brand-sub">FROM-SCRATCH & CLOUD TEXT-TO-IMAGE</span>
+        <h1>ANGEL GENERATOR AI</h1>
+      </div>
+    </div>
+    <div class="status-pills">
+      <span class="pill" id="pill-torch"><span class="dot"></span> PyTorch Neural</span>
+      <span class="pill" id="pill-webgl"><span class="dot active"></span> WebGL Canvas</span>
+      <span class="pill" id="pill-cloud"><span class="dot"></span> Cloud AI</span>
+    </div>
+  </header>
+
+  <main class="studio-container">
+    <!-- Controls Column -->
+    <section class="controls-card glass-panel">
+      <div class="section-title">
+        <span class="icon">✨</span>
+        <h2>Prompt & Vision</h2>
+      </div>
+
+      <div class="prompt-box">
+        <textarea id="promptInput" rows="3" placeholder="Describe your celestial vision, archangel, or sacred scene...">Archangel Michael with massive glowing white feathered wings and golden halo in heavenly clouds, divine light rays</textarea>
+        <div class="prompt-actions">
+          <button id="btnInspire" class="btn-text">🎲 Inspire Me</button>
+          <button id="btnClear" class="btn-text">✕ Clear</button>
+        </div>
+      </div>
+
+      <!-- Quick Preset Chips -->
+      <div class="presets-section">
+        <label>Curated Presets</label>
+        <div class="chips-container" id="presetChips">
+          <button class="chip active" data-preset="archangel">Archangel Michael</button>
+          <button class="chip" data-preset="seraphim">Six-Winged Seraphim</button>
+          <button class="chip" data-preset="cathedral">Cathedral Guardian</button>
+          <button class="chip" data-preset="cyberpunk">Cyberpunk Angel</button>
+          <button class="chip" data-preset="cosmic">Nebula Celestial</button>
+        </div>
+      </div>
+
+      <!-- Engine Selector -->
+      <div class="engine-section">
+        <label>Generation Engine</label>
+        <div class="engine-grid">
+          <div class="engine-card active" data-engine="neural">
+            <div class="engine-icon">🧠</div>
+            <div class="engine-info">
+              <strong>PyTorch Neural</strong>
+              <span>High-res offline coordinate field</span>
+            </div>
+          </div>
+          <div class="engine-card" data-engine="browser">
+            <div class="engine-icon">🎨</div>
+            <div class="engine-info">
+              <strong>Browser Real-Time</strong>
+              <span>Instant client-side WebGL canvas</span>
+            </div>
+          </div>
+          <div class="engine-card" data-engine="cloud">
+            <div class="engine-icon">🌐</div>
+            <div class="engine-info">
+              <strong>Cloud Diffusion</strong>
+              <span>Photorealistic AI / Free APIs</span>
+            </div>
+          </div>
+          <div class="engine-card" data-engine="c_native">
+            <div class="engine-icon">⚙️</div>
+            <div class="engine-info">
+              <strong>Windows C Native</strong>
+              <span>Standalone 64-bit EXE engine</span>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Style Presets -->
+      <div class="style-section">
+        <label>Artistic Style</label>
+        <select id="styleSelect" class="styled-select">
+          <option value="renaissance" selected>Renaissance Divine (Da Vinci & Michelangelo)</option>
+          <option value="divine_gold">Golden Baroque & Sacred Light</option>
+          <option value="celestial">Celestial Cosmic Starlight & Nebula</option>
+          <option value="cyberpunk">Cyberpunk Hologram & Neon Wings</option>
+          <option value="default">Classic Ethereal Vision</option>
+        </select>
+      </div>
+
+      <!-- Advanced Settings Accordion -->
+      <details class="advanced-details">
+        <summary>Advanced Generation Parameters</summary>
+        <div class="advanced-grid">
+          <div class="control-group">
+            <label for="resolutionSelect">Resolution</label>
+            <select id="resolutionSelect" class="styled-select">
+              <option value="512x512" selected>512 x 512 (Standard)</option>
+              <option value="768x768">768 x 768 (Detailed)</option>
+              <option value="1024x1024">1024 x 1024 (HD Masterpiece)</option>
+            </select>
+          </div>
+          <div class="control-group">
+            <label for="seedInput">Seed (Blank for Random)</label>
+            <input type="number" id="seedInput" class="styled-input" placeholder="Random">
+          </div>
+          <div class="control-group full-width">
+            <label for="negativeInput">Negative Prompt (What to Avoid)</label>
+            <input type="text" id="negativeInput" class="styled-input" placeholder="blurry, distorted, dark, muddy, ugly">
+          </div>
+        </div>
+      </details>
+
+      <!-- Generate Buttons -->
+      <div class="action-buttons">
+        <button id="btnGenerate" class="btn-primary">
+          <span class="btn-sparkle">✦</span> Generate Artwork
+        </button>
+      </div>
+    </section>
+
+    <!-- Display / Preview Column -->
+    <section class="preview-card glass-panel">
+      <div class="preview-header">
+        <div class="section-title">
+          <span class="icon">🖼️</span>
+          <h2>Celestial Canvas</h2>
+        </div>
+        <div class="preview-actions">
+          <span id="genStats" class="gen-stats">Ready</span>
+          <button id="btnDownload" class="btn-secondary" title="Download Image">⬇ Download</button>
+        </div>
+      </div>
+
+      <div class="canvas-wrapper">
+        <div id="loader" class="loader-overlay hidden">
+          <div class="celestial-spinner">
+            <div class="halo-ring"></div>
+            <div class="halo-ring inner"></div>
+          </div>
+          <p id="loaderText">Synthesizing celestial rays & wings...</p>
+        </div>
+
+        <img id="resultImage" class="preview-media hidden" alt="Generated Artwork">
+        <canvas id="browserCanvas" class="preview-media" width="512" height="512"></canvas>
+      </div>
+
+      <!-- Gallery / History Section -->
+      <div class="gallery-section">
+        <h3>Recent Creations</h3>
+        <div class="gallery-scroll" id="galleryContainer">
+          <!-- Dynamically populated -->
+        </div>
+      </div>
+    </section>
+  </main>
+
+  <footer class="app-footer">
+    <p>Angel Generator AI Studio — Powered by Deep Coordinate Neural Fields, C Standalone Engine, and Cloud Diffusion</p>
+  </footer>
+
+  <script src="app.js"></script>
+</body>
+</html>

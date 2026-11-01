@@ -1,8 +1,8 @@
 {
-  "model_name": "ScratchGen-T2I-v1.0",
-  "architecture": "Hybrid Text-Conditioned Neural Field (CPPN) + Multi-Scale Latent Scene Decoder",
+  "model_name": "AngelGeneratorAI-v2.0",
+  "architecture": "Deep Coordinate Neural Field (CPPN) + Celestial Multi-Scale Synthesizer",
   "created_from_scratch": true,
-  "vocabulary_size": 98,
+  "vocabulary_size": 115,
   "latent_embedding_dim": 16,
   "coord_fourier_features": 8,
   "mlp_layers": [

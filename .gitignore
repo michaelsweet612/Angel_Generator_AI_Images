@@ -1,0 +1,15 @@
+# Byte-compiled / optimized / DLL files
+__pycache__/
+*.py[cod]
+*$py.class
+
+# Output directories & test files
+outputs/
+test_*.png
+test_*.bmp
+angel_seraphim.png
+
+# Environment
+.env
+venv/
+.venv/
