@@ -12,24 +12,30 @@
   <script src="https://cdnjs.cloudflare.com/ajax/libs/jszip/3.10.1/jszip.min.js"></script>
 </head>
 <body>
-  <!-- Ambient Atmospheric Background -->
+  <!-- Ambient Atmospheric & Nebula Background -->
   <canvas id="starsCanvas"></canvas>
+  <div class="ambient-nebula ambient-top-left"></div>
+  <div class="ambient-nebula ambient-bottom-right"></div>
+  <div class="ambient-nebula ambient-center"></div>
 
   <div class="app-layout">
-    <!-- Collapsible Sidebar (Gemini / Claude style drawer) -->
+    <!-- Collapsible Sidebar (Gemini & Claude style drawer) -->
     <aside id="sidebar" class="sidebar">
       <div class="sidebar-header">
         <button id="btnNewCreation" class="btn-new-creation" title="Start new prompt">
-          <span style="font-size:1.1rem;">✦</span> New Creation
+          <span style="font-size:1.15rem;">✦</span> New Creation
         </button>
+
         <div class="sidebar-warning-banner" id="sidebarWarningBanner" style="display: none;">
           <span>⚠️</span>
           <span><strong>Web Session:</strong> Images are stored in memory. Download before closing to avoid losing them!</span>
         </div>
+
         <div class="sidebar-library-title">
           <h4>AI Image Library</h4>
-          <span class="sidebar-count-badge" id="sidebarCountBadge">0 items</span>
+          <span class="sidebar-count-badge" id="sidebarCountBadge">0 files</span>
         </div>
+
         <div class="sidebar-library-actions">
           <button id="btnSidebarDownloadZip" class="btn-sidebar-tool" title="Download all library images as a ZIP archive">
             <span>📦</span> ZIP
@@ -50,7 +56,7 @@
 
       <div class="sidebar-footer">
         <span>Offline Neural Synthesizer</span>
-        <a href="https://github.com/michaelsweet612/Angel_Generator_AI_Images" target="_blank" rel="noopener">v3.5.0</a>
+        <a href="https://github.com/michaelsweet612/Angel_Generator_AI_Images" target="_blank" rel="noopener">v3.6.0</a>
       </div>
     </aside>
 
@@ -63,20 +69,21 @@
             ☰
           </button>
           <div class="nav-brand">
+            <span class="nav-brand-logo">✦</span>
             <h1>ANGEL GENERATOR AI</h1>
-            <span class="brand-chip">v3.5.0 STUDIO</span>
+            <span class="brand-chip">v3.6.0 MASTERPIECE</span>
           </div>
         </div>
 
         <div class="nav-center">
           <div class="engine-status-pill">
             <span class="status-dot"></span>
-            <span>100% Offline Multi-Category Synthesizer</span>
+            <span>100% Offline Multi-Category Neural Core • 4K Accelerated</span>
           </div>
         </div>
 
         <div class="nav-right">
-          <button id="btnSoundToggle" class="btn-nav-action" title="Toggle Audio Sound FX">
+          <button id="btnSoundToggle" class="btn-nav-action" title="Toggle Celestial Sound FX">
             <span class="nav-icon">🔊</span>
           </button>
           <button id="btnFullscreen" class="btn-nav-action" title="Toggle Fullscreen">
@@ -92,44 +99,63 @@
       <div class="viewport-content">
         <!-- Welcome Screen (Default empty state like Gemini / Claude) -->
         <div id="welcomeContainer" class="welcome-container">
-          <h2 class="welcome-title">What will you imagine?</h2>
-          <p class="welcome-subtitle">From-scratch multi-category procedural neural synthesis. 100% private &amp; offline.</p>
+          <div class="welcome-badge">✦ PROPRIETARY 4K NEURAL FIELD STUDIO</div>
+          <h2 class="welcome-title">What will you imagine today?</h2>
+          <p class="welcome-subtitle">From-scratch multi-category neural synthesis. 100% private, offline, and scalable up to 4K Ultra-HD.</p>
 
           <div class="suggestion-cards-grid">
             <div class="suggestion-card" data-prompt="Archangel Michael with massive radiant golden feathered wings, golden halo in heavenly clouds, volumetric divine light rays, masterpiece, 4k ultra-hd">
               <span class="suggestion-icon">✨</span>
               <div class="suggestion-text">Archangel Michael with massive radiant golden feathered wings and luminous divine rays</div>
-              <span class="suggestion-tag">Celestial &bull; Sacred</span>
+              <div class="suggestion-tag">
+                <span>Celestial • Sacred</span>
+                <span class="suggestion-cta">Try Prompt ↗</span>
+              </div>
             </div>
 
             <div class="suggestion-card" data-prompt="Cyberpunk neon metropolis at rainy night with holographic billboards, reflections on wet asphalt, soaring sky-cars, high detail 4k">
               <span class="suggestion-icon">🏙️</span>
               <div class="suggestion-text">Cyberpunk neon metropolis with rainy reflections and soaring illuminated traffic</div>
-              <span class="suggestion-tag">Sci-Fi &bull; Neon</span>
+              <div class="suggestion-tag">
+                <span>Sci-Fi • Neon City</span>
+                <span class="suggestion-cta">Try Prompt ↗</span>
+              </div>
             </div>
 
             <div class="suggestion-card" data-prompt="Emerald crystal dragon coiled on jagged mountain peaks with violet lightning storm, atmospheric fog, fantasy epic">
               <span class="suggestion-icon">🐉</span>
               <div class="suggestion-text">Emerald crystal dragon perched on jagged mountain peaks with violet lightning</div>
-              <span class="suggestion-tag">Creature &bull; Epic</span>
+              <div class="suggestion-tag">
+                <span>Fantasy • Dragon</span>
+                <span class="suggestion-cta">Try Prompt ↗</span>
+              </div>
             </div>
 
             <div class="suggestion-card" data-prompt="Deep space cosmic nebula with glowing spiral accretion disk, swirling purple and cyan dust clouds, stellar horizon">
               <span class="suggestion-icon">🌌</span>
               <div class="suggestion-text">Deep space cosmic nebula with glowing spiral accretion disk and star clusters</div>
-              <span class="suggestion-tag">Cosmic &bull; Deep Space</span>
+              <div class="suggestion-tag">
+                <span>Cosmic • Deep Space</span>
+                <span class="suggestion-cta">Try Prompt ↗</span>
+              </div>
             </div>
 
             <div class="suggestion-card" data-prompt="Majestic alpine lake reflecting snow-capped golden hour mountain range with dense pine forest and warm sunset lighting">
               <span class="suggestion-icon">🏔️</span>
               <div class="suggestion-text">Majestic alpine lake reflecting snow-capped golden hour mountain range</div>
-              <span class="suggestion-tag">Landscape &bull; Nature</span>
+              <div class="suggestion-tag">
+                <span>Landscape • Nature</span>
+                <span class="suggestion-cta">Try Prompt ↗</span>
+              </div>
             </div>
 
             <div class="suggestion-card" data-prompt="Futuristic hypercar mechanical chassis with glowing titanium exhaust manifolds and aerodynamic carbon fiber splitters">
               <span class="suggestion-icon">🏎️</span>
               <div class="suggestion-text">Futuristic hypercar mechanical engine with glowing titanium exhausts</div>
-              <span class="suggestion-tag">Mechanical &bull; Speed</span>
+              <div class="suggestion-tag">
+                <span>Mechanical • Speed</span>
+                <span class="suggestion-cta">Try Prompt ↗</span>
+              </div>
             </div>
           </div>
         </div>
@@ -151,7 +177,7 @@
           <!-- Instant Artwork Action Toolbar -->
           <div class="artwork-toolbar">
             <button id="btnArtDownload" class="btn-art-action primary-download" title="Save to AI generated image library folder">
-              <span>💾</span> Download Image
+              <span>💾</span> Download 4K Image
             </button>
             <button id="btnArtCopy" class="btn-art-action" title="Copy artwork to clipboard">
               <span>📋</span> Copy Image
@@ -180,7 +206,7 @@
         </div>
       </div>
 
-      <!-- Signature Floating Bottom Prompt Bar (Gemini / Claude Floating Pill) -->
+      <!-- Signature Floating Bottom Prompt Command Bar (Gemini / Claude Floating Pill) -->
       <div class="floating-input-wrapper">
         <!-- Quick Control Chips Bar -->
         <div class="chips-bar">
@@ -194,7 +220,7 @@
             <span>📱</span> Portrait (9:16)
           </button>
           <button class="chip-btn chip-aspect" data-aspect="custom" title="Custom aspect ratio dimensions">
-            <span>⚙️</span> Custom
+            <span>⚙️</span> Custom 4K
           </button>
 
           <select id="selectStyle" class="chip-select" title="Artistic Rendering Style">
@@ -228,7 +254,7 @@
 
         <!-- Main Input Card with Dynamic Generate / Stop action button -->
         <div class="prompt-pill-card">
-          <textarea id="promptInput" class="prompt-textarea" rows="1" placeholder="Ask Angel Generator to create anything... (Press Enter to generate, Shift+Enter for new line)"></textarea>
+          <textarea id="promptInput" class="prompt-textarea" rows="1" placeholder="Ask Angel Generator to synthesize anything... (Press Enter to generate, Shift+Enter for new line)"></textarea>
           <div class="prompt-actions-right">
             <button id="btnEnhanceMagic" class="btn-enhance-magic" title="AI Magic Expand Prompt">
               ✨
@@ -242,8 +268,7 @@
     </main>
   </div>
 
-  <!-- Fullscreen Lightbox Modal -->
-    <!-- Image Ready Notification Popup -->
+  <!-- Image Ready Notification Popup -->
   <div id="imageReadyToast" class="image-ready-toast" style="display: none;">
     <div class="toast-content">
       <img id="toastThumb" class="toast-thumb" src="" alt="Thumbnail" />
@@ -282,6 +307,7 @@
     </div>
   </div>
 
+  <!-- Fullscreen Lightbox Modal -->
   <div id="lightboxModal" class="lightbox-modal" style="display: none;">
     <button id="btnCloseLightbox" class="lightbox-close" title="Close Lightbox">✕</button>
     <img id="lightboxImg" class="lightbox-img" alt="Artwork Enlarged" />
