@@ -9,6 +9,7 @@
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Cinzel:wght@600;700;800;900&family=Plus+Jakarta+Sans:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
   <link rel="icon" href="data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 100 100%22><text y=%22.9em%22 font-size=%2290%22>✨</text></svg>">
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/jszip/3.10.1/jszip.min.js"></script>
 </head>
 <body>
   <!-- Atmospheric Canvas Background -->
@@ -144,26 +145,49 @@
         </div>
       </div>
 
-      <!-- Aspect Ratio Cards -->
+      <!-- Canvas Orientation & Aspect Ratio -->
       <div class="section-block">
-        <label class="section-label">ASPECT RATIO & CANVAS</label>
+        <label class="section-label">CANVAS ORIENTATION & ASPECT RATIO</label>
         <div class="aspect-grid" id="aspectGrid">
-          <button class="aspect-btn active" data-aspect="1:1" data-res="1024x1024">
-            <div class="aspect-box ratio-1-1"></div>
-            <span>1:1 Square</span>
-          </button>
-          <button class="aspect-btn" data-aspect="16:9" data-res="3840x2160">
+          <button class="aspect-btn" data-aspect="landscape" title="Landscape Widescreen (16:9)">
             <div class="aspect-box ratio-16-9"></div>
-            <span>16:9 (4K UHD)</span>
+            <span>Landscape</span>
           </button>
-          <button class="aspect-btn" data-aspect="9:16" data-res="768x1366">
+          <button class="aspect-btn active" data-aspect="square" title="Square (1:1)">
+            <div class="aspect-box ratio-1-1"></div>
+            <span>Square</span>
+          </button>
+          <button class="aspect-btn" data-aspect="portrait" title="Portrait Vertical (9:16)">
             <div class="aspect-box ratio-9-16"></div>
-            <span>9:16 Portrait</span>
+            <span>Portrait</span>
           </button>
-          <button class="aspect-btn" data-aspect="4:3" data-res="2048x1536">
-            <div class="aspect-box ratio-4-3"></div>
-            <span>4:3 Classic</span>
+          <button class="aspect-btn" data-aspect="custom" id="btnCustomAspect" title="Custom Dimensions (Width × Height)">
+            <div class="aspect-box ratio-custom">⚙️</div>
+            <span>Custom</span>
           </button>
+        </div>
+
+        <!-- Custom Dimensions Inline Box -->
+        <div id="customDimBox" class="custom-dim-box hidden">
+          <div class="custom-dim-label">CUSTOM DIMENSIONS (PIXELS)</div>
+          <div class="dim-inputs-row">
+            <div class="dim-field">
+              <label for="customWidth">Width (px)</label>
+              <input type="number" id="customWidth" value="1024" min="64" max="4096" step="64">
+            </div>
+            <span class="dim-times">×</span>
+            <div class="dim-field">
+              <label for="customHeight">Height (px)</label>
+              <input type="number" id="customHeight" value="1024" min="64" max="4096" step="64">
+            </div>
+          </div>
+          <div class="dim-preset-chips">
+            <button type="button" class="chip-preset" data-w="1024" data-h="1024">1024×1024 (1:1)</button>
+            <button type="button" class="chip-preset" data-w="1920" data-h="1080">1920×1080 (HD)</button>
+            <button type="button" class="chip-preset" data-w="1080" data-h="1920">1080×1920 (Story)</button>
+            <button type="button" class="chip-preset" data-w="3840" data-h="2160">3840×2160 (4K)</button>
+            <button type="button" class="chip-preset" data-w="4096" data-h="4096">4096×4096 (4K UHD)</button>
+          </div>
         </div>
       </div>
 
@@ -286,14 +310,32 @@
         </details>
       </div>
 
-      <!-- Recent Creations Gallery -->
-      <div class="gallery-section">
-        <div class="gallery-header">
-          <h3>Recent Creations</h3>
-          <span class="gallery-count" id="galleryCount">Showcase Gallery</span>
+      <!-- AI Generated Image Library Section -->
+      <div class="library-section">
+        <div class="library-header">
+          <div class="library-title-group">
+            <span class="library-folder-icon">📂</span>
+            <div>
+              <h3>AI Generated Image Library</h3>
+              <span class="library-subtitle">Target Folder: <code>AI generated image library/</code></span>
+            </div>
+          </div>
+          <div class="library-actions">
+            <span class="library-count-badge" id="libraryCountBadge">0 Files</span>
+            <button id="btnDownloadZip" class="btn-lib-action" title="Download all images in this library as a ZIP folder">
+              📦 Save All (.ZIP)
+            </button>
+            <button id="btnSyncFolder" class="btn-lib-action" title="Connect to actual local folder on your computer">
+              📁 Sync Local PC Folder
+            </button>
+            <button id="btnClearLibrary" class="btn-lib-action btn-danger" title="Clear all saved library items">
+              🗑️ Clear
+            </button>
+          </div>
         </div>
-        <div class="gallery-scroll" id="galleryContainer">
-          <!-- Dynamically populated -->
+
+        <div class="library-grid-scroll" id="libraryContainer">
+          <!-- Dynamically populated with all synthesized artworks -->
         </div>
       </div>
     </section>

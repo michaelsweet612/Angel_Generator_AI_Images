@@ -107,7 +107,7 @@ function New-AngelImage {
 
     if (-not $OutFile) {
         $timestamp = (Get-Date).ToString("yyyyMMdd_HHmmss")
-        $outputsDir = Join-Path $Script:ModuleRoot "outputs"
+        $outputsDir = Join-Path $Script:ModuleRoot "AI generated image library"
         if (-not (Test-Path $outputsDir)) { New-Item -ItemType Directory -Path $outputsDir | Out-Null }
         $OutFile = Join-Path $outputsDir "angel_$timestamp.png"
     } else {

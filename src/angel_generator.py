@@ -105,7 +105,7 @@ def main():
     parser.add_argument("-w", "--width", type=int, default=512, help="Image width (default: 512)")
     parser.add_argument("-H", "--height", type=int, default=512, help="Image height (default: 512)")
     parser.add_argument("--seed", type=int, default=None, help="Random seed for reproducible generation")
-    parser.add_argument("-o", "--out", type=str, default="angel_output.png", help="Output file path")
+    parser.add_argument("-o", "--out", type=str, default="AI generated image library/angel_output.png", help="Output file path")
     parser.add_argument("--list-presets", action="store_true", help="Print available curated angel prompts")
 
     args = parser.parse_args()

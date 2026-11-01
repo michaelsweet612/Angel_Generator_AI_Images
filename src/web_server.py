@@ -27,8 +27,9 @@ from angel_generator import run_c_executable, PRESETS
 app = Flask(__name__, static_folder=str(BASE_DIR / "web"))
 CORS(app)
 
-OUTPUTS_DIR = BASE_DIR / "outputs"
-OUTPUTS_DIR.mkdir(parents=True, exist_ok=True)
+LIBRARY_DIR = BASE_DIR / "AI generated image library"
+LIBRARY_DIR.mkdir(parents=True, exist_ok=True)
+OUTPUTS_DIR = LIBRARY_DIR
 
 # Global cancellation event
 current_cancel_event = threading.Event()
@@ -45,8 +46,9 @@ def static_proxy(path):
 
 
 @app.route("/outputs/<path:filename>")
+@app.route("/library/<path:filename>")
 def serve_output(filename):
-    return send_from_directory(str(OUTPUTS_DIR), filename)
+    return send_from_directory(str(LIBRARY_DIR), filename)
 
 
 @app.route("/api/status", methods=["GET"])
@@ -134,7 +136,9 @@ def api_generate():
         duration = round(time.time() - t0, 2)
         return jsonify({
             "success": True,
-            "image_url": f"/outputs/{filename}",
+            "filename": filename,
+            "image_url": f"/library/{filename}",
+            "library_folder": "AI generated image library",
             "provider": provider_used,
             "seed": seed,
             "duration_sec": duration,

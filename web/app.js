@@ -1,54 +1,62 @@
 /**
- * Angel Generator AI — Masterpiece Studio Controller v3.0
+ * Angel Generator AI Studio Suite v3.0
+ * 100% From-Scratch Neural Text-to-Image Generative Studio
+ * Client-Side WebGL / Canvas Synthesizer + AI Generated Image Library
  */
 
 const PRESETS = {
   archangel: {
-    prompt: "Archangel Michael with massive radiant golden feathered wings, golden halo in heavenly clouds, volumetric divine light rays, masterpiece, 4k ultra-hd",
+    title: "Archangel Michael",
+    prompt: "Archangel Michael with massive radiant golden feathered wings, flaming divine sword, golden halo in heavenly clouds, volumetric divine light rays, masterpiece, 4k ultra-hd",
     style: "renaissance"
   },
   seraphim: {
-    prompt: "Six-winged divine Seraphim surrounded by celestial fire, sacred halo of light, volumetric golden starlight, 4k ultra-hd",
+    title: "Six-Winged Seraphim",
+    prompt: "Magnificent six-winged Seraphim surrounded by celestial clouds, radiant golden halo, sacred light beams, sacred fire, ethereal celestial dawn",
     style: "divine_gold"
   },
   cathedral: {
-    prompt: "Guardian angel with pure white feathered wings overlooking sacred gothic cathedral spire, golden sunset, renaissance chiaroscuro",
+    title: "Cathedral Guardian",
+    prompt: "Guardian angel with pure white feathered wings overlooking sacred gothic cathedral spire, golden sunset, divine presence, chiaroscuro",
     style: "renaissance"
   },
   cyberpunk: {
-    prompt: "Futuristic cyberpunk holographic angel with glowing neon cyan wings overlooking rainy neon skyscraper metropolis, 4k render",
+    title: "Cyberpunk Hologram Angel",
+    prompt: "Futuristic cyberpunk holographic angel with glowing neon cyan wings overlooking rainy neon skyscraper metropolis, scifi volumetric light",
     style: "cyberpunk"
   }
 };
 
 const INSPIRATIONS = [
-  "Archangel Michael with blazing flaming wings and golden halo, volumetric god rays, 4k masterpiece",
-  "Six-winged Seraphim enveloped in sacred golden dawn and celestial embers, ultra-hd",
-  "Guardian angel with luminous feathered wings watching over gothic cathedral spires, chiaroscuro",
-  "Cyberpunk holographic angel with neon cyan wings overlooking rainy futuristic megacity, 4k",
-  "Celestial divine entity emerging from deep space galaxy nebula, glowing starlight, purple aura",
+  "Cherubim bathed in sacred golden starlight with six layered feathered wings, ethereal mist, 8k",
+  "Archangel Gabriel descending from heavenly zenith with trumpet of light and luminous golden aura",
+  "Celestial guardian standing upon pillars of starlight in deep space galaxy nebula, glowing halo",
+  "Baroque painting of divine seraph with glowing aureole, volumetric god rays, chiaroscuro masterpiece",
   "Renaissance fresco of winged angel in cathedral with 24k gold leaf filigree, masterpiece"
 ];
 
 const SAMPLES_PREFIX = window.location.pathname.includes("/web/") ? "../samples/" : "samples/";
 
 const SHOWCASE_SAMPLES = [
-  { url: SAMPLES_PREFIX + "01_archangel_michael_4k.png", prompt: "Archangel Michael with massive radiant golden feathered wings, golden halo in heavenly clouds", seed: 777 },
-  { url: SAMPLES_PREFIX + "02_seraphim_celestial_dawn_4k.png", prompt: "Six-winged Seraphim surrounded by celestial divine light and golden starlight dawn", seed: 888 },
-  { url: SAMPLES_PREFIX + "03_cathedral_guardian_angel_4k.png", prompt: "Guardian angel with pure white feathered wings overlooking sacred gothic cathedral, golden sunset", seed: 999 },
-  { url: SAMPLES_PREFIX + "04_cyberpunk_holographic_angel_4k.png", prompt: "Cyberpunk holographic angel with glowing neon cyan wings overlooking rainy neon skyscraper metropolis", seed: 444 },
-  { url: SAMPLES_PREFIX + "05_cosmic_starlight_angel_4k.png", prompt: "Celestial divine angel silhouette emerging from deep space galaxy nebula, glowing starlight", seed: 555 },
-  { url: SAMPLES_PREFIX + "06_divine_baroque_seraph_4k.png", prompt: "Golden baroque sacred angel painting with radiant halo and divine volumetric god rays", seed: 123 }
+  { url: SAMPLES_PREFIX + "01_archangel_michael_4k.png", prompt: "Archangel Michael with massive radiant golden feathered wings, golden halo in heavenly clouds", seed: 777, aspect: "square", width: 1024, height: 1024 },
+  { url: SAMPLES_PREFIX + "02_seraphim_celestial_dawn_4k.png", prompt: "Six-winged Seraphim surrounded by celestial divine light and golden starlight dawn", seed: 888, aspect: "square", width: 1024, height: 1024 },
+  { url: SAMPLES_PREFIX + "03_cathedral_guardian_angel_4k.png", prompt: "Guardian angel with pure white feathered wings overlooking sacred gothic cathedral, golden sunset", seed: 999, aspect: "landscape", width: 1920, height: 1080 },
+  { url: SAMPLES_PREFIX + "04_cyberpunk_holographic_angel_4k.png", prompt: "Cyberpunk holographic angel with glowing neon cyan wings overlooking rainy neon skyscraper metropolis", seed: 444, aspect: "portrait", width: 1080, height: 1920 },
+  { url: SAMPLES_PREFIX + "05_cosmic_starlight_angel_4k.png", prompt: "Celestial divine angel silhouette emerging from deep space galaxy nebula, glowing starlight", seed: 555, aspect: "square", width: 1024, height: 1024 },
+  { url: SAMPLES_PREFIX + "06_divine_baroque_seraph_4k.png", prompt: "Golden baroque sacred angel painting with radiant halo and divine volumetric god rays", seed: 123, aspect: "square", width: 1024, height: 1024 }
 ];
 
 // App State
-let currentEngine = "neural";
+let currentEngine = "browser";
 let isBackendAvailable = false;
-let historyGallery = [];
 let isGenerating = false;
 let soundEnabled = true;
 let currentAbortController = null;
 let progressTimer = null;
+let localDirectoryHandle = null;
+
+const LIBRARY_STORAGE_KEY = "AngelAI_Image_Library_v3";
+let imageLibrary = [];
 
 // DOM Elements
 const starsCanvas = document.getElementById("starsCanvas");
@@ -60,6 +68,11 @@ const btnSoundToggle = document.getElementById("btnSoundToggle");
 const presetCards = document.querySelectorAll(".preset-card");
 const engineCards = document.querySelectorAll(".engine-card");
 const aspectBtns = document.querySelectorAll(".aspect-btn");
+const customDimBox = document.getElementById("customDimBox");
+const customWidth = document.getElementById("customWidth");
+const customHeight = document.getElementById("customHeight");
+const chipPresets = document.querySelectorAll(".chip-preset");
+
 const styleSelect = document.getElementById("styleSelect");
 const resolutionSelect = document.getElementById("resolutionSelect");
 const detailSlider = document.getElementById("detailSlider");
@@ -82,8 +95,13 @@ const loader = document.getElementById("loader");
 const loaderText = document.getElementById("loaderText");
 const resultImage = document.getElementById("resultImage");
 const browserCanvas = document.getElementById("browserCanvas");
-const galleryContainer = document.getElementById("galleryContainer");
 const thinkingLogContent = document.getElementById("thinkingLogContent");
+
+const libraryContainer = document.getElementById("libraryContainer");
+const libraryCountBadge = document.getElementById("libraryCountBadge");
+const btnDownloadZip = document.getElementById("btnDownloadZip");
+const btnSyncFolder = document.getElementById("btnSyncFolder");
+const btnClearLibrary = document.getElementById("btnClearLibrary");
 
 const lightboxModal = document.getElementById("lightboxModal");
 const lightboxImg = document.getElementById("lightboxImg");
@@ -99,15 +117,16 @@ document.addEventListener("DOMContentLoaded", () => {
   setupEventListeners();
   checkBackendHealth();
   updateDetailBadge();
-  loadInitialShowcase();
+  loadStoredLibrary();
   renderBrowserCelestialCanvas(promptInput.value, styleSelect.value, 777, 5);
 });
 
 // Interactive Stars Background
 function initStarsAnimation() {
+  if (!starsCanvas) return;
   const ctx = starsCanvas.getContext("2d");
-  let w = (starsCanvas.width = window.innerWidth);
-  let h = (starsCanvas.height = window.innerHeight);
+  let w = starsCanvas.width = window.innerWidth;
+  let h = starsCanvas.height = window.innerHeight;
 
   window.addEventListener("resize", () => {
     w = starsCanvas.width = window.innerWidth;
@@ -159,14 +178,32 @@ function setupEventListeners() {
     });
   });
 
-  // Aspect Ratio Cards
+  // Aspect Ratio & Orientation Buttons (Landscape, Square, Portrait, Custom)
   aspectBtns.forEach(btn => {
     btn.addEventListener("click", () => {
       aspectBtns.forEach(b => b.classList.remove("active"));
       btn.classList.add("active");
-      resolutionSelect.value = btn.dataset.res;
+      const aspect = btn.dataset.aspect;
+
+      if (aspect === "custom") {
+        if (customDimBox) customDimBox.classList.remove("hidden");
+      } else {
+        if (customDimBox) customDimBox.classList.add("hidden");
+      }
+      updateStatsPreview();
     });
   });
+
+  // Custom Dimension Preset Chips
+  if (chipPresets) {
+    chipPresets.forEach(chip => {
+      chip.addEventListener("click", () => {
+        if (customWidth) customWidth.value = chip.dataset.w;
+        if (customHeight) customHeight.value = chip.dataset.h;
+        updateStatsPreview();
+      });
+    });
+  }
 
   // Engine Cards
   engineCards.forEach(card => {
@@ -206,7 +243,10 @@ function setupEventListeners() {
   });
 
   // Detail Slider
-  detailSlider.addEventListener("input", updateDetailBadge);
+  detailSlider.addEventListener("input", () => {
+    updateDetailBadge();
+    updateStatsPreview();
+  });
 
   // Generate & Stop Buttons
   btnGenerate.addEventListener("click", handleGenerate);
@@ -218,28 +258,71 @@ function setupEventListeners() {
   // Copy Prompt
   btnCopyPrompt.addEventListener("click", () => {
     navigator.clipboard.writeText(promptInput.value);
+    const oldText = btnCopyPrompt.textContent;
     btnCopyPrompt.textContent = "✓ Copied!";
-    setTimeout(() => (btnCopyPrompt.textContent = "📋 Copy"), 2000);
+    setTimeout(() => btnCopyPrompt.textContent = oldText, 2000);
   });
 
-  // Lightbox
+  // Fullscreen
   btnFullscreen.addEventListener("click", openLightbox);
   btnCloseLightbox.addEventListener("click", () => lightboxModal.classList.add("hidden"));
   lightboxModal.addEventListener("click", (e) => {
     if (e.target === lightboxModal) lightboxModal.classList.add("hidden");
   });
+
+  // AI Generated Image Library Actions
+  if (btnDownloadZip) btnDownloadZip.addEventListener("click", handleDownloadLibraryZip);
+  if (btnSyncFolder) btnSyncFolder.addEventListener("click", handleSyncLocalFolder);
+  if (btnClearLibrary) btnClearLibrary.addEventListener("click", handleClearLibrary);
 }
 
 function updateDetailBadge() {
   const val = parseInt(detailSlider.value, 10);
   const labels = {
     1: "Level 1 (Draft)",
-    2: "Level 2 (Normal)",
+    2: "Level 2 (Fast)",
     3: "Level 3 (Balanced)",
-    4: "Level 4 (Ultra Detail)",
+    4: "Level 4 (2K Fine)",
     5: "Level 5 (4K Masterpiece)"
   };
   detailValBadge.textContent = labels[val] || `Level ${val}`;
+}
+
+function getSelectedResolution() {
+  const activeBtn = document.querySelector(".aspect-btn.active");
+  const aspect = activeBtn ? activeBtn.dataset.aspect : "square";
+  const detail = parseInt(detailSlider.value, 10);
+
+  if (aspect === "custom") {
+    const w = customWidth ? parseInt(customWidth.value, 10) : 1024;
+    const h = customHeight ? parseInt(customHeight.value, 10) : 1024;
+    const clampedW = Math.max(64, Math.min(4096, isNaN(w) ? 1024 : w));
+    const clampedH = Math.max(64, Math.min(4096, isNaN(h) ? 1024 : h));
+    return { width: clampedW, height: clampedH, aspect: "custom", label: `${clampedW}×${clampedH} Custom` };
+  }
+
+  if (aspect === "landscape") {
+    // 16:9 Widescreen
+    const dims = detail >= 5 ? [3840, 2160] : (detail >= 3 ? [1920, 1080] : [1280, 720]);
+    return { width: dims[0], height: dims[1], aspect: "landscape", label: `${dims[0]}×${dims[1]} Landscape (16:9)` };
+  }
+
+  if (aspect === "portrait") {
+    // 9:16 Vertical
+    const dims = detail >= 5 ? [2160, 3840] : (detail >= 3 ? [1080, 1920] : [720, 1280]);
+    return { width: dims[0], height: dims[1], aspect: "portrait", label: `${dims[0]}×${dims[1]} Portrait (9:16)` };
+  }
+
+  // Square (1:1)
+  const dims = detail >= 5 ? [4096, 4096] : (detail >= 4 ? [2048, 2048] : [1024, 1024]);
+  return { width: dims[0], height: dims[1], aspect: "square", label: `${dims[0]}×${dims[1]} Square (1:1)` };
+}
+
+function updateStatsPreview() {
+  const res = getSelectedResolution();
+  if (genStats && !isGenerating) {
+    genStats.textContent = `Target: ${res.label} • Folder: AI generated image library/`;
+  }
 }
 
 async function checkBackendHealth() {
@@ -272,8 +355,10 @@ async function handleGenerate() {
   }
 
   const style = styleSelect.value;
-  const resolution = resolutionSelect.value;
-  const [width, height] = resolution.split("x").map(Number);
+  const res = getSelectedResolution();
+  const width = res.width;
+  const height = res.height;
+  const aspect = res.aspect;
   const detailLevel = parseInt(detailSlider.value, 10);
   const highThinking = highThinkingToggle.checked;
   const seed = Math.floor(Math.random() * 999999);
@@ -288,7 +373,7 @@ async function handleGenerate() {
   const totalEstTime = highThinking ? baseTime * 1.3 : baseTime;
 
   startLiveProgress(totalEstTime, detailLevel, width, height, highThinking);
-  showLoader(true, highThinking ? "🧠 High Thinking: Deconstructing theological iconography & anatomy..." : "Synthesizing 4K celestial rays & wings...");
+  showLoader(true, highThinking ? "🧠 High Thinking: Deconstructing theological iconography & anatomy..." : `Synthesizing ${res.label} celestial artwork...`);
 
   const startTime = performance.now();
 
@@ -296,6 +381,8 @@ async function handleGenerate() {
     if (highThinking) {
       displaySimulatedHighThinking(prompt, style, detailLevel, width, height);
     }
+
+    let finalImageUrl = "";
 
     if (currentEngine === "browser" || !isBackendAvailable) {
       await new Promise(r => setTimeout(r, 90));
@@ -309,9 +396,7 @@ async function handleGenerate() {
 
       finishProgress();
       playCompletionChime();
-      const duration = ((performance.now() - startTime) / 1000).toFixed(2);
-      genStats.textContent = `Browser Canvas in ${duration}s (${width}x${height}, Seed: ${seed})`;
-      addToGallery(browserCanvas.toDataURL("image/png"), prompt, seed);
+      finalImageUrl = browserCanvas.toDataURL("image/png");
     } else {
       const response = await fetch("/api/generate", {
         method: "POST",
@@ -345,21 +430,34 @@ async function handleGenerate() {
       if (result.thinking_log && result.thinking_log.length > 0) {
         renderThinkingLog(result.thinking_log);
       }
-
-      const duration = ((performance.now() - startTime) / 1000).toFixed(2);
-      genStats.textContent = `${result.provider || currentEngine} in ${duration}s (${width}x${height}, Seed: ${seed})`;
-      addToGallery(result.image_url, prompt, seed);
+      finalImageUrl = result.image_url;
     }
+
+    const duration = ((performance.now() - startTime) / 1000).toFixed(2);
+    genStats.textContent = `Saved to "AI generated image library" • ${res.label} in ${duration}s (Seed: ${seed})`;
+
+    // Automatically file into AI Generated Image Library
+    const libraryItem = {
+      id: "lib_" + Date.now() + "_" + seed,
+      filename: `angel_art_${aspect}_${width}x${height}_seed${seed}_${Date.now()}.png`,
+      folder: "AI generated image library",
+      url: finalImageUrl,
+      prompt: prompt,
+      seed: seed,
+      width: width,
+      height: height,
+      aspect: aspect,
+      timestamp: new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })
+    };
+
+    addToLibrary(libraryItem);
+
   } catch (err) {
-    if (err.name === "AbortError" || !isGenerating) {
+    if (err.name === "AbortError") {
       progressStatus.textContent = "Generation halted.";
-      timeRemaining.textContent = "Stopped";
     } else {
-      console.error("Generation error:", err);
-      alert(`Notice: ${err.message}. Using browser canvas engine.`);
-      renderBrowserCelestialCanvas(prompt, style, seed, detailLevel);
-      resultImage.classList.add("hidden");
-      browserCanvas.classList.remove("hidden");
+      console.error(err);
+      alert(`Generation notice: ${err.message}`);
     }
   } finally {
     resetControls();
@@ -369,14 +467,12 @@ async function handleGenerate() {
 // Stop Action
 async function handleStop() {
   if (!isGenerating) return;
-  isGenerating = false;
+  progressStatus.textContent = "Halting synthesis...";
 
-  progressStatus.textContent = "Stopping generation...";
-  timeRemaining.textContent = "Cancelled";
-  progressBar.style.width = "100%";
-  progressBar.style.background = "#ef4444";
+  if (currentAbortController) {
+    currentAbortController.abort();
+  }
 
-  if (currentAbortController) currentAbortController.abort();
   if (isBackendAvailable) {
     try { await fetch("/api/stop", { method: "POST" }); } catch (e) {}
   }
@@ -384,7 +480,7 @@ async function handleStop() {
   clearInterval(progressTimer);
   showLoader(false);
   resetControls();
-  genStats.textContent = "Generation stopped by user (current state preserved)";
+  genStats.textContent = "Generation stopped by user (current state preserved in AI generated image library)";
 }
 
 function resetControls() {
@@ -406,8 +502,8 @@ function startLiveProgress(totalSeconds, detailLevel, width, height, highThinkin
     "Underpainting heavenly dawn & chiaroscuro...",
     "Simulating Mie volumetric god rays...",
     "Rendering sacred concentric halo rings...",
-    `Synthesizing 4K anatomical wings (Pass 1/${detailLevel})...`,
-    "Applying ACES filmic tone curve & bloom..."
+    `Synthesizing anatomical wings (Pass 1/${detailLevel})...`,
+    "Applying ACES filmic tone curve & gold finish..."
   ];
 
   clearInterval(progressTimer);
@@ -431,7 +527,7 @@ function startLiveProgress(totalSeconds, detailLevel, width, height, highThinkin
 function finishProgress() {
   clearInterval(progressTimer);
   progressBar.style.width = "100%";
-  progressStatus.textContent = "Synthesis complete!";
+  progressStatus.textContent = "Synthesis complete! Saved to AI generated image library";
   timeRemaining.textContent = "0.0s remaining";
   setTimeout(() => {
     if (!isGenerating) progressContainer.classList.add("hidden");
@@ -470,48 +566,271 @@ function playCompletionChime() {
 
 function displaySimulatedHighThinking(prompt, style, detailLevel, width, height) {
   const thoughts = [
-    `1. [Theological Iconography]: Mapping subject to 'Militant Archangel with Celestial Aegis'.`,
-    `2. [Wing Aerodynamics & Anatomy]: Constructing 3-tier feather canopy: primary flight remiges (${width}px span), secondary fans, and covert plumes.`,
-    `3. [Sacred Geometric Halo]: Rendering concentric dual gold rings (R1=0.155, R2=0.185) with 8-fold cruciform starlight flares.`,
-    `4. [Volumetric Atmospheric Optics]: Simulating 28 Mie-scattered god-ray shafts radiating from celestial zenith.`,
-    `5. [Classical Chiaroscuro Draping]: Applying Da Vinci / Caravaggio shadow modeling to flowing ivory robes with golden filigree.`,
-    `6. [Detail Multi-Pass Synthesis]: Detail Level ${detailLevel}/5 — computing ${detailLevel * 6} octave fractal micro-striations for individual feather barbs.`,
-    `7. [ACES Filmic Color Grading]: Harmonizing ${style.toUpperCase()} palette with golden specular bloom and fine canvas texture at ${width}x{height}.`
+    `1. [Theological Iconography Analysis]: Extracting archetypes for prompt: "${prompt}". Mapping sacred attributes (Wings, Halo, Filigree, Chiaroscuro).`,
+    `2. [Anatomical Wing Geometry]: Planning flight structure at ${width}×${height}. Distributing primary remiges, secondary coverts, and downy plumes across ${detailLevel} micro-passes.`,
+    `3. [Sacred Geometric Halos]: Calculating concentric aureole orbits with 8-fold cruciform starlight spikes in ${style} spectral grading.`,
+    `4. [Volumetric Mie Scattering]: Raymarching 32 atmospheric light beams through heavenly zenith mist with golden chromatic dispersion.`,
+    `5. [ACES Filmic Master Pass]: Tone-mapping dynamic range, applying golden leaf vignette, and writing output directly to "AI generated image library/".`
   ];
   renderThinkingLog(thoughts);
 }
 
 function renderThinkingLog(logs) {
   thinkingLogContent.innerHTML = "";
-  logs.forEach(log => {
+  logs.forEach(step => {
     const p = document.createElement("p");
-    p.textContent = log;
+    p.textContent = step;
     thinkingLogContent.appendChild(p);
   });
 }
 
-function loadInitialShowcase() {
-  SHOWCASE_SAMPLES.forEach(s => addToGallery(s.url, s.prompt, s.seed));
+// -------------------------------------------------------------
+// AI GENERATED IMAGE LIBRARY SYSTEM
+// -------------------------------------------------------------
+
+function loadStoredLibrary() {
+  try {
+    const saved = localStorage.getItem(LIBRARY_STORAGE_KEY);
+    if (saved) {
+      imageLibrary = JSON.parse(saved);
+    }
+  } catch (e) {
+    console.warn("Could not read stored library:", e);
+    imageLibrary = [];
+  }
+
+  // If empty, load the initial 4K showcase artworks into the library
+  if (!imageLibrary || imageLibrary.length === 0) {
+    imageLibrary = SHOWCASE_SAMPLES.map((s, idx) => ({
+      id: "showcase_" + idx,
+      filename: `AI_generated_image_library_${s.url.split("/").pop()}`,
+      folder: "AI generated image library",
+      url: s.url,
+      prompt: s.prompt,
+      seed: s.seed,
+      width: s.width || 1024,
+      height: s.height || 1024,
+      aspect: s.aspect || "square",
+      timestamp: "Masterpiece Showcase"
+    }));
+  }
+
+  renderLibraryView();
 }
 
-function addToGallery(url, prompt, seed) {
-  historyGallery.unshift({ url, prompt, seed });
-  if (historyGallery.length > 10) historyGallery.pop();
+function addToLibrary(item) {
+  imageLibrary.unshift(item);
+  // Keep up to 35 items
+  if (imageLibrary.length > 35) imageLibrary.pop();
 
-  galleryContainer.innerHTML = "";
-  historyGallery.forEach(item => {
-    const div = document.createElement("div");
-    div.className = "gallery-item";
-    div.title = `${item.prompt} (Seed: ${item.seed})`;
-    div.innerHTML = `<img src="${item.url}" alt="Celestial Art">`;
-    div.addEventListener("click", () => {
+  try {
+    // Only store data urls or paths, pruning large base64 if quota exceeded
+    localStorage.setItem(LIBRARY_STORAGE_KEY, JSON.stringify(imageLibrary.slice(0, 20)));
+  } catch (e) {
+    console.warn("Storage full; retained in live session:", e);
+  }
+
+  renderLibraryView();
+
+  // If user connected their local PC directory, write file to disk
+  if (localDirectoryHandle) {
+    saveToLocalDirectory(item);
+  }
+}
+
+function renderLibraryView() {
+  if (!libraryContainer) return;
+  libraryContainer.innerHTML = "";
+
+  if (libraryCountBadge) {
+    libraryCountBadge.textContent = `${imageLibrary.length} Files in Library`;
+  }
+
+  if (imageLibrary.length === 0) {
+    libraryContainer.innerHTML = `
+      <div class="library-empty-notice">
+        <span>📂</span>
+        <strong>Your AI Generated Image Library is Empty</strong>
+        <p>Click "✦ GENERATE 4K ARTWORK" above to create and file artworks here.</p>
+      </div>
+    `;
+    return;
+  }
+
+  imageLibrary.forEach(item => {
+    const card = document.createElement("div");
+    card.className = "library-card";
+    card.innerHTML = `
+      <div class="library-card-thumb-wrap">
+        <img src="${item.url}" alt="${item.prompt}">
+        <span class="library-card-aspect-badge">${item.aspect}</span>
+      </div>
+      <div class="library-card-info">
+        <p class="library-card-prompt" title="${item.prompt}">${item.prompt}</p>
+        <div class="library-card-meta">
+          <span>${item.width}×${item.height}</span>
+          <span>Seed: ${item.seed}</span>
+        </div>
+        <button class="btn-card-save" title="Save file to 'AI generated image library'">
+          ⬇ Save to Folder
+        </button>
+      </div>
+    `;
+
+    // Click thumbnail to inspect in Lightbox
+    const thumbWrap = card.querySelector(".library-card-thumb-wrap");
+    thumbWrap.addEventListener("click", () => {
       resultImage.src = item.url;
       resultImage.classList.remove("hidden");
       browserCanvas.classList.add("hidden");
       promptInput.value = item.prompt;
+      openLightbox();
     });
-    galleryContainer.appendChild(div);
+
+    // Save individual file to folder
+    const saveBtn = card.querySelector(".btn-card-save");
+    saveBtn.addEventListener("click", (e) => {
+      e.stopPropagation();
+      downloadSingleLibraryFile(item);
+    });
+
+    libraryContainer.appendChild(card);
   });
+}
+
+function downloadSingleLibraryFile(item) {
+  const link = document.createElement("a");
+  link.download = item.filename || `AI_generated_image_library_angel_${item.seed}.png`;
+  link.href = item.url;
+  document.body.appendChild(link);
+  link.click();
+  document.body.removeChild(link);
+}
+
+// Bulk ZIP Download for "AI generated image library"
+async function handleDownloadLibraryZip() {
+  if (!imageLibrary || imageLibrary.length === 0) {
+    alert("Your AI Generated Image Library is empty!");
+    return;
+  }
+
+  if (typeof JSZip === "undefined") {
+    // Fallback: download sequentially
+    alert("Preparing multi-file download into 'AI generated image library'...");
+    imageLibrary.slice(0, 5).forEach((item, idx) => {
+      setTimeout(() => downloadSingleLibraryFile(item), idx * 400);
+    });
+    return;
+  }
+
+  try {
+    btnDownloadZip.textContent = "⏳ Archiving...";
+    btnDownloadZip.disabled = true;
+
+    const zip = new JSZip();
+    const folder = zip.folder("AI generated image library");
+
+    for (let i = 0; i < imageLibrary.length; i++) {
+      const item = imageLibrary[i];
+      const filename = `angel_${item.aspect}_${item.width}x${item.height}_seed${item.seed}_${i + 1}.png`;
+
+      if (item.url.startsWith("data:image")) {
+        const base64Data = item.url.split(",")[1];
+        folder.file(filename, base64Data, { base64: true });
+      } else {
+        try {
+          const resp = await fetch(item.url);
+          const blob = await resp.blob();
+          folder.file(filename, blob);
+        } catch (e) {
+          console.warn("Could not fetch remote item for ZIP:", item.url);
+        }
+      }
+    }
+
+    const content = await zip.generateAsync({ type: "blob" });
+    const link = document.createElement("a");
+    link.href = URL.createObjectURL(content);
+    link.download = "AI_generated_image_library.zip";
+    document.body.appendChild(link);
+    link.click();
+    document.body.removeChild(link);
+
+    btnDownloadZip.textContent = "✓ Saved ZIP!";
+    setTimeout(() => {
+      btnDownloadZip.textContent = "📦 Save All (.ZIP)";
+      btnDownloadZip.disabled = false;
+    }, 2500);
+
+  } catch (err) {
+    console.error("ZIP creation error:", err);
+    alert("Error creating ZIP archive: " + err.message);
+    btnDownloadZip.textContent = "📦 Save All (.ZIP)";
+    btnDownloadZip.disabled = false;
+  }
+}
+
+// Sync to real PC folder via Web File System Access API
+async function handleSyncLocalFolder() {
+  if (!("showDirectoryPicker" in window)) {
+    alert("Your browser doesn't support direct local directory access. Use '📦 Save All (.ZIP)' or the individual '⬇ Save to Folder' buttons instead!");
+    return;
+  }
+
+  try {
+    localDirectoryHandle = await window.showDirectoryPicker();
+    const syncStatus = document.getElementById("librarySyncStatus");
+    if (syncStatus) {
+      syncStatus.innerHTML = `<span>📁 Live Synced with Local Folder: <strong>${localDirectoryHandle.name}</strong></span>`;
+      syncStatus.style.borderColor = "var(--gold-primary)";
+    }
+
+    btnSyncFolder.textContent = `✓ Folder Synced`;
+    btnSyncFolder.style.borderColor = "var(--gold-primary)";
+    btnSyncFolder.style.color = "var(--gold-bright)";
+
+    // Save all current images into the selected directory
+    for (const item of imageLibrary) {
+      await saveToLocalDirectory(item);
+    }
+
+    alert(`Successfully synced ${imageLibrary.length} artworks directly into folder: "${localDirectoryHandle.name}"!`);
+  } catch (err) {
+    if (err.name !== "AbortError") {
+      console.warn("Folder sync notice:", err);
+    }
+  }
+}
+
+async function saveToLocalDirectory(item) {
+  if (!localDirectoryHandle) return;
+  try {
+    const fileHandle = await localDirectoryHandle.getFileHandle(item.filename, { create: true });
+    const writable = await fileHandle.createWritable();
+
+    if (item.url.startsWith("data:image")) {
+      const resp = await fetch(item.url);
+      const blob = await resp.blob();
+      await writable.write(blob);
+    } else {
+      const resp = await fetch(item.url);
+      const blob = await resp.blob();
+      await writable.write(blob);
+    }
+    await writable.close();
+  } catch (err) {
+    console.warn("Could not write directly to local file:", err);
+  }
+}
+
+function handleClearLibrary() {
+  if (confirm("Are you sure you want to clear your AI Generated Image Library?")) {
+    imageLibrary = [];
+    try {
+      localStorage.removeItem(LIBRARY_STORAGE_KEY);
+    } catch (e) {}
+    renderLibraryView();
+  }
 }
 
 function openLightbox() {
@@ -523,30 +842,43 @@ function openLightbox() {
 }
 
 function handleDownload() {
+  const res = getSelectedResolution();
   const link = document.createElement("a");
-  const res = resolutionSelect.value;
-  link.download = `angel_art_${res}_${Date.now()}.png`;
+  link.download = `AI_generated_image_library_angel_${res.aspect}_${res.width}x${res.height}_${Date.now()}.png`;
+
   if (!resultImage.classList.contains("hidden") && resultImage.src) {
     link.href = resultImage.src;
   } else {
     link.href = browserCanvas.toDataURL("image/png");
   }
+  document.body.appendChild(link);
   link.click();
+  document.body.removeChild(link);
 }
 
 /**
- * Procedural Client-Side Celestial Canvas Synthesizer with 4K Micro-Details
+ * Procedural Client-Side Celestial Canvas Synthesizer with Proportional Aspect Ratios
  */
 function renderBrowserCelestialCanvas(prompt, style, seed, detailLevel = 5) {
   const ctx = browserCanvas.getContext("2d");
   const W = browserCanvas.width;
   const H = browserCanvas.height;
+  const baseDim = Math.min(W, H);
 
-  let s = seed % 2147483647;
-  const rnd = () => (s = (s * 16807) % 2147483647) / 2147483647;
+  // Seeded PRNG
+  let s = (seed || 12345) % 2147483647;
+  const rnd = () => {
+    s = (s * 16807) % 2147483647;
+    return (s - 1) / 2147483646;
+  };
 
-  let topColor = "#fbf5e6", botColor = "#2b1820", haloColor = "#ffd700", rayColor = "rgba(255, 225, 120, 0.30)";
-  let wingColor = "#ffffff", robeColor = "#f8f4eb";
+  // Celestial Color Grading Palette
+  let topColor = "#1a162b";
+  let botColor = "#060813";
+  let haloColor = "#f5c542";
+  let rayColor = "rgba(245, 197, 66, 0.4)";
+  let wingColor = "#ffffff";
+  let robeColor = "#e6ded1";
 
   if (style === "renaissance") {
     topColor = "#edd7a8"; botColor = "#21150c"; haloColor = "#f5c542"; rayColor = "rgba(245, 197, 66, 0.35)";
@@ -575,7 +907,7 @@ function renderBrowserCelestialCanvas(prompt, style, seed, detailLevel = 5) {
   for (let i = 0; i < numClouds; i++) {
     const cx = rnd() * W;
     const cy = H * 0.40 + rnd() * H * 0.60;
-    const cr = (W * 0.12) + rnd() * (W * 0.25);
+    const cr = (baseDim * 0.12) + rnd() * (baseDim * 0.25);
     const cloudGrad = ctx.createRadialGradient(cx, cy, 0, cx, cy, cr);
     cloudGrad.addColorStop(0, "rgba(255, 255, 255, 0.22)");
     cloudGrad.addColorStop(1, "rgba(255, 255, 255, 0)");
@@ -606,8 +938,8 @@ function renderBrowserCelestialCanvas(prompt, style, seed, detailLevel = 5) {
   // 4. Concentric Sacred Geometry Halo
   const headX = W * 0.5;
   const headY = H * 0.38;
-  const haloR1 = W * 0.095;
-  const haloR2 = W * 0.125;
+  const haloR1 = baseDim * 0.095;
+  const haloR2 = baseDim * 0.125;
 
   ctx.save();
   // Outer Specular Bloom
@@ -622,40 +954,40 @@ function renderBrowserCelestialCanvas(prompt, style, seed, detailLevel = 5) {
 
   // Dual Concentric Golden Rings
   ctx.strokeStyle = haloColor;
-  ctx.lineWidth = Math.max(4, W * 0.008);
+  ctx.lineWidth = Math.max(4, baseDim * 0.008);
   ctx.shadowColor = haloColor;
   ctx.shadowBlur = 35;
   ctx.beginPath();
   ctx.arc(headX, headY, haloR1, 0, Math.PI * 2);
   ctx.stroke();
 
-  ctx.lineWidth = Math.max(2, W * 0.004);
+  ctx.lineWidth = Math.max(2, baseDim * 0.004);
   ctx.beginPath();
   ctx.arc(headX, headY, haloR2, 0, Math.PI * 2);
   ctx.stroke();
   ctx.restore();
 
-  // 5. Feathered Wings with Multi-Tier Remiges
+  // 5. Feathered Wings with Multi-Tier Remiges (Scaled to baseDim)
   ctx.save();
   ctx.shadowColor = haloColor;
   ctx.shadowBlur = 40;
 
   const drawWing = (dir) => {
     ctx.save();
-    ctx.translate(headX, headY + W * 0.05);
+    ctx.translate(headX, headY + baseDim * 0.05);
     ctx.scale(dir, 1);
 
     const wingLayers = 4 + detailLevel;
     for (let layer = 0; layer < wingLayers; layer++) {
       ctx.beginPath();
-      ctx.moveTo(W * 0.03, W * 0.02);
-      const spanX = W * (0.28 + layer * 0.048);
-      const spanY = -W * (0.12 + layer * 0.042);
-      ctx.bezierCurveTo(W * 0.12, -W * (0.16 + layer * 0.03), spanX - W * 0.04, spanY - W * 0.03, spanX, spanY);
-      ctx.bezierCurveTo(spanX + W * 0.035, spanY + W * 0.08, spanX - W * 0.08, spanY + W * 0.25, W * 0.05, W * (0.18 + layer * 0.03));
+      ctx.moveTo(baseDim * 0.03, baseDim * 0.02);
+      const spanX = baseDim * (0.32 + layer * 0.052);
+      const spanY = -baseDim * (0.14 + layer * 0.046);
+      ctx.bezierCurveTo(baseDim * 0.12, -baseDim * (0.18 + layer * 0.03), spanX - baseDim * 0.04, spanY - baseDim * 0.03, spanX, spanY);
+      ctx.bezierCurveTo(spanX + baseDim * 0.035, spanY + baseDim * 0.08, spanX - baseDim * 0.08, spanY + baseDim * 0.28, baseDim * 0.05, baseDim * (0.20 + layer * 0.03));
       ctx.closePath();
 
-      const wingGrad = ctx.createLinearGradient(0, spanY, spanX, spanY + W * 0.25);
+      const wingGrad = ctx.createLinearGradient(0, spanY, spanX, spanY + baseDim * 0.25);
       wingGrad.addColorStop(0, wingColor);
       wingGrad.addColorStop(0.75, "rgba(255, 255, 255, 0.9)");
       wingGrad.addColorStop(1, "rgba(245, 197, 66, 0.28)");
@@ -663,7 +995,7 @@ function renderBrowserCelestialCanvas(prompt, style, seed, detailLevel = 5) {
       ctx.fill();
 
       ctx.strokeStyle = "rgba(255, 255, 255, 0.6)";
-      ctx.lineWidth = Math.max(1.5, W * 0.003);
+      ctx.lineWidth = Math.max(1.5, baseDim * 0.003);
       ctx.stroke();
     }
     ctx.restore();
@@ -676,14 +1008,14 @@ function renderBrowserCelestialCanvas(prompt, style, seed, detailLevel = 5) {
   // 6. Flowing Chiaroscuro Robes & Head Silhouette
   ctx.save();
   ctx.beginPath();
-  ctx.arc(headX, headY, W * 0.046, 0, Math.PI * 2);
-  ctx.moveTo(headX - W * 0.042, headY + W * 0.035);
-  ctx.bezierCurveTo(headX - W * 0.07, headY + W * 0.16, headX - W * 0.18, H * 0.85, headX - W * 0.23, H);
-  ctx.lineTo(headX + W * 0.23, H);
-  ctx.bezierCurveTo(headX + W * 0.18, H * 0.85, headX + W * 0.07, headY + W * 0.16, headX + W * 0.042, headY + W * 0.035);
+  ctx.arc(headX, headY, baseDim * 0.046, 0, Math.PI * 2);
+  ctx.moveTo(headX - baseDim * 0.042, headY + baseDim * 0.035);
+  ctx.bezierCurveTo(headX - baseDim * 0.07, headY + baseDim * 0.16, headX - baseDim * 0.18, H * 0.85, headX - baseDim * 0.23, H);
+  ctx.lineTo(headX + baseDim * 0.23, H);
+  ctx.bezierCurveTo(headX + baseDim * 0.18, H * 0.85, headX + baseDim * 0.07, headY + baseDim * 0.16, headX + baseDim * 0.042, headY + baseDim * 0.035);
   ctx.closePath();
 
-  const robeGrad = ctx.createLinearGradient(headX - W * 0.14, headY, headX + W * 0.14, H);
+  const robeGrad = ctx.createLinearGradient(headX - baseDim * 0.14, headY, headX + baseDim * 0.14, H);
   robeGrad.addColorStop(0, robeColor);
   robeGrad.addColorStop(0.5, "rgba(242, 242, 252, 0.96)");
   robeGrad.addColorStop(1, "rgba(182, 162, 142, 0.88)");
@@ -696,9 +1028,9 @@ function renderBrowserCelestialCanvas(prompt, style, seed, detailLevel = 5) {
   // 7. Golden Filigree Pectoral
   ctx.save();
   ctx.strokeStyle = haloColor;
-  ctx.lineWidth = Math.max(2, W * 0.004);
+  ctx.lineWidth = Math.max(2, baseDim * 0.004);
   ctx.beginPath();
-  ctx.arc(headX, headY + W * 0.08, W * 0.04, 0, Math.PI);
+  ctx.arc(headX, headY + baseDim * 0.08, baseDim * 0.04, 0, Math.PI);
   ctx.stroke();
   ctx.restore();
 
@@ -709,7 +1041,7 @@ function renderBrowserCelestialCanvas(prompt, style, seed, detailLevel = 5) {
   for (let i = 0; i < numEmbers; i++) {
     const px = rnd() * W;
     const py = rnd() * H;
-    const pr = rnd() * (W * 0.004) + 1.2;
+    const pr = rnd() * (baseDim * 0.004) + 1.2;
     ctx.beginPath();
     ctx.arc(px, py, pr, 0, Math.PI * 2);
     ctx.fill();
