@@ -1,6 +1,6 @@
 @echo off
 setlocal enabledelayedexpansion
-title Angel Generator AI Studio v3.0 - 4K Ultra-HD Masterpiece Edition
+title Angel Generator AI Studio v3.5 - Universal 4K Masterpiece Edition
 color 0E
 
 cls
@@ -11,19 +11,21 @@ echo      ^| ^|_^| ^| ^|  \^| ^| ^| ^|_    ^| ^|_    ^| ^|      / /_\ \  ^| ^|
 echo      ^|  _  ^| ^| ^|\  ^| ^|  _^]   ^|  _^]   ^| ^|___   ^|  _  ^|  ^| ^| 
 echo      ^|_^| ^|_^| ^|_^| \_^| ^|____^|  ^|_____^| ^|_____^|  ^|_^| ^|_^| ^|___^|
 echo.
-echo           ANGEL GENERATOR AI — 4K CELESTIAL MASTERPIECE STUDIO
-echo           Zero-Dependency PE32+ • PyTorch 4K • WebGL Studio Suite
+echo           ANGEL GENERATOR AI - 4K CELESTIAL MASTERPIECE STUDIO
+echo           Zero-Dependency PE32+   PyTorch 4K   WebGL Studio Suite
 echo ===============================================================================
 echo.
-echo   [1] Launch Interactive Web Studio (Browser + Real-time Canvas)
+echo   [1] Launch Interactive Web Studio (Gemini Dark Mode + Real-time Canvas)
 echo   [2] Launch Native Desktop Window Studio (4K Ultra-HD & High Thinking GUI)
 echo   [3] Synthesize 4K Archangel Artwork Now (Instant Render to /outputs)
 echo   [4] Run Comprehensive Diagnostic Health Check
 echo   [5] Run Native 64-bit Standalone C Binary (AI_Image_Generator.exe)
+echo   [6] Publish Detailed GitHub Release (What Changed, Removed, Why, Impact)
+echo   [7] Start Real-Time File Watcher (Auto-Release on File Changes)
 echo   [0] Exit
 echo.
 echo ===============================================================================
-set /p choice="  Select an option [1-5]: "
+set /p choice="  Select an option [1-7]: "
 
 if "%choice%"=="1" (
     echo.
@@ -56,6 +58,19 @@ if "%choice%"=="5" (
     echo  [+] Running native C PE32+ executable...
     "%~dp0AI_Image_Generator.exe"
     pause
+    goto end
+)
+if "%choice%"=="6" (
+    echo.
+    echo  [+] Packaging and publishing detailed GitHub release...
+    powershell -NoProfile -ExecutionPolicy Bypass -File "%~dp0Publish-AngelRelease.ps1"
+    pause
+    goto end
+)
+if "%choice%"=="7" (
+    echo.
+    echo  [+] Starting real-time file watcher (press Ctrl+C to stop)...
+    powershell -NoProfile -ExecutionPolicy Bypass -File "%~dp0Watch-And-Release.ps1"
     goto end
 )
 
