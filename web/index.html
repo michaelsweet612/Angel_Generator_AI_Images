@@ -89,6 +89,7 @@
           <button id="btnFullscreen" class="btn-nav-action" title="Toggle Fullscreen">
             <span>⛶</span> Fullscreen
           </button>
+          <button id="btnFakeUpgrade" class="btn-nav-action upgrade-pro-badge" title="Upgrade to Angel Generator Ultra">👑 Upgrade to Pro</button>
           <a href="https://github.com/michaelsweet612/Angel_Generator_AI_Images/releases" target="_blank" class="btn-nav-action gold-accent" rel="noopener">
             <span>⚡</span> Win64 App
           </a>
@@ -308,6 +309,41 @@
   </div>
 
   <!-- Fullscreen Lightbox Modal -->
+  
+  <!-- April Fools Fake Upgrade Easter Egg Modal -->
+  <div id="fakeUpgradeModal" class="fake-upgrade-modal" style="display: none;">
+    <div id="fakeUpgradeCard" class="fake-upgrade-card">
+      <div id="upgradeStageInput">
+        <div style="font-size: 3rem; margin-bottom: 8px;">👑</div>
+        <h3 style="font-family: var(--font-serif); font-size: 1.4rem; color: #fff; margin-bottom: 8px;">Upgrade to Angel Pro</h3>
+        <p style="font-size: 0.88rem; color: var(--text-muted); margin-bottom: 20px;">
+          Enter your 3-digit VIP access pin to unlock unlimited 4K Ultra-HD synthesis:
+        </p>
+        <div style="display: flex; justify-content: center; margin-bottom: 20px;">
+          <input type="text" id="fakePinInput" class="upgrade-code-input" maxlength="3" placeholder="777" autocomplete="off" />
+        </div>
+        <div style="display: flex; gap: 10px; width: 100%;">
+          <button id="btnFakeSubmit" class="btn-fake-ok" style="flex: 1;">Unlock Pro Now</button>
+          <button id="btnFakeCancel" class="btn-nav-action" style="padding: 12px 20px;">Cancel</button>
+        </div>
+      </div>
+
+      <div id="upgradeStageGlitch" style="display: none; width: 100%;">
+        <div style="font-size: 3.2rem; margin-bottom: 6px;">🚨</div>
+        <h3 style="font-family: var(--font-serif); font-size: 1.35rem; color: #ef4444; margin-bottom: 10px;">
+          TRANSACTION OVERLOAD: PAYWALL REJECTED!
+        </h3>
+        <p style="font-size: 0.92rem; color: #f87171; line-height: 1.5; margin-bottom: 14px; font-weight: 600;">
+          Keep your money and credit cards away! We don't want them! Angel Generator AI is 100% free and open-source forever! Wealthy corporations don't own art — the people do!
+        </p>
+        <div id="glitchStream" class="glitch-text-stream">
+          <!-- Populated with raining glitch characters -->
+        </div>
+        <button id="btnFakeOkDismiss" class="btn-fake-ok" style="margin-top: 18px;">OK</button>
+      </div>
+    </div>
+  </div>
+
   <div id="lightboxModal" class="lightbox-modal" style="display: none;">
     <button id="btnCloseLightbox" class="lightbox-close" title="Close Lightbox">✕</button>
     <img id="lightboxImg" class="lightbox-img" alt="Artwork Enlarged" />

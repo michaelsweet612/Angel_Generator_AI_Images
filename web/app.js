@@ -90,6 +90,7 @@ const starsCanvas = document.getElementById("starsCanvas");
 // Initialize on Load
 document.addEventListener("DOMContentLoaded", () => {
   initBackgroundStars();
+  initFakeUpgradeEasterEgg();
   setupEventListeners();
   checkBackendHealth();
   loadStoredLibrary();
@@ -2120,3 +2121,91 @@ document.addEventListener("click", function (e) {
     showExitWarningModal(href);
   }
 });
+
+
+// -----------------------------------------------------------
+// APRIL FOOLS FAKE UPGRADE EASTER EGG
+// -----------------------------------------------------------
+const btnFakeUpgrade = document.getElementById("btnFakeUpgrade");
+const fakeUpgradeModal = document.getElementById("fakeUpgradeModal");
+const fakeUpgradeCard = document.getElementById("fakeUpgradeCard");
+const upgradeStageInput = document.getElementById("upgradeStageInput");
+const upgradeStageGlitch = document.getElementById("upgradeStageGlitch");
+const fakePinInput = document.getElementById("fakePinInput");
+const btnFakeSubmit = document.getElementById("btnFakeSubmit");
+const btnFakeCancel = document.getElementById("btnFakeCancel");
+const btnFakeOkDismiss = document.getElementById("btnFakeOkDismiss");
+const glitchStream = document.getElementById("glitchStream");
+
+let glitchInterval = null;
+
+function initFakeUpgradeEasterEgg() {
+  if (btnFakeUpgrade) {
+    btnFakeUpgrade.addEventListener("click", () => {
+      if (!fakeUpgradeModal) return;
+      fakeUpgradeModal.style.display = "flex";
+      if (upgradeStageInput) upgradeStageInput.style.display = "block";
+      if (upgradeStageGlitch) upgradeStageGlitch.style.display = "none";
+      if (fakeUpgradeCard) fakeUpgradeCard.classList.remove("glitched");
+      if (fakePinInput) {
+        fakePinInput.value = "";
+        fakePinInput.focus();
+      }
+    });
+  }
+
+  const triggerGlitchExplosion = () => {
+    if (upgradeStageInput) upgradeStageInput.style.display = "none";
+    if (upgradeStageGlitch) upgradeStageGlitch.style.display = "block";
+    if (fakeUpgradeCard) fakeUpgradeCard.classList.add("glitched");
+
+    if (glitchInterval) clearInterval(glitchInterval);
+    const chars = "01$#@!%&*~_░▒▓█▲▼§±¶ΞΩΨERROR_PAYWALL_DENIED_0xFREE_FOREVER_NO_CARDS_ACCEPTED_";
+    if (glitchStream) {
+      glitchStream.textContent = "";
+      glitchInterval = setInterval(() => {
+        let chunk = "";
+        for (let i = 0; i < 48; i++) {
+          chunk += chars.charAt(Math.floor(Math.random() * chars.length));
+        }
+        glitchStream.textContent = (chunk + "\n" + glitchStream.textContent).slice(0, 480);
+      }, 60);
+    }
+
+    if (soundEnabled && typeof audioCtx !== "undefined" && audioCtx) {
+      try {
+        const osc = audioCtx.createOscillator();
+        const gain = audioCtx.createGain();
+        osc.type = "sawtooth";
+        osc.frequency.setValueAtTime(150, audioCtx.currentTime);
+        osc.frequency.exponentialRampToValueAtTime(40, audioCtx.currentTime + 0.3);
+        gain.gain.setValueAtTime(0.12, audioCtx.currentTime);
+        gain.gain.exponentialRampToValueAtTime(0.001, audioCtx.currentTime + 0.3);
+        osc.connect(gain);
+        gain.connect(audioCtx.destination);
+        osc.start();
+        osc.stop(audioCtx.currentTime + 0.32);
+      } catch (e) {}
+    }
+  };
+
+  if (btnFakeSubmit) btnFakeSubmit.addEventListener("click", triggerGlitchExplosion);
+
+  if (fakePinInput) {
+    fakePinInput.addEventListener("keydown", (e) => {
+      if (e.key === "Enter") triggerGlitchExplosion();
+    });
+  }
+
+  const closeFakeUpgrade = () => {
+    if (fakeUpgradeModal) fakeUpgradeModal.style.display = "none";
+    if (glitchInterval) {
+      clearInterval(glitchInterval);
+      glitchInterval = null;
+    }
+    if (fakeUpgradeCard) fakeUpgradeCard.classList.remove("glitched");
+  };
+
+  if (btnFakeCancel) btnFakeCancel.addEventListener("click", closeFakeUpgrade);
+  if (btnFakeOkDismiss) btnFakeOkDismiss.addEventListener("click", closeFakeUpgrade);
+}
