@@ -22,6 +22,10 @@
         <button id="btnNewCreation" class="btn-new-creation" title="Start new prompt">
           <span style="font-size:1.1rem;">✦</span> New Creation
         </button>
+        <div class="sidebar-warning-banner" id="sidebarWarningBanner" style="display: none;">
+          <span>⚠️</span>
+          <span><strong>Web Session:</strong> Images are stored in memory. Download before closing to avoid losing them!</span>
+        </div>
         <div class="sidebar-library-title">
           <h4>AI Image Library</h4>
           <span class="sidebar-count-badge" id="sidebarCountBadge">0 items</span>
@@ -239,6 +243,45 @@
   </div>
 
   <!-- Fullscreen Lightbox Modal -->
+    <!-- Image Ready Notification Popup -->
+  <div id="imageReadyToast" class="image-ready-toast" style="display: none;">
+    <div class="toast-content">
+      <img id="toastThumb" class="toast-thumb" src="" alt="Thumbnail" />
+      <div class="toast-body">
+        <div class="toast-header">
+          <h4><span class="toast-sparkle">✨</span> Image Ready in Library!</h4>
+          <button id="btnCloseToast" class="toast-close" title="Dismiss Notification">✕</button>
+        </div>
+        <p class="toast-msg">Your artwork is now in the <strong>AI Generated Image Library</strong>. Would you like to download it now?</p>
+        <div class="toast-actions">
+          <button id="btnToastDownload" class="btn-toast-download" title="Download Image Directly">
+            <span>💾</span> Download Image
+          </button>
+          <button id="btnToastLibrary" class="btn-toast-library" title="View in Sidebar Library">
+            <span>📁</span> View in Library
+          </button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Unsaved Session Exit Warning Modal -->
+  <div id="exitWarningModal" class="exit-warning-modal" style="display: none;">
+    <div class="exit-modal-card">
+      <div class="exit-modal-icon">⚠️</div>
+      <h3 class="exit-modal-title">Are you sure you want to close this website?</h3>
+      <p class="exit-modal-desc">
+        By closing you delete all your generated images and will have to manually regenerate every single one again!
+      </p>
+      <div class="exit-modal-stat" id="exitModalStat">You have unsaved images in your current web session.</div>
+      <div class="exit-modal-actions">
+        <button id="btnExitDownloadZip" class="btn-exit-zip">📦 Download Library as ZIP First</button>
+        <button id="btnExitStay" class="btn-exit-stay">Stay on Website</button>
+        <button id="btnExitLeave" class="btn-exit-leave">Leave Anyway</button>
+      </div>
+    </div>
+  </div>
+
   <div id="lightboxModal" class="lightbox-modal" style="display: none;">
     <button id="btnCloseLightbox" class="lightbox-close" title="Close Lightbox">✕</button>
     <img id="lightboxImg" class="lightbox-img" alt="Artwork Enlarged" />

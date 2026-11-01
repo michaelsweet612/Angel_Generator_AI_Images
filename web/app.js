@@ -272,6 +272,59 @@ function setupEventListeners() {
     });
   }
 
+  
+  // Toast & Exit Warning Event Listeners
+  if (btnCloseToast) btnCloseToast.addEventListener("click", hideImageReadyToast);
+
+  if (btnToastDownload) {
+    btnToastDownload.addEventListener("click", () => {
+      if (currentToastItem) {
+        handleDownloadCurrentArtwork();
+        btnToastDownload.innerHTML = "<span>✓</span> Downloaded!";
+        setTimeout(() => {
+          btnToastDownload.innerHTML = "<span>💾</span> Download Image";
+          hideImageReadyToast();
+        }, 1200);
+      }
+    });
+  }
+
+  if (btnToastLibrary) {
+    btnToastLibrary.addEventListener("click", () => {
+      hideImageReadyToast();
+      if (sidebar && sidebar.classList.contains("collapsed")) {
+        sidebar.classList.remove("collapsed");
+      }
+      const firstItem = sidebarLibraryList ? sidebarLibraryList.querySelector(".sidebar-library-item") : null;
+      if (firstItem) {
+        firstItem.scrollIntoView({ behavior: "smooth", block: "center" });
+        firstItem.classList.add("active");
+      }
+    });
+  }
+
+  if (btnExitDownloadZip) {
+    btnExitDownloadZip.addEventListener("click", () => {
+      handleDownloadLibraryZip();
+    });
+  }
+
+  if (btnExitStay) {
+    btnExitStay.addEventListener("click", () => {
+      hideExitWarningModal();
+    });
+  }
+
+  if (btnExitLeave) {
+    btnExitLeave.addEventListener("click", () => {
+      const url = pendingExitUrl;
+      hideExitWarningModal();
+      if (url) {
+        window.location.href = url;
+      }
+    });
+  }
+
   // Lightbox
   if (btnCloseLightbox) btnCloseLightbox.addEventListener("click", () => lightboxModal.classList.add("hidden"));
   if (lightboxModal) {
@@ -423,6 +476,7 @@ async function handleGenerate() {
     };
 
     addToLibrary(libraryItem);
+    showImageReadyToast(libraryItem);
 
   } catch (err) {
     if (err.name === "AbortError") {
@@ -1232,6 +1286,7 @@ function renderLibrarySidebar() {
 
   if (sidebarCountBadge) {
     sidebarCountBadge.textContent = `${imageLibrary.length} Files`;
+  if (sidebarWarningBanner) sidebarWarningBanner.style.display = imageLibrary.length > 0 ? 'flex' : 'none';
   }
 
   imageLibrary.forEach(item => {
